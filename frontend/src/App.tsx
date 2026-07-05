@@ -136,7 +136,9 @@ export default function App() {
         link.click();
         
         document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
       } else {
         alert('ไม่พบข้อมูลบันทึกในช่วงเวลาที่ระบุ (สำหรับทุกโซน)');
       }
