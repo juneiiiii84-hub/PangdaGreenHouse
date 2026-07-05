@@ -234,10 +234,16 @@ export class SensorController {
         return res.status(400).json({ success: false, error: 'จำเป็นต้องระบุวันเริ่มต้นและสิ้นสุด' });
       }
 
+      const start = new Date(startStr);
+      start.setUTCHours(0, 0, 0, 0);
+
+      const end = new Date(endStr);
+      end.setUTCHours(23, 59, 59, 999);
+
       const logs = await climateService.getLogsByDateRange(
         zone,
-        new Date(startStr),
-        new Date(endStr)
+        start,
+        end
       );
 
       res.json({ success: true, isSimulationMode: useMock, data: logs });
