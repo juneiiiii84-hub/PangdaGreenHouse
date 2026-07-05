@@ -125,9 +125,8 @@ export default function App() {
       }
 
       if (hasData) {
-        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-        const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = URL.createObjectURL(blob);
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+        const url = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + wbout;
         
         const link = document.createElement('a');
         link.href = url;
@@ -136,9 +135,6 @@ export default function App() {
         link.click();
         
         document.body.removeChild(link);
-        setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 1000);
       } else {
         alert('ไม่พบข้อมูลบันทึกในช่วงเวลาที่ระบุ (สำหรับทุกโซน)');
       }
