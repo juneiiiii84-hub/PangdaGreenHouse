@@ -170,50 +170,52 @@ export default function App() {
         {/* การ์ดข้อมูลเซนเซอร์พร้อม Sparklines */}
         <ClimateCards latestData={currentLatest} history={dataList.filter(d => d.zone === selectedZone)} />
 
-        {/* กล่องวิเคราะห์เกณฑ์ความปลอดภัยและเกษตรกรรมธีมมืดดั่งต้นแบบ */}
-        <ClimateDiagnostics diagnosticsData={diagnosticsData} />
-
-        {/* แผงวิเคราะห์และเปรียบเทียบชาร์ตกราฟ */}
+        {/* แผงวิเคราะห์และเปรียบเทียบชาร์ตกราฟ — ย้ายขึ้นมาก่อนการประเมิน */}
         <ZoneComparison dataList={dataList} selectedZone={selectedZone} />
 
-        {/* ฟังก์ชันดาวน์โหลดไฟล์ข้อมูลดิบสไตล์ปฏิทิน Monospace */}
-        <section className="bg-white border border-slate-100 rounded-[32px] p-6 shadow-xl shadow-slate-100/30 space-y-4">
+        {/* กล่องวิเคราะห์เกณฑ์ความปลอดภัยและเกษตรกรรมธีมมืด */}
+        <ClimateDiagnostics diagnosticsData={diagnosticsData} />
+
+        {/* ฟังก์ชันดาวน์โหลดไฟล์ข้อมูลดิบ */}
+        <section className="bg-white border border-slate-100 rounded-[32px] p-5 shadow-xl shadow-slate-100/30 space-y-4">
           <div>
             <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
               <Calendar size={18} className="text-slate-500" />
-              <span>ดาวน์โหลดข้อมูลดิบของโซน {selectedZone} (CSV Export)</span>
+              <span>ดาวน์โหลดข้อมูลทั้ง 5 โซน (Excel Export)</span>
             </h3>
-            <p className="text-[10px] text-slate-400 mt-0.5">ระบุช่วงเวลากราฟสถิติตามการเลือกพารามิเตอร์วันปฏิทิน</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">เลือกช่วงวันที่ และกดดาวน์โหลดไฟล์ Excel แยกแต่ละโซน</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 items-end">
-            <div className="flex-1 space-y-1">
-              <label className="text-[10px] font-extrabold tracking-widest text-slate-400 block uppercase">วันเริ่มต้น:</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 font-mono"
-              />
-            </div>
-            
-            <div className="flex-1 space-y-1">
-              <label className="text-[10px] font-extrabold tracking-widest text-slate-400 block uppercase">วันสิ้นสุด:</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 font-mono"
-              />
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-extrabold tracking-widest text-slate-400 block uppercase">วันเริ่มต้น:</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <label className="text-[10px] font-extrabold tracking-widest text-slate-400 block uppercase">วันสิ้นสุด:</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200/60 rounded-xl text-xs font-bold focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
             </div>
 
             <button
               onClick={handleDownloadExcel}
               disabled={isDownloading}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-600/10 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-black flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
             >
-              {isDownloading ? <RefreshCcw size={12} className="animate-spin" /> : <Download size={12} />}
-              <span>{isDownloading ? 'กำลังดึงข้อมูล...' : 'ดาวน์โหลดข้อมูล (Export)'}</span>
+              {isDownloading ? <RefreshCcw size={14} className="animate-spin" /> : <Download size={14} />}
+              <span>{isDownloading ? 'กำลังดึงข้อมูล...' : 'ดาวน์โหลด Excel (ทุกโซน)'}</span>
             </button>
           </div>
         </section>

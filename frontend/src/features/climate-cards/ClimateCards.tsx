@@ -32,11 +32,11 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history 
         {
           data: points,
           borderColor: color,
-          backgroundColor: 'transparent',
+          backgroundColor: `${color}18`,
           borderWidth: 2,
           pointRadius: 0,
           tension: 0.4,
-          fill: false,
+          fill: true,
         }
       ]
     };
@@ -54,82 +54,116 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history 
 
   const cards = [
     {
-      title: 'อุณหภูมิอากาศ (DHT22)',
-      value: `${temp.toFixed(1)} °C`,
+      title: 'อุณหภูมิอากาศ',
+      subtitle: 'DHT22 Sensor',
+      value: `${temp.toFixed(1)}`,
+      unit: '°C',
       desc: 'อุณหภูมิความร้อนแวดล้อม',
-      icon: <Thermometer size={14} />,
-      glowClass: 'after:bg-rose-500/5',
+      icon: <Thermometer size={16} />,
+      borderColor: 'border-rose-200',
+      bgGlow: 'bg-rose-500/5',
+      iconBg: 'bg-rose-50 border-rose-100',
+      sparkColor: '#f43f5e',
       sparkline: createSparklineData('temperature', '#f43f5e'),
-      textColor: 'text-rose-500'
+      textColor: 'text-rose-500',
+      valueColor: 'text-rose-600',
     },
     {
-      title: 'ความชื้นสัมพัทธ์ (DHT22)',
-      value: `${hum.toFixed(1)} %RH`,
+      title: 'ความชื้นสัมพัทธ์',
+      subtitle: 'DHT22 Sensor',
+      value: `${hum.toFixed(1)}`,
+      unit: '%RH',
       desc: 'ระดับไอน้ำสัมพัทธ์สะสม',
-      icon: <Droplets size={14} />,
-      glowClass: 'after:bg-blue-500/5',
+      icon: <Droplets size={16} />,
+      borderColor: 'border-blue-200',
+      bgGlow: 'bg-blue-500/5',
+      iconBg: 'bg-blue-50 border-blue-100',
+      sparkColor: '#3b82f6',
       sparkline: createSparklineData('humidity', '#3b82f6'),
-      textColor: 'text-blue-500'
+      textColor: 'text-blue-500',
+      valueColor: 'text-blue-600',
     },
     {
-      title: 'Vapor Pressure Deficit (VPD)',
-      value: `${vpd.toFixed(2)} kPa`,
+      title: 'Vapor Pressure Deficit',
+      subtitle: 'VPD (คำนวณจาก T + RH)',
+      value: `${vpd.toFixed(2)}`,
+      unit: 'kPa',
       desc: 'แรงดันไอขาดน้ำปากใบพืช',
-      icon: <Wind size={14} />,
-      glowClass: 'after:bg-purple-500/5',
+      icon: <Wind size={16} />,
+      borderColor: 'border-purple-200',
+      bgGlow: 'bg-purple-500/5',
+      iconBg: 'bg-purple-50 border-purple-100',
+      sparkColor: '#a855f7',
       sparkline: createSparklineData('vpd', '#a855f7'),
-      textColor: 'text-purple-500'
+      textColor: 'text-purple-500',
+      valueColor: 'text-purple-600',
     },
     {
-      title: 'ความเข้มแสงแวดล้อม (PPFD)',
-      value: `${ppfd.toLocaleString()} μmol`,
-      desc: `ความสว่าง ${lux.toLocaleString()} LUX`,
-      icon: <Sun size={14} />,
-      glowClass: 'after:bg-amber-500/5',
+      title: 'ความเข้มแสงแวดล้อม',
+      subtitle: 'BH1750 Light Sensor',
+      value: `${ppfd.toLocaleString()}`,
+      unit: 'μmol/m²/s',
+      desc: `💡 ${lux.toLocaleString()} Lux (แสงดิบ)`,
+      icon: <Sun size={16} />,
+      borderColor: 'border-amber-200',
+      bgGlow: 'bg-amber-500/5',
+      iconBg: 'bg-amber-50 border-amber-100',
+      sparkColor: '#f59e0b',
       sparkline: createSparklineData('ppfd', '#f59e0b'),
       textColor: 'text-amber-500',
+      valueColor: 'text-amber-600',
       action: (
         <button
+          id="ppfd-info-btn"
           onClick={() => setIsModalOpen(true)}
-          className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-amber-500 transition-all cursor-pointer flex items-center justify-center"
+          title="ดูรายละเอียดการคำนวณ PPFD"
+          className="flex items-center gap-1 px-2 py-1 rounded-lg text-amber-500 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-all cursor-pointer text-[10px] font-bold"
         >
-          <Info size={13} />
+          <Info size={11} />
+          <span>สูตรคำนวณ</span>
         </button>
       )
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((card, idx) => (
-        <div
-          key={idx}
-          className={`bg-white border border-slate-100 rounded-2xl md:rounded-[24px] p-4 md:p-5 shadow-lg shadow-slate-100/30 flex flex-col justify-between space-y-3 relative overflow-hidden after:content-[""] after:absolute after:top-0 after:right-0 after:w-28 after:h-28 after:rounded-full after:blur-2xl after:-mr-6 after:-mt-6 ${card.glowClass}`}
-        >
-          <div className="flex justify-between items-center">
-            <div className={`p-1.5 bg-slate-50 rounded-lg ${card.textColor} border border-slate-100`}>
-              {card.icon}
+    <>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {cards.map((card, idx) => (
+          <div
+            key={idx}
+            className={`bg-white border-2 ${card.borderColor} rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 relative overflow-hidden`}
+          >
+            {/* กลักแสงหัวการ์ด */}
+            <div className={`absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl -mr-4 -mt-4 ${card.bgGlow}`} />
+
+            {/* หัวการ์ด: ไอคอน + ปุ่มข้อมูล */}
+            <div className="flex justify-between items-start z-10">
+              <div className={`p-2 rounded-xl border ${card.iconBg} ${card.textColor}`}>
+                {card.icon}
+              </div>
+              {card.action}
             </div>
-            {card.action}
-          </div>
 
-          <div className="space-y-0.5 z-10">
-            <span className="text-[9px] md:text-[10px] font-black tracking-wider text-slate-400 block uppercase">
-              {card.title}
-            </span>
-            <span className="text-xl md:text-2xl font-black text-slate-800 font-mono tracking-tight block">
-              {latestData ? card.value : '---'}
-            </span>
-            <span className="text-[9px] text-slate-400 block font-bold">
-              {card.desc}
-            </span>
-          </div>
+            {/* ตัวเลขหลัก */}
+            <div className="z-10">
+              <div className="text-[10px] font-extrabold tracking-wider text-slate-400 uppercase leading-none mb-1">
+                {card.title}
+              </div>
+              <div className={`text-2xl md:text-3xl font-black font-mono tracking-tight leading-none ${card.valueColor}`}>
+                {latestData ? card.value : '---'}
+                <span className="text-sm md:text-base font-bold ml-1 text-slate-400">{card.unit}</span>
+              </div>
+              <div className="text-[10px] text-slate-400 mt-1 font-medium">{card.desc}</div>
+            </div>
 
-          <div className="h-10 w-full pt-1">
-            <Line data={card.sparkline} options={sparklineOptions} />
+            {/* Sparkline */}
+            <div className="h-10 w-full">
+              <Line data={card.sparkline} options={sparklineOptions} />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       <PpfdModal
         isOpen={isModalOpen}
@@ -138,6 +172,6 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history 
         currentMultiplier={multiplier}
         onMultiplierChange={(val) => setMultiplier(val)}
       />
-    </div>
+    </>
   );
 };
