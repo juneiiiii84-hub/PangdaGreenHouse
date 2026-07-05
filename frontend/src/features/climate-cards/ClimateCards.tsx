@@ -5,6 +5,44 @@ import { PpfdModal } from './PpfdModal';
 import { DEFAULT_MULTIPLIER } from '../../shared/utils/ppfd';
 import type { SensorData, DiagnosticsResponse } from '../../services/api';
 
+const simplifyRecommendation = (text: string): string => {
+  if (!text) return 'กำลังวิเคราะห์สภาวะแวดล้อม...';
+  
+  // อุณหภูมิ
+  if (text.includes('รักษาเสถียรภาพความร้อน')) return '✅ อุณหภูมิเหมาะสม ดีต่อการเติบโต คุมระดับนี้ต่อไป';
+  if (text.includes('ไม่ให้อุณหภูมิผันผวน')) return '👍 อุณหภูมิปกติ ควรสังเกตไม่ให้ผันผวนเร็วเกินไป';
+  if (text.includes('อุณหภูมิค่อนข้างสูง')) return '⚠️ อากาศร้อนขึ้น: เปิดพัดลมระบายอากาศหรือเพิ่มการไหลเวียนของลม';
+  if (text.includes('อุณหภูมิค่อนข้างต่ำ')) return '⚠️ อากาศเย็นลง: ลดระดับพัดลมระบายอากาศเพื่อสะสมความร้อน';
+  if (text.includes('อุณหภูมิสูงเกินไป')) return '🚨 ร้อนจัดวิกฤต: เปิดพัดลมระบายอากาศ พ่นหมอกน้ำ และกางสแลนกรองแสง';
+  if (text.includes('อุณหภูมิต่ำเกินไป')) return '🚨 หนาวจัดวิกฤต: ปิดพัดลมระบายอากาศ หรือเปิดเครื่องทำความร้อน';
+
+  // ความชื้น
+  if (text.includes('เหมาะสมกับการเปิดปากใบดูดซึม')) return '✅ ความชื้นพอดี: พืชเปิดปากใบรับปุ๋ยได้ดี รักษาค่านี้ไว้';
+  if (text.includes('ไม่ให้อิ่มตัวในช่วงกลางคืน')) return '👍 ความชื้นปกติ: ระวังไม่ให้ชื้นสะสมสูงเกินไปในช่วงกลางคืน';
+  if (text.includes('ความชื้นสูงเกินเกณฑ์')) return '⚠️ เริ่มชื้นไป: เปิดพัดลมหมุนเวียนเพื่อลดความอับชื้นสะสม';
+  if (text.includes('ความชื้นต่ำเกินเกณฑ์')) return '⚠️ เริ่มแห้งไป: เปิดระบบพ่นหมอกน้ำเป็นรอบสั้นๆ เพื่อเพิ่มความชื้น';
+  if (text.includes('ความชื้นสูงวิกฤต')) return '🚨 ชื้นจัดวิกฤต: เสี่ยงราใบไม้ เปิดพัดลมระบายลม 100% และหยุดให้น้ำ';
+  if (text.includes('ความชื้นต่ำวิกฤต')) return '🚨 แห้งจัดวิกฤต: พืชเสี่ยงเฉา เปิดเครื่องพ่นหมอกเต็มกำลังด่วน';
+
+  // VPD
+  if (text.includes('ระดับแรงดันไอดีเลิศ')) return '✅ VPD ดีเลิศ: พืชลำเลียงน้ำและอาหารได้เต็มประสิทธิภาพ';
+  if (text.includes('ประคองระดับค่ากระบอกไอ')) return '👍 VPD ปกติ: ตรวจสอบอุณหภูมิและความชื้นสม่ำเสมอ';
+  if (text.includes('VPD ค่อนข้างสูง')) return '⚠️ อากาศแห้ง (VPD สูง): พ่นหมอกน้ำฝอยเพื่อลดค่า VPD ลงมา';
+  if (text.includes('VPD ค่อนข้างต่ำ')) return '⚠️ อากาศชื้นอับ (VPD ต่ำ): เปิดพัดลมระบายลมขับไล่ไอน้ำสะสมรอบใบ';
+  if (text.includes('VPD สูงวิกฤต')) return '🚨 แห้งวิกฤต (VPD สูงจัด): พืชปิดปากใบ กางสแลนกรองแสงและพ่นหมอกด่วน';
+  if (text.includes('VPD ต่ำวิกฤต')) return '🚨 ชื้นวิกฤต (VPD ต่ำจัด): หยุดให้น้ำทางดิน เปิดพัดลมระบายลมด่วน';
+
+  // แสง
+  if (text.includes('แสงเหมาะสมมาก: ให้พลังงาน') || text.includes('แสงเหมาะสมมาก')) return '✅ แสงดีเยี่ยม: พืชเติบโตเร็ว สังเคราะห์แสงได้เต็มที่';
+  if (text.includes('หลีกเลี่ยงภาวะแสงจ้าเกินจำเป็น') || text.includes('แสงข้อมูลปกติ')) return '👍 แสงปกติ: ระวังแสงจ้าเกินไปในช่วงบ่าย';
+  if (text.includes('แสงจ้าเกินไป: แนะนำ') || text.includes('แสงจ้าเกินไป')) return '⚠️ แสงจ้าไป: กางตาข่ายกรองแสง (Shading Net) บรรเทาความเครียด';
+  if (text.includes('แสงค่อนข้างสลัว: แนะนำ') || text.includes('แสงค่อนข้างสลัว')) return '⚠️ แสงสลัวไป: เปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมความเข้มแสง';
+  if (text.includes('แสงแดดจัดแผดเผาเกรียม') || text.includes('แสงแดดจัด')) return '🚨 แดดเผาวิกฤต: กางสแลนกรองแสง 50% และพ่นหมอกน้ำด่วน';
+  if (text.includes('แสงมืดสลัวรุนแรง') || text.includes('แสงมืดสลัว')) return '🚨 มืดจัดวิกฤต: การโตชะงัก เปิดไฟช่วยปลูก (Grow Lights) ทันที';
+
+  return text;
+};
+
 interface ClimateCardsProps {
   latestData: SensorData | null;
   history: SensorData[];
@@ -252,7 +290,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                   <span>💡 คำแนะนำ:</span>
                 </div>
                 <p className={`font-semibold leading-relaxed text-xs ${styles.recTextColor}`}>
-                  {cardDiag ? cardDiag.recommendation : 'กำลังวิเคราะห์สภาวะแวดล้อม...'}
+                  {cardDiag ? simplifyRecommendation(cardDiag.recommendation) : 'กำลังวิเคราะห์สภาวะแวดล้อม...'}
                 </p>
               </div>
             </div>
