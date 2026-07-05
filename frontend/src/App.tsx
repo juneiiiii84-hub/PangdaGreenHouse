@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import * as XLSX from 'xlsx';
 import { Download, Calendar, RefreshCcw } from 'lucide-react';
 import { api } from './services/api';
 import type { SensorData, DiagnosticsResponse } from './services/api';
@@ -29,7 +30,7 @@ export default function App() {
     loadInitialLogs();
 
     // 2. เชื่อมสายสตรีมสด
-    const BACKEND_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://127.0.0.1:3001' : 'https://pangda-backend.onrender.com');
+    const BACKEND_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:3001` : 'https://pangda-backend.onrender.com');
     const eventSource = new EventSource(`${BACKEND_URL}/api/sensors/stream`);
 
     eventSource.onmessage = (event) => {
@@ -68,8 +69,8 @@ export default function App() {
     return () => clearInterval(interval);
   }, [selectedZone]);
 
-  // 📥 ฟังก์ชันดาวน์โหลดไฟล์ข้อมูลดิบเป็น CSV
-  const handleDownloadCsv = async () => {
+  // 📥 ฟังก์ชันดาวน์โหลดไฟล์ข้อมูลเป็น Excel (ทุกโซน)
+  const handleDownloadExcel = async () => {
     if (!startDate || !endDate) {
       alert('กรุณาระบุวันเริ่มต้นและสิ้นสุด');
       return;
@@ -77,37 +78,41 @@ export default function App() {
 
     setIsDownloading(true);
     try {
-      const res = await api.getHistoryRange(selectedZone, startDate, endDate);
-      if (res.success && res.data.length > 0) {
-        const headers = ['ID', 'Timestamp (วัน-เวลา)', 'Zone (โซน)', 'Temperature (°C)', 'Humidity (%RH)', 'VPD (kPa)', 'Lux', 'PPFD (μmol/m²/s)'];
-        const csvRows = [headers.join(',')];
+      const wb = XLSX.utils.book_new();
+      let hasData = false;
 
-        res.data.forEach((row) => {
-          const values = [
-            row.id,
-            new Date(row.created_at).toLocaleString('th-TH'),
-            row.zone,
-            row.temperature,
-            row.humidity,
-            row.vpd,
-            row.lux,
-            row.ppfd
-          ];
-          csvRows.push(values.join(','));
-        });
+      for (let z = 1; z <= 5; z++) {
+        const res = await api.getHistoryRange(z, startDate, endDate);
+        if (res.success && res.data.length > 0) {
+          hasData = true;
+          const headers = ['ID', 'Timestamp (วัน-เวลา)', 'Zone (โซน)', 'Temperature (°C)', 'Humidity (%RH)', 'VPD (kPa)', 'Lux', 'PPFD (μmol/m²/s)'];
+          
+          const wsData = [headers];
+          res.data.forEach((row) => {
+            wsData.push([
+              row.id,
+              new Date(row.created_at).toLocaleString('th-TH'),
+              row.zone,
+              row.temperature,
+              row.humidity,
+              row.vpd,
+              row.lux,
+              row.ppfd
+            ]);
+          });
 
-        const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csvRows.join('\n'));
-        const link = document.createElement('a');
-        link.setAttribute('href', csvContent);
-        link.setAttribute('download', `greenhouse_zone_${selectedZone}_history_${startDate}_to_${endDate}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+          const ws = XLSX.utils.aoa_to_sheet(wsData);
+          XLSX.utils.book_append_sheet(wb, ws, `Zone ${z}`);
+        }
+      }
+
+      if (hasData) {
+        XLSX.writeFile(wb, `greenhouse_all_zones_history_${startDate}_to_${endDate}.xlsx`);
       } else {
-        alert('ไม่พบข้อมูลบันทึกในช่วงเวลาที่ระบุ');
+        alert('ไม่พบข้อมูลบันทึกในช่วงเวลาที่ระบุ (สำหรับทุกโซน)');
       }
     } catch (e) {
-      alert('เกิดข้อผิดพลาดในการโหลดไฟล์ข้อมูลดิบ');
+      alert('เกิดข้อผิดพลาดในการโหลดไฟล์ข้อมูล');
     } finally {
       setIsDownloading(false);
     }
@@ -185,7 +190,7 @@ export default function App() {
             </div>
 
             <button
-              onClick={handleDownloadCsv}
+              onClick={handleDownloadExcel}
               disabled={isDownloading}
               className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-600/10 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
             >
