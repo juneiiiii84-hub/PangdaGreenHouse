@@ -125,7 +125,18 @@ export default function App() {
       }
 
       if (hasData) {
-        XLSX.writeFile(wb, `greenhouse_all_zones_history_${startDate}_to_${endDate}.xlsx`);
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `greenhouse_all_zones_history_${startDate}_to_${endDate}.xlsx`);
+        document.body.appendChild(link);
+        link.click();
+        
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
       } else {
         alert('ไม่พบข้อมูลบันทึกในช่วงเวลาที่ระบุ (สำหรับทุกโซน)');
       }
