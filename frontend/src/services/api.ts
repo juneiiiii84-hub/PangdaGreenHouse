@@ -34,7 +34,7 @@ export interface DiagnosticItem {
   recommendation: string;
 }
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://127.0.0.1:3001' : '');
+const BACKEND_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://127.0.0.1:3001' : 'https://pangda-backend.onrender.com');
 const API_BASE = `${BACKEND_URL}/api/sensors`;
 
 export const api = {

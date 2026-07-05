@@ -29,7 +29,7 @@ export default function App() {
     loadInitialLogs();
 
     // 2. เชื่อมสายสตรีมสด
-    const BACKEND_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://127.0.0.1:3001' : '');
+    const BACKEND_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://127.0.0.1:3001' : 'https://pangda-backend.onrender.com');
     const eventSource = new EventSource(`${BACKEND_URL}/api/sensors/stream`);
 
     eventSource.onmessage = (event) => {
