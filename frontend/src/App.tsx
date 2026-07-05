@@ -31,24 +31,42 @@ export default function App() {
 
     // 2. เชื่อมสายสตรีมสด
     const BACKEND_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:3001` : 'https://pangda-backend.onrender.com');
+    console.log('Connecting to SSE at:', `${BACKEND_URL}/api/sensors/stream`);
     const eventSource = new EventSource(`${BACKEND_URL}/api/sensors/stream`);
 
+    eventSource.onopen = () => {
+      console.log('SSE Connection opened successfully!');
+    };
+
+    eventSource.onerror = (err) => {
+      console.error('SSE Connection failed or closed:', err);
+    };
+
     eventSource.onmessage = (event) => {
+      console.log('SSE raw data received:', event.data);
       try {
-        const newTicks = JSON.parse(event.data);
-        if (Array.isArray(newTicks)) {
+        const parsed = JSON.parse(event.data);
+        if (!parsed) return;
+        
+        // แปลงให้เป็น Array เสมอ ไม่ว่าจะส่งมาเป็น Object เดียวหรือ Array
+        const ticksArray = Array.isArray(parsed) ? parsed : [parsed];
+        
+        // กรองข้อมูลเฉพาะตัวที่มีค่าอุณหภูมิและความชื้นจริง (เพื่อข้ามข้อความเช่น {"connected": true})
+        const validTicks = ticksArray.filter((t: any) => t && t.temperature !== undefined && t.humidity !== undefined);
+        
+        if (validTicks.length > 0) {
           setDataList((prev) => {
-            const combined = [...newTicks, ...prev];
+            const combined = [...prev, ...validTicks];
             // กรองขอบเขตประวัติสูงสุด 100 แถวต่อโซนในการเก็บบันทึกบนหน้าจอเพื่อความเบา
             const trimmed: SensorData[] = [];
             for (let z = 1; z <= 5; z++) {
-              trimmed.push(...combined.filter((d) => d.zone === z).slice(0, 100));
+              trimmed.push(...combined.filter((d) => d.zone === z).slice(-100));
             }
             return trimmed;
           });
         }
       } catch (err) {
-        console.error('SSE Error:', err);
+        console.error('SSE Parse Error:', err);
       }
     };
 
@@ -87,7 +105,7 @@ export default function App() {
           hasData = true;
           const headers = ['ID', 'Timestamp (วัน-เวลา)', 'Zone (โซน)', 'Temperature (°C)', 'Humidity (%RH)', 'VPD (kPa)', 'Lux', 'PPFD (μmol/m²/s)'];
           
-          const wsData = [headers];
+          const wsData: any[][] = [headers];
           res.data.forEach((row) => {
             wsData.push([
               row.id,
