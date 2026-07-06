@@ -73,7 +73,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
             📊 ค่าเฉลี่ยรวมทั้งโรงเรือน
           </h3>
           <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            ค่าเฉลี่ยอากาศและแสงจากโซน 1-5 ({periodLabel})
+            ค่าเฉลี่ยอากาศและแสงจากโซน A-E ({periodLabel})
           </p>
         </div>
 

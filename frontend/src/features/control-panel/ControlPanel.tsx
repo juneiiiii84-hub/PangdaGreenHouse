@@ -10,11 +10,11 @@ interface ControlPanelProps {
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZoneSelect, theme }) => {
   const zones = [
-    { id: 1, name: 'โซน 1', desc: 'ล่างซ้าย (South-West)', color: 'bg-emerald-500' },
-    { id: 2, name: 'โซน 2', desc: 'ล่างขวา (South-East)', color: 'bg-blue-500' },
-    { id: 3, name: 'โซน 3', desc: 'บนซ้าย (North-West)', color: 'bg-purple-500' },
-    { id: 4, name: 'โซน 4', desc: 'ตรงกลาง (Center)', color: 'bg-amber-500' },
-    { id: 5, name: 'โซน 5', desc: 'บนขวา (North-East)', color: 'bg-pink-500' },
+    { id: 1, name: 'โซน A', desc: 'ล่างซ้าย (South-West)', color: 'bg-emerald-500' },
+    { id: 2, name: 'โซน B', desc: 'ล่างขวา (South-East)', color: 'bg-blue-500' },
+    { id: 3, name: 'โซน C', desc: 'บนซ้าย (North-West)', color: 'bg-purple-500' },
+    { id: 4, name: 'โซน D', desc: 'ตรงกลาง (Center)', color: 'bg-amber-500' },
+    { id: 5, name: 'โซน E', desc: 'บนขวา (North-East)', color: 'bg-pink-500' },
   ];
 
   return (

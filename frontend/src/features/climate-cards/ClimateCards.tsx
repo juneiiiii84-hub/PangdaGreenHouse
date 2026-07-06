@@ -436,7 +436,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                   }}
                 >
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border uppercase ${item.color}`}>
+                    <span className={`w-[82px] text-center py-1 rounded-full text-[10px] font-black border uppercase whitespace-nowrap flex-shrink-0 ${item.color}`}>
                       {item.status}
                     </span>
                     <span className="text-xs font-black font-mono" style={{ color: 'var(--text-value)' }}>

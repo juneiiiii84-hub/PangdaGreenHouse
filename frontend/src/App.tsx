@@ -179,12 +179,14 @@ export default function App() {
           });
 
           const ws = XLSX.utils.aoa_to_sheet(wsData);
-          XLSX.utils.book_append_sheet(wb, ws, `โซน ${z}`);
+          const zoneLetter = z === 1 ? 'A' : z === 2 ? 'B' : z === 3 ? 'C' : z === 4 ? 'D' : 'E';
+          XLSX.utils.book_append_sheet(wb, ws, `โซน ${zoneLetter}`);
         }
       }
 
       if (hasData) {
-        const zoneLabel = downloadZone === 'all' ? 'ทุกโซน' : `โซน${downloadZone}`;
+        const zoneLetter = downloadZone === '1' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '3' ? 'C' : downloadZone === '4' ? 'D' : 'E';
+        const zoneLabel = downloadZone === 'all' ? 'ทุกโซน' : `โซน${zoneLetter}`;
         XLSX.writeFile(wb, `ข้อมูลโรงเรือน_${zoneLabel}_${startDate}_ถึง_${endDate}.xlsx`);
       } else {
         setDownloadWarning('ไม่พบข้อมูลในช่วงเวลาที่เลือก');
@@ -279,12 +281,12 @@ export default function App() {
                     color: 'var(--text-primary)',
                   }}
                 >
-                  <option value="all">ทุกโซน (1-5)</option>
-                  <option value="1">โซน 1 — ล่างซ้าย</option>
-                  <option value="2">โซน 2 — ล่างขวา</option>
-                  <option value="3">โซน 3 — บนซ้าย</option>
-                  <option value="4">โซน 4 — ตรงกลาง</option>
-                  <option value="5">โซน 5 — บนขวา</option>
+                  <option value="all">ทุกโซน (A-E)</option>
+                  <option value="1">โซน A — ล่างซ้าย</option>
+                  <option value="2">โซน B — ล่างขวา</option>
+                  <option value="3">โซน C — บนซ้าย</option>
+                  <option value="4">โซน D — ตรงกลาง</option>
+                  <option value="5">โซน E — บนขวา</option>
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
               </div>
@@ -319,7 +321,7 @@ export default function App() {
               className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm md:text-base font-black flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
             >
               {isDownloading ? <RefreshCcw size={16} className="animate-spin" /> : <Download size={16} />}
-              <span>{isDownloading ? 'กำลังดึงข้อมูล...' : `ดาวน์โหลด Excel (${downloadZone === 'all' ? 'ทุกโซน' : `โซน ${downloadZone}`})`}</span>
+              <span>{isDownloading ? 'กำลังดึงข้อมูล...' : `ดาวน์โหลด Excel (${downloadZone === 'all' ? 'ทุกโซน' : `โซน ${downloadZone === '1' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '3' ? 'C' : downloadZone === '4' ? 'D' : 'E'}`})`}</span>
             </button>
           </div>
         </section>

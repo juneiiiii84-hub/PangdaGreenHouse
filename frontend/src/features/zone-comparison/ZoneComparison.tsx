@@ -65,11 +65,11 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
   ];
 
   const zoneConfig = [
-    { id: 1, label: 'โซน 1', sublabel: 'ล่างซ้าย', color: '#10b981', bg: 'bg-emerald-500' },
-    { id: 2, label: 'โซน 2', sublabel: 'ล่างขวา', color: '#3b82f6', bg: 'bg-blue-500' },
-    { id: 3, label: 'โซน 3', sublabel: 'บนซ้าย', color: '#a855f7', bg: 'bg-purple-500' },
-    { id: 4, label: 'โซน 4', sublabel: 'ตรงกลาง', color: '#f59e0b', bg: 'bg-amber-500' },
-    { id: 5, label: 'โซน 5', sublabel: 'บนขวา', color: '#ec4899', bg: 'bg-pink-500' },
+    { id: 1, label: 'โซน A', sublabel: 'ล่างซ้าย', color: '#10b981', bg: 'bg-emerald-500' },
+    { id: 2, label: 'โซน B', sublabel: 'ล่างขวา', color: '#3b82f6', bg: 'bg-blue-500' },
+    { id: 3, label: 'โซน C', sublabel: 'บนซ้าย', color: '#a855f7', bg: 'bg-purple-500' },
+    { id: 4, label: 'โซน D', sublabel: 'ตรงกลาง', color: '#f59e0b', bg: 'bg-amber-500' },
+    { id: 5, label: 'โซน E', sublabel: 'บนขวา', color: '#ec4899', bg: 'bg-pink-500' },
   ];
 
   const handleZoneToggle = (zone: number) => {
@@ -457,7 +457,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
                       } : undefined}
                     >
                       <span className={`h-1.5 w-1.5 rounded-full ${metricsZone === z.id ? 'bg-white' : z.bg}`} />
-                      {z.id}
+                      {z.label.replace('โซน ', '')}
                     </button>
                   ))}
                 </div>
