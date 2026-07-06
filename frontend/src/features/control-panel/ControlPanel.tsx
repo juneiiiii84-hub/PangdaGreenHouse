@@ -166,6 +166,22 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
           <span className="text-[10px] font-bold animate-pulse" style={{ color: 'var(--text-muted)' }}>
             * คลิกเลือกโซนที่ต้องการบนแผนที่ได้โดยตรง
           </span>
+
+          {/* ข้อมูลกายภาพของโซนที่เลือก แสดงคู่กับแผนที่ */}
+          <div
+            className="w-full p-4 rounded-xl border theme-transition flex flex-col gap-1.5 text-left mt-2"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-card)',
+            }}
+          >
+            <div className="font-black flex items-center gap-1.5 text-xs uppercase tracking-wider">
+              <span style={{ color: currentZone?.hexColor }}>📍 ลักษณะทางกายภาพ {currentZone?.name}:</span>
+            </div>
+            <p className="font-semibold text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              {currentZone?.details}
+            </p>
+          </div>
         </div>
       )}
 
@@ -192,22 +208,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
             <span className="text-xs md:text-sm leading-none">{zone.name}</span>
           </button>
         ))}
-      </div>
-
-      {/* ข้อมูลกายภาพของโซนที่เลือก */}
-      <div
-        className="p-4 rounded-2xl border theme-transition flex flex-col gap-1.5 text-left"
-        style={{
-          backgroundColor: 'var(--bg-subtle)',
-          borderColor: 'var(--border-card)',
-        }}
-      >
-        <div className="font-black flex items-center gap-1.5 text-xs uppercase tracking-wider">
-          <span style={{ color: currentZone?.hexColor }}>📍 ข้อมูลกายภาพ {currentZone?.name}:</span>
-        </div>
-        <p className="font-semibold text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-          {currentZone?.details}
-        </p>
       </div>
     </div>
   );
