@@ -29,30 +29,20 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
   const filteredData = getFilteredData();
 
   const getGreenhouseAverage = () => {
-    const activeZones = [1, 2, 3, 4, 5]; // รวมโซน 5
-    const zoneAvgs = activeZones
-      .map(id => {
-        const zoneData = filteredData.filter(d => d.zone === id);
-        if (zoneData.length === 0) return null;
-        return {
-          temp: zoneData.reduce((s, d) => s + d.temperature, 0) / zoneData.length,
-          humidity: zoneData.reduce((s, d) => s + d.humidity, 0) / zoneData.length,
-          vpd: zoneData.reduce((s, d) => s + d.vpd, 0) / zoneData.length,
-          ppfd: zoneData.reduce((s, d) => s + d.ppfd, 0) / zoneData.length,
-          count: zoneData.length,
-        };
-      })
-      .filter((avg): avg is NonNullable<typeof avg> => avg !== null);
+    // รวมโซน 1-5 และเฉลี่ยตรงๆ จากข้อมูลทั้งหมดที่กรองแล้วตามช่วงเวลา
+    if (filteredData.length === 0) return null;
 
-    if (zoneAvgs.length === 0) return null;
+    const sumTemp = filteredData.reduce((s, d) => s + d.temperature, 0);
+    const sumHum = filteredData.reduce((s, d) => s + d.humidity, 0);
+    const sumVpd = filteredData.reduce((s, d) => s + d.vpd, 0);
+    const sumPpfd = filteredData.reduce((s, d) => s + d.ppfd, 0);
+    const count = filteredData.length;
 
     return {
-      temp: zoneAvgs.reduce((s, a) => s + a.temp, 0) / zoneAvgs.length,
-      humidity: zoneAvgs.reduce((s, a) => s + a.humidity, 0) / zoneAvgs.length,
-      vpd: zoneAvgs.reduce((s, a) => s + a.vpd, 0) / zoneAvgs.length,
-      ppfd: zoneAvgs.reduce((s, a) => s + a.ppfd, 0) / zoneAvgs.length,
-      count: zoneAvgs.reduce((s, a) => s + a.count, 0),
-      zoneCount: zoneAvgs.length,
+      temp: sumTemp / count,
+      humidity: sumHum / count,
+      vpd: sumVpd / count,
+      ppfd: sumPpfd / count,
     };
   };
 
@@ -155,23 +145,6 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
             </div>
           </div>
         ))}
-      </div>
-
-      {/* ข้อมูลสรุป */}
-      <div
-        className="text-xs font-bold border-t pt-3 flex flex-wrap justify-between items-center gap-2 theme-transition"
-        style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
-      >
-        <span>ข้อมูลจาก {avg?.zoneCount ?? 0} โซน</span>
-        <span
-          className="px-2 py-0.5 rounded-full font-mono font-bold text-xs"
-          style={{
-            backgroundColor: theme === 'night' ? 'rgba(16,185,129,0.15)' : 'rgba(16,185,129,0.1)',
-            color: '#10b981',
-          }}
-        >
-          {avg ? `${avg.count} รายการ` : '0 รายการ'}
-        </span>
       </div>
     </section>
   );

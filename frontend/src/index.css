@@ -5,13 +5,15 @@
   --font-sans: 'Inter', 'Noto Sans Thai', sans-serif;
 }
 
+@import "flatpickr/dist/flatpickr.css";
+
 /* ====== Day/Night Theme System ====== */
 
 /* กลางวัน (Light) — ค่าเริ่มต้น */
 :root, .theme-day {
   --bg-page: #f8fafc;
   --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
+  --bg-card-hover: #f1f5f9;
   --bg-section: #ffffff;
   --bg-input: #f8fafc;
   --bg-subtle: rgba(248, 250, 252, 0.5);
@@ -21,7 +23,7 @@
   --text-primary: #1e293b;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
-  --text-value: #334155;
+  --text-value: #1e293b;
 
   --border-primary: #e2e8f0;
   --border-subtle: rgba(226, 232, 240, 0.6);
@@ -36,33 +38,34 @@
   --shadow-section: rgba(241, 245, 249, 0.5);
 }
 
-/* กลางคืน (Dark) */
+/* กลางคืน (Dark) — ดีไซน์ใหม่ โมเดิร์น พรีเมียม (Deep Space Slate & Neon Elements) */
 .theme-night {
-  --bg-page: #0f172a;
-  --bg-card: #1e293b;
-  --bg-card-hover: #334155;
-  --bg-section: #1e293b;
-  --bg-input: #334155;
-  --bg-subtle: rgba(30, 41, 59, 0.5);
-  --bg-control: #334155;
-  --bg-overlay: rgba(0, 0, 0, 0.7);
+  --bg-page: #060913;
+  --bg-card: #0c1220;
+  --bg-card-hover: #131c30;
+  --bg-section: #0c1220;
+  --bg-input: #141c2e;
+  --bg-subtle: rgba(20, 28, 46, 0.7);
+  --bg-control: #141c2e;
+  --bg-overlay: rgba(3, 7, 18, 0.85);
 
-  --text-primary: #f1f5f9;
+  --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #64748b;
-  --text-value: #e2e8f0;
+  --text-value: #ffffff;
 
-  --border-primary: #334155;
-  --border-subtle: rgba(51, 65, 85, 0.6);
-  --border-card: #334155;
+  --border-primary: #1e293b;
+  --border-subtle: rgba(30, 41, 59, 0.6);
+  --border-card: #131b2e;
 
-  --header-from: #064e3b;
-  --header-to: #115e59;
-  --header-border: #064e3b;
-  --header-badge-bg: rgba(6, 78, 59, 0.6);
+  /* สี Header ตอนกลางคืน: สีกรมท่าหรูหราพร้อมขอบเรืองแสง */
+  --header-from: #090e1a;
+  --header-to: #131d35;
+  --header-border: #1e293b;
+  --header-badge-bg: rgba(30, 41, 59, 0.8);
 
-  --shadow-card: rgba(0, 0, 0, 0.3);
-  --shadow-section: rgba(0, 0, 0, 0.4);
+  --shadow-card: rgba(0, 0, 0, 0.5);
+  --shadow-section: rgba(0, 0, 0, 0.6);
 }
 
 body {

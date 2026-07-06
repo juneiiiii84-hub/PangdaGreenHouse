@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { Download, Calendar, RefreshCcw, ChevronDown } from 'lucide-react';
+import flatpickr from 'flatpickr';
 import { api } from './services/api';
 import type { SensorData, DiagnosticsResponse } from './services/api';
 import { ControlPanel } from './features/control-panel/ControlPanel';
@@ -20,6 +21,8 @@ export default function App() {
   const [downloadZone, setDownloadZone] = useState<string>('all');
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadWarning, setDownloadWarning] = useState<string>('');
+
+  const datePickerRef = useRef<HTMLInputElement>(null);
 
   // ธีมกลางวัน/กลางคืนอัตโนมัติ
   const themePeriod = useTheme();
@@ -101,6 +104,36 @@ export default function App() {
     const interval = setInterval(fetchDiagnostics, 5000); // อัปเดตผลทุก 5 วินาที
     return () => clearInterval(interval);
   }, [selectedZone]);
+
+  // 📅 เริ่มต้นใช้งาน Flatpickr สำหรับเลือกช่วงวันที่ในปฏิทินเดียว
+  useEffect(() => {
+    if (!datePickerRef.current) return;
+
+    const fp = flatpickr(datePickerRef.current, {
+      mode: 'range',
+      dateFormat: 'Y-m-d',
+      onChange: (selectedDates) => {
+        setDownloadWarning('');
+        if (selectedDates.length === 2) {
+          const start = selectedDates[0]!.toISOString().split('T')[0]!;
+          const end = selectedDates[1]!.toISOString().split('T')[0]!;
+          setStartDate(start);
+          setEndDate(end);
+        } else if (selectedDates.length === 1) {
+          const start = selectedDates[0]!.toISOString().split('T')[0]!;
+          setStartDate(start);
+          setEndDate('');
+        } else {
+          setStartDate('');
+          setEndDate('');
+        }
+      }
+    });
+
+    return () => {
+      fp.destroy();
+    };
+  }, []);
 
   // 📥 ฟังก์ชันดาวน์โหลดไฟล์ข้อมูลเป็น Excel
   const handleDownloadExcel = async () => {
@@ -258,36 +291,19 @@ export default function App() {
             </div>
 
             {/* เลือกวันที่ */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>วันเริ่มต้น:</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => { setStartDate(e.target.value); setDownloadWarning(''); }}
-                  className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 font-mono theme-transition"
-                  style={{
-                    backgroundColor: 'var(--bg-input)',
-                    borderColor: 'var(--border-subtle)',
-                    color: 'var(--text-primary)',
-                  }}
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>วันสิ้นสุด:</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => { setEndDate(e.target.value); setDownloadWarning(''); }}
-                  className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 font-mono theme-transition"
-                  style={{
-                    backgroundColor: 'var(--bg-input)',
-                    borderColor: 'var(--border-subtle)',
-                    color: 'var(--text-primary)',
-                  }}
-                />
-              </div>
+            <div className="space-y-1">
+              <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>เลือกช่วงวันที่:</label>
+              <input
+                ref={datePickerRef}
+                type="text"
+                placeholder="คลิกเพื่อเลือก วันเริ่มต้น ➔ วันสิ้นสุด..."
+                className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 font-mono theme-transition cursor-pointer"
+                style={{
+                  backgroundColor: 'var(--bg-input)',
+                  borderColor: 'var(--border-subtle)',
+                  color: 'var(--text-primary)',
+                }}
+              />
             </div>
 
             {/* ข้อความเตือน */}
