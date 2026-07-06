@@ -13,11 +13,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
 
   // แผนที่จับคู่รหัสโซน (หลังบ้าน) กับตัวอักษรและตำแหน่งจริงตามภาพร่าง
   const zones = [
-    { id: 5, name: 'โซน A', desc: 'บนขวา (North-East)', color: 'bg-pink-500', hexColor: '#ec4899' },
-    { id: 2, name: 'โซน B', desc: 'ล่างขวา (South-East)', color: 'bg-blue-500', hexColor: '#3b82f6' },
-    { id: 4, name: 'โซน C', desc: 'ตรงกลาง (Center)', color: 'bg-amber-500', hexColor: '#f59e0b' },
-    { id: 1, name: 'โซน D', desc: 'ล่างซ้าย (South-West)', color: 'bg-emerald-500', hexColor: '#10b981' },
-    { id: 3, name: 'โซน E', desc: 'ด้านนอกโรงเรือน (Outside)', color: 'bg-purple-500', hexColor: '#a855f7' },
+    { id: 5, name: 'โซน A', desc: 'บนขวา (North-East)', color: 'bg-pink-500', hexColor: '#ec4899', activeClass: 'bg-pink-500 text-white border-pink-400 shadow-pink-500/20' },
+    { id: 2, name: 'โซน B', desc: 'ล่างขวา (South-East)', color: 'bg-blue-500', hexColor: '#3b82f6', activeClass: 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' },
+    { id: 4, name: 'โซน C', desc: 'ตรงกลาง (Center)', color: 'bg-amber-500', hexColor: '#f59e0b', activeClass: 'bg-amber-500 text-white border-amber-400 shadow-amber-500/20' },
+    { id: 1, name: 'โซน D', desc: 'ล่างซ้าย (South-West)', color: 'bg-emerald-500', hexColor: '#10b981', activeClass: 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20' },
+    { id: 3, name: 'โซน E', desc: 'ด้านนอกโรงเรือน (Outside)', color: 'bg-purple-500', hexColor: '#a855f7', activeClass: 'bg-purple-500 text-white border-purple-400 shadow-purple-500/20' },
   ];
 
   const currentZone = zones.find(z => z.id === selectedZone);
@@ -89,37 +89,33 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
                 <text x="0" y="35" fill="var(--text-muted)" fontSize="9" textAnchor="middle" fontWeight="bold">ต้นไม้</text>
               </g>
 
-              {/* ขอบเขตโรงเรือนรูปตัว L */}
-              {/* โซน D (ล่างซ้าย) */}
+              {/* ขอบเขตโรงเรือนรูปตัว L แบบติดกัน (ไม่มีช่องว่างตรงกลาง) */}
+              
+              {/* โซน D (ล่างซ้าย) - ขยายให้ชนกับโซน C โดยตรง */}
               <g onClick={() => onZoneSelect(1)} className="cursor-pointer group/zone">
-                <rect x="90" y="130" width="55" height="90" fill={selectedZone === 1 ? 'rgba(16,185,129,0.2)' : 'transparent'} stroke="#10b981" strokeWidth={selectedZone === 1 ? 3.5 : 1.5} rx="4" />
-                <circle cx="117" cy="175" r="14" fill="#10b981" className="transition-transform group-hover/zone:scale-110" />
-                <text x="117" y="179" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">D</text>
+                {/* ใช้ fill แบบกึ่งโปร่งใส (เมื่อไม่เลือก) หรือมีสี (เมื่อเลือก) เพื่อให้ทุกจุดบนพื้นที่รับคลิกได้ 100% ไม่หลุดลอด */}
+                <rect x="90" y="130" width="70" height="90" fill={selectedZone === 1 ? 'rgba(16,185,129,0.2)' : 'rgba(0,0,0,0.005)'} stroke="#10b981" strokeWidth={selectedZone === 1 ? 3.5 : 1.5} rx="4" />
+                <circle cx="125" cy="175" r="14" fill="#10b981" className="transition-transform group-hover/zone:scale-110" />
+                <text x="125" y="179" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">D</text>
               </g>
 
-              {/* พื้นที่สีเขียวทางเดิน/บัฟเฟอร์ตรงกลาง */}
-              <g>
-                <rect x="145" y="130" width="40" height="90" fill="#22c55e" fillOpacity="0.25" stroke="var(--border-subtle)" strokeWidth="1" rx="2" />
-                <text x="165" y="178" fill="#15803d" fontSize="8" fontWeight="black" textAnchor="middle" transform="rotate(-90 165 178)">ตรงกลาง</text>
-              </g>
-
-              {/* โซน C (ตรงกลางขวา) */}
+              {/* โซน C (ตรงกลาง) - ติดกับโซน D และโซน B */}
               <g onClick={() => onZoneSelect(4)} className="cursor-pointer group/zone">
-                <rect x="185" y="130" width="60" height="90" fill={selectedZone === 4 ? 'rgba(245,158,11,0.2)' : 'transparent'} stroke="#f59e0b" strokeWidth={selectedZone === 4 ? 3.5 : 1.5} rx="4" />
-                <circle cx="215" cy="175" r="14" fill="#f59e0b" className="transition-transform group-hover/zone:scale-110" />
-                <text x="215" y="179" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">C</text>
+                <rect x="160" y="130" width="85" height="90" fill={selectedZone === 4 ? 'rgba(245,158,11,0.2)' : 'rgba(0,0,0,0.005)'} stroke="#f59e0b" strokeWidth={selectedZone === 4 ? 3.5 : 1.5} rx="4" />
+                <circle cx="202.5" cy="175" r="14" fill="#f59e0b" className="transition-transform group-hover/zone:scale-110" />
+                <text x="202.5" y="179" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">C</text>
               </g>
 
-              {/* โซน B (ล่างขวา) */}
+              {/* โซน B (ล่างขวา) - ติดกับโซน C */}
               <g onClick={() => onZoneSelect(2)} className="cursor-pointer group/zone">
-                <rect x="245" y="130" width="60" height="90" fill={selectedZone === 2 ? 'rgba(59,130,246,0.2)' : 'transparent'} stroke="#3b82f6" strokeWidth={selectedZone === 2 ? 3.5 : 1.5} rx="4" />
+                <rect x="245" y="130" width="60" height="90" fill={selectedZone === 2 ? 'rgba(59,130,246,0.2)' : 'rgba(0,0,0,0.005)'} stroke="#3b82f6" strokeWidth={selectedZone === 2 ? 3.5 : 1.5} rx="4" />
                 <circle cx="275" cy="175" r="14" fill="#3b82f6" className="transition-transform group-hover/zone:scale-110" />
                 <text x="275" y="179" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">B</text>
               </g>
 
-              {/* โซน A (บนขวา) */}
+              {/* โซน A (บนขวา) - วางพาดต่อจากโซน B ขึ้นไปข้างบนพอดี */}
               <g onClick={() => onZoneSelect(5)} className="cursor-pointer group/zone">
-                <rect x="245" y="30" width="60" height="100" fill={selectedZone === 5 ? 'rgba(236,72,153,0.2)' : 'transparent'} stroke="#ec4899" strokeWidth={selectedZone === 5 ? 3.5 : 1.5} rx="4" />
+                <rect x="245" y="30" width="60" height="100" fill={selectedZone === 5 ? 'rgba(236,72,153,0.2)' : 'rgba(0,0,0,0.005)'} stroke="#ec4899" strokeWidth={selectedZone === 5 ? 3.5 : 1.5} rx="4" />
                 <circle cx="275" cy="80" r="14" fill="#ec4899" className="transition-transform group-hover/zone:scale-110" />
                 <text x="275" y="84" fill="#fff" fontSize="11" fontWeight="black" text-anchor="middle">A</text>
               </g>
@@ -135,12 +131,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
                 <path d="M 314 126 L 310 130 L 314 134" stroke="#a855f7" strokeWidth="1.5" fill="none" />
               </g>
 
-              {/* ประตูต่างๆ */}
-              <g stroke="var(--text-primary)" strokeWidth="2">
+              {/* ประตูทางเดินและหน้าต่างอิงภาพสเก็ตช์ */}
+              <g stroke="var(--text-primary)" strokeWidth="2.5">
                 {/* ประตูบน (โซน D) */}
                 <line x1="95" y1="130" x2="115" y2="130" />
                 {/* ประตูล่าง (โซน D) */}
                 <line x1="95" y1="220" x2="115" y2="220" />
+                {/* ประตูข้างซ้าย (โซน A) */}
+                <line x1="245" y1="50" x2="245" y2="70" />
                 {/* ประตูทางขวา (โซน B) */}
                 <line x1="305" y1="170" x2="305" y2="190" />
               </g>
@@ -165,7 +163,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
               </g>
             </svg>
           </div>
-          <span className="text-[10px] font-bold" style={{ color: 'var(--text-muted)' }}>
+          <span className="text-[10px] font-bold animate-pulse" style={{ color: 'var(--text-muted)' }}>
             * คลิกเลือกโซนที่ต้องการบนแผนที่ได้โดยตรง
           </span>
         </div>
@@ -180,7 +178,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
             onClick={() => onZoneSelect(zone.id)}
             className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl text-center transition-all cursor-pointer border ${
               selectedZone === zone.id
-                ? 'bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/20 font-black'
+                ? `${zone.activeClass} font-black shadow-md`
                 : 'border-transparent font-bold hover:opacity-80'
             }`}
             style={selectedZone !== zone.id ? {
