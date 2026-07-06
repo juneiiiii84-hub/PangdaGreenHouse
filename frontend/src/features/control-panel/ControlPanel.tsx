@@ -149,9 +149,9 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
                 <line x1="90" y1="235" x2="305" y2="235" />
                 <text x="197" y="247" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle">36 m</text>
                 
-                {/* 19m (บนโรงเรือนขวา) */}
+                {/* 12m (บนโรงเรือนขวา) */}
                 <line x1="245" y1="18" x2="305" y2="18" />
-                <text x="275" y="12" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle">19 m</text>
+                <text x="275" y="12" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle">12 m</text>
 
                 {/* 16m (ความสูงโรงเรือนซ้าย) */}
                 <line x1="75" y1="130" x2="75" y2="220" />
