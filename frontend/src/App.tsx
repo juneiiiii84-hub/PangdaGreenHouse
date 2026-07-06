@@ -179,13 +179,13 @@ export default function App() {
           });
 
           const ws = XLSX.utils.aoa_to_sheet(wsData);
-          const zoneLetter = z === 1 ? 'A' : z === 2 ? 'B' : z === 3 ? 'C' : z === 4 ? 'D' : 'E';
+          const zoneLetter = z === 5 ? 'A' : z === 2 ? 'B' : z === 4 ? 'C' : z === 1 ? 'D' : 'E';
           XLSX.utils.book_append_sheet(wb, ws, `โซน ${zoneLetter}`);
         }
       }
 
       if (hasData) {
-        const zoneLetter = downloadZone === '1' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '3' ? 'C' : downloadZone === '4' ? 'D' : 'E';
+        const zoneLetter = downloadZone === '5' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '4' ? 'C' : downloadZone === '1' ? 'D' : 'E';
         const zoneLabel = downloadZone === 'all' ? 'ทุกโซน' : `โซน${zoneLetter}`;
         XLSX.writeFile(wb, `ข้อมูลโรงเรือน_${zoneLabel}_${startDate}_ถึง_${endDate}.xlsx`);
       } else {
@@ -282,11 +282,11 @@ export default function App() {
                   }}
                 >
                   <option value="all">ทุกโซน (A-E)</option>
-                  <option value="1">โซน A — ล่างซ้าย</option>
+                  <option value="5">โซน A — บนขวา</option>
                   <option value="2">โซน B — ล่างขวา</option>
-                  <option value="3">โซน C — บนซ้าย</option>
-                  <option value="4">โซน D — ตรงกลาง</option>
-                  <option value="5">โซน E — บนขวา</option>
+                  <option value="4">โซน C — ตรงกลาง</option>
+                  <option value="1">โซน D — ล่างซ้าย</option>
+                  <option value="3">โซน E — ด้านนอกโรงเรือน</option>
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
               </div>
@@ -321,7 +321,7 @@ export default function App() {
               className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm md:text-base font-black flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
             >
               {isDownloading ? <RefreshCcw size={16} className="animate-spin" /> : <Download size={16} />}
-              <span>{isDownloading ? 'กำลังดึงข้อมูล...' : `ดาวน์โหลด Excel (${downloadZone === 'all' ? 'ทุกโซน' : `โซน ${downloadZone === '1' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '3' ? 'C' : downloadZone === '4' ? 'D' : 'E'}`})`}</span>
+              <span>{isDownloading ? 'กำลังดึงข้อมูล...' : `ดาวน์โหลด Excel (${downloadZone === 'all' ? 'ทุกโซน' : `โซน ${downloadZone === '5' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '4' ? 'C' : downloadZone === '1' ? 'D' : 'E'}`})`}</span>
             </button>
           </div>
         </section>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Home } from 'lucide-react';
 import type { ThemePeriod } from '../../shared/utils/useTheme';
 
@@ -9,13 +9,18 @@ interface ControlPanelProps {
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZoneSelect, theme }) => {
+  const [showMap, setShowMap] = useState(false);
+
+  // แผนที่จับคู่รหัสโซน (หลังบ้าน) กับตัวอักษรและตำแหน่งจริงตามภาพร่าง
   const zones = [
-    { id: 1, name: 'โซน A', desc: 'ล่างซ้าย (South-West)', color: 'bg-emerald-500' },
-    { id: 2, name: 'โซน B', desc: 'ล่างขวา (South-East)', color: 'bg-blue-500' },
-    { id: 3, name: 'โซน C', desc: 'บนซ้าย (North-West)', color: 'bg-purple-500' },
-    { id: 4, name: 'โซน D', desc: 'ตรงกลาง (Center)', color: 'bg-amber-500' },
-    { id: 5, name: 'โซน E', desc: 'บนขวา (North-East)', color: 'bg-pink-500' },
+    { id: 5, name: 'โซน A', desc: 'บนขวา (North-East)', color: 'bg-pink-500', hexColor: '#ec4899' },
+    { id: 2, name: 'โซน B', desc: 'ล่างขวา (South-East)', color: 'bg-blue-500', hexColor: '#3b82f6' },
+    { id: 4, name: 'โซน C', desc: 'ตรงกลาง (Center)', color: 'bg-amber-500', hexColor: '#f59e0b' },
+    { id: 1, name: 'โซน D', desc: 'ล่างซ้าย (South-West)', color: 'bg-emerald-500', hexColor: '#10b981' },
+    { id: 3, name: 'โซน E', desc: 'ด้านนอกโรงเรือน (Outside)', color: 'bg-purple-500', hexColor: '#a855f7' },
   ];
+
+  const currentZone = zones.find(z => z.id === selectedZone);
 
   return (
     <div
@@ -26,15 +31,145 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
         boxShadow: `0 10px 40px ${theme === 'night' ? 'rgba(0,0,0,0.3)' : 'rgba(241,245,249,0.5)'}`,
       }}
     >
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-emerald-500 rounded-xl shadow-md shadow-emerald-500/20">
-          <Home size={18} className="text-white" />
+      {/* หัวข้อ + ปุ่มแผนที่ */}
+      <div className="flex justify-between items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-emerald-500 rounded-xl shadow-md shadow-emerald-500/20">
+            <Home size={18} className="text-white" />
+          </div>
+          <div>
+            <h2 className="text-sm md:text-base font-black tracking-wide" style={{ color: 'var(--text-primary)' }}>เลือกโซนโรงเรือน</h2>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>กดเลือกโซนที่ต้องการดูข้อมูล</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-sm md:text-base font-black tracking-wide" style={{ color: 'var(--text-primary)' }}>เลือกโซนโรงเรือน</h2>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>กดเลือกโซนที่ต้องการดูข้อมูล</p>
-        </div>
+
+        {/* ปุ่มเปิด/ปิดแผนที่ */}
+        <button
+          onClick={() => setShowMap(!showMap)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border hover:opacity-90 active:scale-95 shrink-0"
+          style={{
+            backgroundColor: showMap ? 'rgba(16,185,129,0.15)' : 'var(--bg-control)',
+            borderColor: showMap ? 'rgba(16,185,129,0.3)' : 'var(--border-subtle)',
+            color: showMap ? '#10b981' : 'var(--text-muted)',
+          }}
+        >
+          <span>🗺️ {showMap ? 'ปิดแผนที่โรงเรือน' : 'ดูแผนที่โรงเรือน'}</span>
+        </button>
       </div>
+
+      {/* แผนที่โรงเรือนจำลองรูปภาพร่าง (SVG Map) */}
+      {showMap && (
+        <div 
+          className="border rounded-2xl p-4 transition-all duration-300 animate-in fade-in slide-in-from-top-3 flex flex-col items-center justify-center gap-2"
+          style={{
+            backgroundColor: 'var(--bg-subtle)',
+            borderColor: 'var(--border-subtle)',
+          }}
+        >
+          <div className="w-full max-w-lg">
+            <svg viewBox="0 0 420 300" className="w-full h-auto select-none">
+              {/* ตารางพื้นหลังเพื่อสไตล์พิมพ์เขียว */}
+              <defs>
+                <pattern id="map-grid" width="15" height="15" patternUnits="userSpaceOnUse">
+                  <path d="M 15 0 L 0 0 0 15" fill="none" stroke={theme === 'night' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'} strokeWidth="1" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#map-grid)" rx="12" />
+
+              {/* อาคาร */}
+              <g>
+                <rect x="90" y="30" width="130" height="65" rx="6" fill={theme === 'night' ? '#1e293b' : '#f1f5f9'} stroke="var(--border-subtle)" strokeWidth="1.5" />
+                <text x="155" y="68" fill="var(--text-secondary)" fontSize="11" fontWeight="bold" textAnchor="middle">อาคาร</text>
+              </g>
+
+              {/* ต้นไม้ */}
+              <g transform="translate(45, 170)">
+                <path d="M 0 0 C -15 -10, -20 -30, -5 -40 C -15 -55, 15 -55, 5 -40 C 20 -30, 15 -10, 0 0" fill="#10b981" fillOpacity="0.8" />
+                <rect x="-3" y="0" width="6" height="22" fill="#78350f" />
+                <text x="0" y="35" fill="var(--text-muted)" fontSize="9" textAnchor="middle" fontWeight="bold">ต้นไม้</text>
+              </g>
+
+              {/* ขอบเขตโรงเรือนรูปตัว L */}
+              {/* โซน D (ล่างซ้าย) */}
+              <g onClick={() => onZoneSelect(1)} className="cursor-pointer group/zone">
+                <rect x="90" y="130" width="55" height="90" fill={selectedZone === 1 ? 'rgba(16,185,129,0.2)' : 'transparent'} stroke="#10b981" strokeWidth={selectedZone === 1 ? 3.5 : 1.5} rx="4" />
+                <circle cx="117" cy="175" r="14" fill="#10b981" className="transition-transform group-hover/zone:scale-110" />
+                <text x="117" y="179" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">D</text>
+              </g>
+
+              {/* พื้นที่สีเขียวทางเดิน/บัฟเฟอร์ตรงกลาง */}
+              <g>
+                <rect x="145" y="130" width="40" height="90" fill="#22c55e" fillOpacity="0.25" stroke="var(--border-subtle)" strokeWidth="1" rx="2" />
+                <text x="165" y="178" fill="#15803d" fontSize="8" fontWeight="black" textAnchor="middle" transform="rotate(-90 165 178)">ตรงกลาง</text>
+              </g>
+
+              {/* โซน C (ตรงกลางขวา) */}
+              <g onClick={() => onZoneSelect(4)} className="cursor-pointer group/zone">
+                <rect x="185" y="130" width="60" height="90" fill={selectedZone === 4 ? 'rgba(245,158,11,0.2)' : 'transparent'} stroke="#f59e0b" strokeWidth={selectedZone === 4 ? 3.5 : 1.5} rx="4" />
+                <circle cx="215" cy="175" r="14" fill="#f59e0b" className="transition-transform group-hover/zone:scale-110" />
+                <text x="215" y="179" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">C</text>
+              </g>
+
+              {/* โซน B (ล่างขวา) */}
+              <g onClick={() => onZoneSelect(2)} className="cursor-pointer group/zone">
+                <rect x="245" y="130" width="60" height="90" fill={selectedZone === 2 ? 'rgba(59,130,246,0.2)' : 'transparent'} stroke="#3b82f6" strokeWidth={selectedZone === 2 ? 3.5 : 1.5} rx="4" />
+                <circle cx="275" cy="175" r="14" fill="#3b82f6" className="transition-transform group-hover/zone:scale-110" />
+                <text x="275" y="179" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">B</text>
+              </g>
+
+              {/* โซน A (บนขวา) */}
+              <g onClick={() => onZoneSelect(5)} className="cursor-pointer group/zone">
+                <rect x="245" y="30" width="60" height="100" fill={selectedZone === 5 ? 'rgba(236,72,153,0.2)' : 'transparent'} stroke="#ec4899" strokeWidth={selectedZone === 5 ? 3.5 : 1.5} rx="4" />
+                <circle cx="275" cy="80" r="14" fill="#ec4899" className="transition-transform group-hover/zone:scale-110" />
+                <text x="275" y="84" fill="#fff" fontSize="11" fontWeight="black" text-anchor="middle">A</text>
+              </g>
+
+              {/* โซน E (ด้านนอก) */}
+              <g onClick={() => onZoneSelect(3)} className="cursor-pointer group/zone">
+                <circle cx="345" cy="130" r="14" fill="#a855f7" className="transition-transform group-hover/zone:scale-110" stroke={selectedZone === 3 ? '#fff' : 'transparent'} strokeWidth="2.5" />
+                <text x="345" y="134" fill="#fff" fontSize="11" fontWeight="black" text-anchor="middle">E</text>
+                <text x="345" y="156" fill="var(--text-muted)" fontSize="8.5" fontWeight="black" textAnchor="middle">ด้านนอก</text>
+                
+                {/* ลูกศรชี้เข้าหาโรงเรือน */}
+                <path d="M 325 130 L 310 130" stroke="#a855f7" strokeWidth="1.5" fill="none" />
+                <path d="M 314 126 L 310 130 L 314 134" stroke="#a855f7" strokeWidth="1.5" fill="none" />
+              </g>
+
+              {/* ประตูต่างๆ */}
+              <g stroke="var(--text-primary)" strokeWidth="2">
+                {/* ประตูบน (โซน D) */}
+                <line x1="95" y1="130" x2="115" y2="130" />
+                {/* ประตูล่าง (โซน D) */}
+                <line x1="95" y1="220" x2="115" y2="220" />
+                {/* ประตูทางขวา (โซน B) */}
+                <line x1="305" y1="170" x2="305" y2="190" />
+              </g>
+
+              {/* เส้นและตัวเลขสเกลระยะทางจริง (มิติเมตร) */}
+              <g stroke="var(--text-muted)" strokeWidth="0.8" opacity="0.6">
+                {/* 36m (ล่างโรงเรือน) */}
+                <line x1="90" y1="235" x2="305" y2="235" />
+                <text x="197" y="247" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle">36 m</text>
+                
+                {/* 19m (บนโรงเรือนขวา) */}
+                <line x1="245" y1="18" x2="305" y2="18" />
+                <text x="275" y="12" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle">19 m</text>
+
+                {/* 16m (ความสูงโรงเรือนซ้าย) */}
+                <line x1="75" y1="130" x2="75" y2="220" />
+                <text x="66" y="178" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(-90 66 178)">16 m</text>
+
+                {/* 32m (ความสูงรวมฝั่งขวา) */}
+                <line x1="320" y1="30" x2="320" y2="220" />
+                <text x="329" y="125" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(90 329 125)">32 m</text>
+              </g>
+            </svg>
+          </div>
+          <span className="text-[10px] font-bold" style={{ color: 'var(--text-muted)' }}>
+            * คลิกเลือกโซนที่ต้องการบนแผนที่ได้โดยตรง
+          </span>
+        </div>
+      )}
 
       {/* ปุ่มเลือกโซน */}
       <div className="grid grid-cols-5 gap-2.5">
@@ -70,7 +205,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
           color: 'var(--text-secondary)',
         }}
       >
-        📍 <span className="text-emerald-500">{zones.find(z => z.id === selectedZone)?.desc}</span>
+        📍 โซนปัจจุบัน: <span style={{ color: currentZone?.hexColor }}>{currentZone?.name} — {currentZone?.desc}</span>
       </div>
     </div>
   );
