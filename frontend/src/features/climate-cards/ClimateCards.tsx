@@ -4,10 +4,11 @@ import { Thermometer, Droplets, Wind, Sun, Info } from 'lucide-react';
 import { PpfdModal } from './PpfdModal';
 import { DEFAULT_MULTIPLIER } from '../../shared/utils/ppfd';
 import type { SensorData, DiagnosticsResponse } from '../../services/api';
+import type { ThemePeriod } from '../../shared/utils/useTheme';
 
 const simplifyRecommendation = (text: string): string => {
-  if (!text) return 'กำลังวิเคราะห์สภาวะแวดล้อม...';
-  
+  if (!text) return 'กำลังวิเคราะห์...';
+
   // อุณหภูมิ
   if (text.includes('รักษาเสถียรภาพความร้อน')) return '✅ อุณหภูมิเหมาะสม ดีต่อการเติบโต คุมระดับนี้ต่อไป';
   if (text.includes('ไม่ให้อุณหภูมิผันผวน')) return '👍 อุณหภูมิปกติ ควรสังเกตไม่ให้ผันผวนเร็วเกินไป';
@@ -38,18 +39,68 @@ const simplifyRecommendation = (text: string): string => {
   if (text.includes('แสงจ้าเกินไป: แนะนำ') || text.includes('แสงจ้าเกินไป')) return '⚠️ แสงจ้าไป: กางตาข่ายกรองแสง (Shading Net) บรรเทาความเครียด';
   if (text.includes('แสงค่อนข้างสลัว: แนะนำ') || text.includes('แสงค่อนข้างสลัว')) return '⚠️ แสงสลัวไป: เปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมความเข้มแสง';
   if (text.includes('แสงแดดจัดแผดเผาเกรียม') || text.includes('แสงแดดจัด')) return '🚨 แดดเผาวิกฤต: กางสแลนกรองแสง 50% และพ่นหมอกน้ำด่วน';
-  if (text.includes('แสงมืดสลัวรุนแรง') || text.includes('แสงมืดสลัว')) return '🚨 มืดจัดวิกฤต: การโตชะงัก เปิดไฟช่วยปลูก (Grow Lights) ทันที';
+  if (text.includes('แสงมืดสลัวรุนแรง') || text.includes('แสงมืดสลัว')) return '🚨 มืดจัดวิกฤต: พืชเติบโตได้ไม่ดี เปิดไฟช่วยปลูก (Grow Lights) ทันที';
 
   return text;
+};
+
+// ข้อมูล tooltip ค่าเหมาะสมและผลกระทบต่อพืช
+const tooltipData: Record<string, { title: string; lines: string[] }> = {
+  temp: {
+    title: 'เกณฑ์ความเหมาะสม (อุณหภูมิ)',
+    lines: [
+      '🟢 เหมาะสมมาก: 25 — 30 °C',
+      '🔵 เหมาะสม: 22—24 / 31—32 °C',
+      '🟡 เฝ้าระวัง: 20—21 / 33—35 °C',
+      '🔴 ไม่เหมาะสม: <20 / >35 °C'
+    ]
+  },
+  hum: {
+    title: 'เกณฑ์ความชื้นสัมพัทธ์ (RH)',
+    lines: [
+      '🟢 เหมาะสมมาก: 60 — 80 %RH',
+      '🔵 เหมาะสม: 50—59 / 81—85 %RH',
+      '🟡 เฝ้าระวัง: 40—49 / 86—90 %RH',
+      '🔴 ไม่เหมาะสม: <40 / >90 %RH'
+    ]
+  },
+  vpd: {
+    title: 'เกณฑ์แรงดันไอน้ำ (VPD)',
+    lines: [
+      '🟢 เหมาะสมมาก: 0.4 — 0.8 kPa',
+      '🔵 เหมาะสม: 0.3 / 0.9—1.2 kPa',
+      '🟡 เฝ้าระวัง: 0.2 / 1.3—1.6 kPa',
+      '🔴 ไม่เหมาะสม: <0.2 / >1.6 kPa'
+    ]
+  },
+  ppfd: {
+    title: 'เกณฑ์แสงพืช (PPFD)',
+    lines: [
+      '🟢 เหมาะสมมาก: 400 — 800 μmol',
+      '🔵 เหมาะสม: 300—399 / 801—950 μmol',
+      '🟡 เฝ้าระวัง: 200—299 / 951—1100 μmol',
+      '🔴 ไม่เหมาะสม: <200 / >1100 μmol'
+    ]
+  },
+  lux: {
+    title: 'เกณฑ์ความสว่าง (Lux)',
+    lines: [
+      '🟢 เหมาะสมมาก: 21,600 — 43,200 Lux',
+      '🔵 เหมาะสม: 16,200—21,599 / 43,201—51,350 Lux',
+      '🟡 เฝ้าระวัง: 10,800—16,199 / 51,351—59,450 Lux',
+      '🔴 ไม่เหมาะสม: <10,800 / >59,450 Lux'
+    ]
+  }
 };
 
 interface ClimateCardsProps {
   latestData: SensorData | null;
   history: SensorData[];
   diagnosticsData: DiagnosticsResponse | null;
+  theme: ThemePeriod;
 }
 
-export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history, diagnosticsData }) => {
+export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history, diagnosticsData, theme }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [multiplier, setMultiplier] = useState(DEFAULT_MULTIPLIER);
 
@@ -168,44 +219,44 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
   const cards = [
     {
       key: 'temp' as const,
-      title: 'อุณหภูมิอากาศ',
+      title: 'อุณหภูมิ',
       subtitle: 'DHT22 Sensor',
       value: `${temp.toFixed(1)}`,
       unit: '°C',
-      desc: 'อุณหภูมิความร้อนแวดล้อม',
+      desc: 'ความร้อนในโรงเรือน',
       icon: <Thermometer size={16} />,
       sparkColor: '#f43f5e',
       sparkline: createSparklineData('temperature', '#f43f5e'),
     },
     {
       key: 'hum' as const,
-      title: 'ความชื้นสัมพัทธ์',
+      title: 'ความชื้น',
       subtitle: 'DHT22 Sensor',
       value: `${hum.toFixed(1)}`,
       unit: '%RH',
-      desc: 'ระดับไอน้ำสัมพัทธ์สะสม',
+      desc: 'ไอน้ำในอากาศ',
       icon: <Droplets size={16} />,
       sparkColor: '#3b82f6',
       sparkline: createSparklineData('humidity', '#3b82f6'),
     },
     {
       key: 'vpd' as const,
-      title: 'Vapor Pressure Deficit',
-      subtitle: 'VPD (คำนวณจาก T + RH)',
+      title: 'VPD',
+      subtitle: 'คำนวณจาก อุณหภูมิ + ความชื้น',
       value: `${vpd.toFixed(2)}`,
       unit: 'kPa',
-      desc: 'แรงดันไอขาดน้ำปากใบพืช',
+      desc: 'แรงดันไอน้ำ (ดูดซึมปุ๋ยได้ดีแค่ไหน)',
       icon: <Wind size={16} />,
       sparkColor: '#a855f7',
       sparkline: createSparklineData('vpd', '#a855f7'),
     },
     {
       key: 'ppfd' as const,
-      title: 'ความเข้มแสงแวดล้อม (PPFD)',
-      subtitle: 'คำนวณจาก Lux * Multiplier',
+      title: 'PPFD (แสงที่พืชใช้ได้)',
+      subtitle: 'คำนวณจาก Lux × ตัวคูณ',
       value: `${ppfd.toLocaleString()}`,
       unit: 'μmol/m²/s',
-      desc: 'ความเข้มแสงสังเคราะห์แสงของพืช',
+      desc: 'แสงที่พืชใช้สังเคราะห์ได้',
       icon: <Sun size={16} />,
       sparkColor: '#f59e0b',
       sparkline: createSparklineData('ppfd', '#f59e0b'),
@@ -223,11 +274,11 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'lux' as const,
-      title: 'ความเข้มแสงแวดล้อม (Lux)',
+      title: 'ความสว่าง (Lux)',
       subtitle: 'BH1750 Light Sensor',
       value: `${lux.toLocaleString()}`,
       unit: 'Lux',
-      desc: 'ความสว่างรอบข้างรวมในโรงเรือน',
+      desc: 'ความสว่างรวมในโรงเรือน',
       icon: <Sun size={16} />,
       sparkColor: '#eab308',
       sparkline: createSparklineData('ppfd', '#eab308'),
@@ -241,41 +292,60 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
           const styles = getDynamicStyles(card.key);
           const lookupKey = card.key === 'lux' ? 'ppfd' : card.key;
           const cardDiag = diagnostics?.[lookupKey];
+          const tip = tooltipData[card.key];
 
           return (
             <div key={idx} className="flex flex-col gap-2">
               {/* การ์ดหลักแสดงค่าตัวเลข */}
               <div
-                className={`bg-white border-2 ${styles.borderColor} rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 relative overflow-hidden flex-grow`}
+                className={`border-2 ${styles.borderColor} rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 relative overflow-hidden flex-grow theme-transition`}
+                style={{ backgroundColor: 'var(--bg-card)' }}
               >
-                {/* กลักแสงหัวการ์ด */}
+                {/* แสงหัวการ์ด */}
                 <div className={`absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl -mr-4 -mt-4 ${styles.bgGlow}`} />
 
-                {/* หัวการ์ด: ไอคอน + ปุ่มข้อมูล */}
+                {/* หัวการ์ด: ไอคอน + tooltip + ปุ่มข้อมูล */}
                 <div className="flex justify-between items-start z-10">
-                  <div className={`p-2 rounded-xl border ${styles.iconBg} ${styles.textColor}`}>
-                    {card.icon}
+                  <div className="flex items-center gap-2">
+                    <div className={`p-2 rounded-xl border ${styles.iconBg} ${styles.textColor}`}>
+                      {card.icon}
+                    </div>
+                    {/* Tooltip ค่าเหมาะสม */}
+                    {tip && (
+                      <div className="tooltip-container">
+                        <div className={`p-1.5 rounded-lg cursor-help transition-colors ${theme === 'night' ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}>
+                          <Info size={13} style={{ color: 'var(--text-muted)' }} />
+                        </div>
+                        <div className="tooltip-content">
+                          <div className="font-black text-xs mb-2 border-b pb-1 border-slate-700">{tip.title}</div>
+                          <div className="space-y-1 text-[10px] font-medium leading-relaxed">
+                            {tip.lines.map((line, lIdx) => (
+                              <div key={lIdx}>{line}</div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {card.action}
                 </div>
 
-                {/* ตัวเลขหลัก + สถานะความเหมาะสม */}
+                {/* ตัวเลขหลัก + สถานะ */}
                 <div className="z-10">
                   <div className="flex justify-between items-center mb-1.5 gap-1">
-                    <span className="text-xs font-black tracking-wide text-slate-400 uppercase leading-none">
+                    <span className="text-xs font-black tracking-wide uppercase leading-none" style={{ color: 'var(--text-muted)' }}>
                       {card.title}
                     </span>
-                    <span className={`px-2 py-0.5 border rounded-full text-[10.5px] font-black shrink-0 transition-colors ${
-                      cardDiag ? cardDiag.color : 'bg-slate-100 text-slate-400 border-slate-200'
-                    }`}>
+                    <span className={`px-2 py-0.5 border rounded-full text-[10.5px] font-black shrink-0 transition-colors ${cardDiag ? cardDiag.color : 'bg-slate-100 text-slate-400 border-slate-200'
+                      }`}>
                       {cardDiag ? cardDiag.status : 'รอข้อมูล...'}
                     </span>
                   </div>
                   <div className={`text-2xl md:text-3xl font-black font-mono tracking-tight leading-none ${styles.valueColor}`}>
                     {latestData ? card.value : '---'}
-                    <span className="text-sm md:text-base font-bold ml-1 text-slate-400">{card.unit}</span>
+                    <span className="text-sm md:text-base font-bold ml-1" style={{ color: 'var(--text-muted)' }}>{card.unit}</span>
                   </div>
-                  <div className="text-xs text-slate-400 mt-1 font-medium">{card.desc}</div>
+                  <div className="text-xs mt-1 font-medium" style={{ color: 'var(--text-muted)' }}>{card.desc}</div>
                 </div>
 
                 {/* Sparkline */}
@@ -284,13 +354,13 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 </div>
               </div>
 
-              {/* กล่องคำแนะนำที่เพิ่มเข้ามาด้านล่าง */}
+              {/* กล่องคำแนะนำ */}
               <div className={`rounded-xl p-3 shadow-md text-xs flex flex-col gap-1 min-h-[64px] justify-center transition-all hover:shadow-lg ${styles.recBg}`}>
                 <div className={`font-black flex items-center gap-1 text-[10.5px] uppercase tracking-wider ${styles.recTitleColor}`}>
                   <span>💡 คำแนะนำ:</span>
                 </div>
                 <p className={`font-semibold leading-relaxed text-xs ${styles.recTextColor}`}>
-                  {cardDiag ? simplifyRecommendation(cardDiag.recommendation) : 'กำลังวิเคราะห์สภาวะแวดล้อม...'}
+                  {cardDiag ? simplifyRecommendation(cardDiag.recommendation) : 'กำลังวิเคราะห์...'}
                 </p>
               </div>
             </div>

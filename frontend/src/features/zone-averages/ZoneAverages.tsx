@@ -1,236 +1,177 @@
-import React from 'react';
-import { Thermometer, Droplets, Wind, Sun } from 'lucide-react';
+import React, { useState } from 'react';
+import { Thermometer, Droplets, Wind, Sun, SunMedium, Moon } from 'lucide-react';
 import type { SensorData } from '../../services/api';
+import type { ThemePeriod } from '../../shared/utils/useTheme';
+import { isDayTime, isNightTime } from '../../shared/utils/useTheme';
+
+type AveragePeriod = 'all' | 'day' | 'night';
 
 interface ZoneAveragesProps {
   dataList: SensorData[];
+  theme: ThemePeriod;
 }
 
-export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList }) => {
-  const zones = [
-    { id: 1, name: 'โซน 1', desc: 'ล่างซ้าย (South-West)', color: 'bg-emerald-500', text: 'text-emerald-600', border: 'border-emerald-100', glow: 'bg-emerald-500/5' },
-    { id: 2, name: 'โซน 2', desc: 'ล่างขวา (South-East)', color: 'bg-blue-500', text: 'text-blue-600', border: 'border-blue-100', glow: 'bg-blue-500/5' },
-    { id: 3, name: 'โซน 3', desc: 'บนซ้าย (North-West)', color: 'bg-purple-500', text: 'text-purple-600', border: 'border-purple-100', glow: 'bg-purple-500/5' },
-    { id: 4, name: 'โซน 4', desc: 'ตรงกลาง (Center)', color: 'bg-amber-500', text: 'text-amber-600', border: 'border-amber-100', glow: 'bg-amber-500/5' },
-  ];
+export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) => {
+  const [averagePeriod, setAveragePeriod] = useState<AveragePeriod>('all');
 
-  const calculateZoneAverages = (zoneId: number) => {
-    const zoneData = dataList.filter((d) => d.zone === zoneId);
-    if (zoneData.length === 0) return null;
-
-    const sumTemp = zoneData.reduce((sum, d) => sum + d.temperature, 0);
-    const sumHum = zoneData.reduce((sum, d) => sum + d.humidity, 0);
-    const sumVpd = zoneData.reduce((sum, d) => sum + d.vpd, 0);
-    const sumPpfd = zoneData.reduce((sum, d) => sum + d.ppfd, 0);
-    const count = zoneData.length;
-
-    return {
-      temp: sumTemp / count,
-      humidity: sumHum / count,
-      vpd: sumVpd / count,
-      ppfd: sumPpfd / count,
-      count,
-    };
+  // กรองข้อมูลตามช่วงเวลาที่เลือก
+  const getFilteredData = () => {
+    switch (averagePeriod) {
+      case 'day':
+        return dataList.filter(d => isDayTime(d.created_at));
+      case 'night':
+        return dataList.filter(d => isNightTime(d.created_at));
+      default:
+        return dataList;
+    }
   };
 
+  const filteredData = getFilteredData();
+
   const getGreenhouseAverage = () => {
-    const activeZones = [1, 2, 3, 4];
+    const activeZones = [1, 2, 3, 4, 5]; // รวมโซน 5
     const zoneAvgs = activeZones
-      .map(id => calculateZoneAverages(id))
+      .map(id => {
+        const zoneData = filteredData.filter(d => d.zone === id);
+        if (zoneData.length === 0) return null;
+        return {
+          temp: zoneData.reduce((s, d) => s + d.temperature, 0) / zoneData.length,
+          humidity: zoneData.reduce((s, d) => s + d.humidity, 0) / zoneData.length,
+          vpd: zoneData.reduce((s, d) => s + d.vpd, 0) / zoneData.length,
+          ppfd: zoneData.reduce((s, d) => s + d.ppfd, 0) / zoneData.length,
+          count: zoneData.length,
+        };
+      })
       .filter((avg): avg is NonNullable<typeof avg> => avg !== null);
 
     if (zoneAvgs.length === 0) return null;
 
-    const sumTemp = zoneAvgs.reduce((sum, a) => sum + a.temp, 0);
-    const sumHum = zoneAvgs.reduce((sum, a) => sum + a.humidity, 0);
-    const sumVpd = zoneAvgs.reduce((sum, a) => sum + a.vpd, 0);
-    const sumPpfd = zoneAvgs.reduce((sum, a) => sum + a.ppfd, 0);
-    const count = zoneAvgs.length;
-
     return {
-      temp: sumTemp / count,
-      humidity: sumHum / count,
-      vpd: sumVpd / count,
-      ppfd: sumPpfd / count,
-      count: zoneAvgs.reduce((sum, a) => sum + a.count, 0)
+      temp: zoneAvgs.reduce((s, a) => s + a.temp, 0) / zoneAvgs.length,
+      humidity: zoneAvgs.reduce((s, a) => s + a.humidity, 0) / zoneAvgs.length,
+      vpd: zoneAvgs.reduce((s, a) => s + a.vpd, 0) / zoneAvgs.length,
+      ppfd: zoneAvgs.reduce((s, a) => s + a.ppfd, 0) / zoneAvgs.length,
+      count: zoneAvgs.reduce((s, a) => s + a.count, 0),
+      zoneCount: zoneAvgs.length,
     };
   };
 
-  const greenhouseAvg = getGreenhouseAverage();
+  const avg = getGreenhouseAverage();
+
+  const periodLabel = averagePeriod === 'day' ? 'กลางวัน (06:30-18:30)' : averagePeriod === 'night' ? 'กลางคืน (18:30-06:30)' : 'ทั้งหมด';
+
+  const metricCards = [
+    { label: 'อุณหภูมิ', value: avg ? `${avg.temp.toFixed(1)}` : '---', unit: '°C', icon: <Thermometer size={18} className="text-rose-500" />, bgIcon: 'bg-rose-50 border-rose-100' },
+    { label: 'ความชื้น', value: avg ? `${avg.humidity.toFixed(1)}` : '---', unit: '%RH', icon: <Droplets size={18} className="text-blue-500" />, bgIcon: 'bg-blue-50 border-blue-100' },
+    { label: 'VPD', value: avg ? `${avg.vpd.toFixed(2)}` : '---', unit: 'kPa', icon: <Wind size={18} className="text-purple-500" />, bgIcon: 'bg-purple-50 border-purple-100' },
+    { label: 'PPFD', value: avg ? `${avg.ppfd.toFixed(1)}` : '---', unit: 'μmol/m²/s', icon: <Sun size={18} className="text-amber-500" />, bgIcon: 'bg-amber-50 border-amber-100' },
+  ];
 
   return (
-    <section className="bg-white border border-slate-100 rounded-[32px] p-5 shadow-xl shadow-slate-100/30 space-y-5">
-      <div>
-        <h3 className="text-base md:text-lg font-black text-slate-800 flex items-center gap-2">
-          ⚡ ค่าเฉลี่ยสภาพแวดล้อมในแต่ละโซน
-        </h3>
-        <p className="text-xs text-slate-400 mt-0.5">
-          วิเคราะห์ค่าเฉลี่ยสภาวะอากาศและแสงสว่างจากประวัติข้อมูลการบันทึกของโซนในโรงเรือน (โซน 1-4)
-        </p>
+    <section
+      className="border rounded-[32px] p-5 shadow-xl space-y-5 theme-transition"
+      style={{
+        backgroundColor: 'var(--bg-section)',
+        borderColor: 'var(--border-card)',
+        boxShadow: `0 20px 60px ${theme === 'night' ? 'rgba(0,0,0,0.3)' : 'rgba(241,245,249,0.3)'}`,
+      }}
+    >
+      {/* หัวข้อ + แถบเลือกช่วงเวลา */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+          <h3 className="text-base md:text-lg font-black flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            📊 ค่าเฉลี่ยรวมทั้งโรงเรือน
+          </h3>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+            ค่าเฉลี่ยอากาศและแสงจากโซน 1-5 ({periodLabel})
+          </p>
+        </div>
+
+        {/* แถบเมนูเลือก กลางวัน / กลางคืน / ทั้งหมด */}
+        <div
+          className="flex p-1.5 rounded-2xl gap-1 w-full sm:w-auto"
+          style={{ backgroundColor: 'var(--bg-control)' }}
+        >
+          <button
+            onClick={() => setAveragePeriod('all')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              averagePeriod === 'all'
+                ? 'bg-emerald-500 text-white shadow-sm'
+                : ''
+            }`}
+            style={averagePeriod !== 'all' ? { color: 'var(--text-muted)' } : undefined}
+          >
+            <span>ทั้งหมด</span>
+          </button>
+          <button
+            onClick={() => setAveragePeriod('day')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              averagePeriod === 'day'
+                ? 'bg-amber-500 text-white shadow-sm'
+                : ''
+            }`}
+            style={averagePeriod !== 'day' ? { color: 'var(--text-muted)' } : undefined}
+          >
+            <SunMedium size={13} />
+            <span>กลางวัน</span>
+          </button>
+          <button
+            onClick={() => setAveragePeriod('night')}
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              averagePeriod === 'night'
+                ? 'bg-indigo-500 text-white shadow-sm'
+                : ''
+            }`}
+            style={averagePeriod !== 'night' ? { color: 'var(--text-muted)' } : undefined}
+          >
+            <Moon size={13} />
+            <span>กลางคืน</span>
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {zones.map((zone) => {
-          const avg = calculateZoneAverages(zone.id);
-
-          return (
-            <div
-              key={zone.id}
-              className={`bg-white border border-slate-150 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-3 relative overflow-hidden`}
-            >
-              {/* ตราเรืองแสงตามสีโซน */}
-              <div className={`absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl -mr-4 -mt-4 ${zone.glow}`} />
-
-              {/* หัวการ์ด: ชื่อโซน */}
-              <div className="flex justify-between items-center z-10">
-                <div className="flex items-center gap-1.5">
-                  <span className={`h-2.5 w-2.5 rounded-full ${zone.color}`} />
-                  <span className="text-sm font-black text-slate-800">{zone.name}</span>
-                </div>
-                <span className="text-xs text-slate-400 font-bold max-w-[90px] text-right truncate">
-                  {zone.desc.split(' ')[0]}
-                </span>
+      {/* การ์ดค่าเฉลี่ยรวม — แสดงเต็มความกว้าง */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {metricCards.map((m, idx) => (
+          <div
+            key={idx}
+            className="border rounded-2xl p-4 flex flex-col gap-3 hover:shadow-md transition-all theme-transition"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border-subtle)',
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <div className={`p-2 rounded-xl border ${m.bgIcon}`}>
+                {m.icon}
               </div>
-
-              {/* ค่าเฉลี่ยต่างๆ */}
-              <div className="grid grid-cols-2 gap-2.5 z-10">
-                {/* อุณหภูมิ */}
-                <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100/60 flex flex-col justify-center">
-                  <div className="flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase">
-                    <Thermometer size={11} className="text-rose-500" />
-                    <span>อุณหภูมิ</span>
-                  </div>
-                  <div className="text-sm font-black text-slate-700 mt-0.5 font-mono">
-                    {avg ? `${avg.temp.toFixed(1)}` : '---'}
-                    <span className="text-[10px] font-normal text-slate-400 ml-0.5">°C</span>
-                  </div>
-                </div>
-
-                {/* ความชื้น */}
-                <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100/60 flex flex-col justify-center">
-                  <div className="flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase">
-                    <Droplets size={11} className="text-blue-500" />
-                    <span>ความชื้น</span>
-                  </div>
-                  <div className="text-sm font-black text-slate-700 mt-0.5 font-mono">
-                    {avg ? `${avg.humidity.toFixed(1)}` : '---'}
-                    <span className="text-[10px] font-normal text-slate-400 ml-0.5">%</span>
-                  </div>
-                </div>
-
-                {/* VPD */}
-                <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100/60 flex flex-col justify-center">
-                  <div className="flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase">
-                    <Wind size={11} className="text-purple-500" />
-                    <span>VPD</span>
-                  </div>
-                  <div className="text-sm font-black text-slate-700 mt-0.5 font-mono">
-                    {avg ? `${avg.vpd.toFixed(2)}` : '---'}
-                    <span className="text-[10px] font-normal text-slate-400 ml-0.5">kPa</span>
-                  </div>
-                </div>
-
-                {/* PPFD */}
-                <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100/60 flex flex-col justify-center">
-                  <div className="flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase">
-                    <Sun size={11} className="text-amber-500" />
-                    <span>PPFD</span>
-                  </div>
-                  <div className="text-sm font-black text-slate-700 mt-0.5 font-mono">
-                    {avg ? `${avg.ppfd.toFixed(1)}` : '---'}
-                    <span className="text-[10px] font-normal text-slate-400 ml-0.5">μmol</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* ท้ายการ์ด: จำนวนข้อมูล */}
-              <div className="text-xs text-slate-400 font-bold border-t border-slate-50 pt-1.5 mt-1 flex justify-between items-center">
-                <span>จำนวนข้อมูล</span>
-                <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-mono font-bold text-xs">
-                  {avg ? `${avg.count} แถว` : '0 แถว'}
-                </span>
-              </div>
+              <span className="text-xs font-black uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+                {m.label}
+              </span>
             </div>
-          );
-        })}
+            <div className="font-black font-mono text-2xl md:text-3xl" style={{ color: 'var(--text-value)' }}>
+              {m.value}
+              <span className="text-sm font-bold ml-1" style={{ color: 'var(--text-muted)' }}>{m.unit}</span>
+            </div>
+          </div>
+        ))}
+      </div>
 
-        {/* การ์ดที่ 5: ค่าเฉลี่ยรวมในโรงเรือน (Greenhouse Average) */}
-        <div
-          className="bg-emerald-50/30 border border-emerald-250 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-3 relative overflow-hidden text-slate-800"
+      {/* ข้อมูลสรุป */}
+      <div
+        className="text-xs font-bold border-t pt-3 flex flex-wrap justify-between items-center gap-2 theme-transition"
+        style={{ borderColor: 'var(--border-subtle)', color: 'var(--text-muted)' }}
+      >
+        <span>ข้อมูลจาก {avg?.zoneCount ?? 0} โซน</span>
+        <span
+          className="px-2 py-0.5 rounded-full font-mono font-bold text-xs"
+          style={{
+            backgroundColor: theme === 'night' ? 'rgba(16,185,129,0.15)' : 'rgba(16,185,129,0.1)',
+            color: '#10b981',
+          }}
         >
-          {/* ตราเรืองแสงสีเขียวพรีเมียม */}
-          <div className="absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl -mr-4 -mt-4 bg-emerald-500/5" />
-
-          {/* หัวการ์ด */}
-          <div className="flex justify-between items-center z-10">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-sm font-black text-slate-800">เฉลี่ยโรงเรือน</span>
-            </div>
-            <span className="text-xs text-slate-400 font-bold max-w-[90px] text-right truncate">
-              โซน 1-4 รวมกัน
-            </span>
-          </div>
-
-          {/* ค่าเฉลี่ยต่างๆ */}
-          <div className="grid grid-cols-2 gap-2.5 z-10">
-            {/* อุณหภูมิ */}
-            <div className="bg-white/80 p-2 rounded-xl border border-emerald-100/60 flex flex-col justify-center">
-              <div className="flex items-center gap-1 text-[10px] font-black text-slate-405 uppercase">
-                <Thermometer size={11} className="text-rose-500" />
-                <span>อุณหภูมิ</span>
-              </div>
-              <div className="text-sm font-black text-slate-705 mt-0.5 font-mono">
-                {greenhouseAvg ? `${greenhouseAvg.temp.toFixed(1)}` : '---'}
-                <span className="text-[10px] font-normal text-slate-400 ml-0.5">°C</span>
-              </div>
-            </div>
-
-            {/* ความชื้น */}
-            <div className="bg-white/80 p-2 rounded-xl border border-emerald-100/60 flex flex-col justify-center">
-              <div className="flex items-center gap-1 text-[10px] font-black text-slate-405 uppercase">
-                <Droplets size={11} className="text-blue-500" />
-                <span>ความชื้น</span>
-              </div>
-              <div className="text-sm font-black text-slate-705 mt-0.5 font-mono">
-                {greenhouseAvg ? `${greenhouseAvg.humidity.toFixed(1)}` : '---'}
-                <span className="text-[10px] font-normal text-slate-400 ml-0.5">%</span>
-              </div>
-            </div>
-
-            {/* VPD */}
-            <div className="bg-white/80 p-2 rounded-xl border border-emerald-100/60 flex flex-col justify-center">
-              <div className="flex items-center gap-1 text-[10px] font-black text-slate-405 uppercase">
-                <Wind size={11} className="text-purple-500" />
-                <span>VPD</span>
-              </div>
-              <div className="text-sm font-black text-slate-705 mt-0.5 font-mono">
-                {greenhouseAvg ? `${greenhouseAvg.vpd.toFixed(2)}` : '---'}
-                <span className="text-[10px] font-normal text-slate-400 ml-0.5">kPa</span>
-              </div>
-            </div>
-
-            {/* PPFD */}
-            <div className="bg-white/80 p-2 rounded-xl border border-emerald-100/60 flex flex-col justify-center">
-              <div className="flex items-center gap-1 text-[10px] font-black text-slate-405 uppercase">
-                <Sun size={11} className="text-amber-500" />
-                <span>PPFD</span>
-              </div>
-              <div className="text-sm font-black text-slate-705 mt-0.5 font-mono">
-                {greenhouseAvg ? `${greenhouseAvg.ppfd.toFixed(1)}` : '---'}
-                <span className="text-[10px] font-normal text-slate-400 ml-0.5">μmol</span>
-              </div>
-            </div>
-          </div>
-
-          {/* ท้ายการ์ด: จำนวนข้อมูลทั้งหมด */}
-          <div className="text-xs text-slate-400 font-bold border-t border-emerald-100/60 pt-1.5 mt-1 flex justify-between items-center">
-            <span>ข้อมูลรวม</span>
-            <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-mono font-bold text-xs">
-              {greenhouseAvg ? `${greenhouseAvg.count} แถว` : '0 แถว'}
-            </span>
-          </div>
-        </div>
+          {avg ? `${avg.count} รายการ` : '0 รายการ'}
+        </span>
       </div>
     </section>
   );

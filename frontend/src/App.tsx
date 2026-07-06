@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
-import { Download, Calendar, RefreshCcw } from 'lucide-react';
+import { Download, Calendar, RefreshCcw, ChevronDown } from 'lucide-react';
 import { api } from './services/api';
 import type { SensorData, DiagnosticsResponse } from './services/api';
 import { ControlPanel } from './features/control-panel/ControlPanel';
 import { ClimateCards } from './features/climate-cards/ClimateCards';
 import { ZoneComparison } from './features/zone-comparison/ZoneComparison';
 import { ZoneAverages } from './features/zone-averages/ZoneAverages';
+import { useTheme } from './shared/utils/useTheme';
 
 export default function App() {
   const [selectedZone, setSelectedZone] = useState<number>(1);
@@ -14,9 +15,14 @@ export default function App() {
   const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(null);
 
   // สเปกสำหรับช่วงวันดาวน์โหลดข้อมูลดิบ
-  const [startDate, setStartDate] = useState<string>(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]!);
-  const [endDate, setEndDate] = useState<string>(new Date().toISOString().split('T')[0]!);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [downloadZone, setDownloadZone] = useState<string>('all');
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadWarning, setDownloadWarning] = useState<string>('');
+
+  // ธีมกลางวัน/กลางคืนอัตโนมัติ
+  const themePeriod = useTheme();
 
   // 📡 เชื่อมท่อสตรีมมิ่งสด (Server-Sent Events) และดึงประวัติเริ่มต้นสำหรับทุกโซน
   useEffect(() => {
@@ -96,10 +102,17 @@ export default function App() {
     return () => clearInterval(interval);
   }, [selectedZone]);
 
-  // 📥 ฟังก์ชันดาวน์โหลดไฟล์ข้อมูลเป็น Excel (ทุกโซน)
+  // 📥 ฟังก์ชันดาวน์โหลดไฟล์ข้อมูลเป็น Excel
   const handleDownloadExcel = async () => {
+    setDownloadWarning('');
+
     if (!startDate || !endDate) {
-      alert('กรุณาระบุวันเริ่มต้นและสิ้นสุด');
+      setDownloadWarning('⚠️ กรุณาเลือกวันเริ่มต้นและวันสิ้นสุดก่อนดาวน์โหลด');
+      return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      setDownloadWarning('⚠️ วันเริ่มต้นต้องไม่เกินวันสิ้นสุด');
       return;
     }
 
@@ -108,11 +121,15 @@ export default function App() {
       const wb = XLSX.utils.book_new();
       let hasData = false;
 
-      for (let z = 1; z <= 5; z++) {
+      const zonesToDownload = downloadZone === 'all'
+        ? [1, 2, 3, 4, 5]
+        : [parseInt(downloadZone)];
+
+      for (const z of zonesToDownload) {
         const res = await api.getHistoryRange(z, startDate, endDate);
         if (res.success && res.data.length > 0) {
           hasData = true;
-          const headers = ['ID', 'Timestamp (วัน-เวลา)', 'Zone (โซน)', 'Temperature (°C)', 'Humidity (%RH)', 'VPD (kPa)', 'Lux', 'PPFD (μmol/m²/s)'];
+          const headers = ['ID', 'วัน-เวลา', 'โซน', 'อุณหภูมิ (°C)', 'ความชื้น (%RH)', 'VPD (kPa)', 'Lux', 'PPFD (μmol/m²/s)'];
 
           const wsData: any[][] = [headers];
           res.data.forEach((row) => {
@@ -129,17 +146,18 @@ export default function App() {
           });
 
           const ws = XLSX.utils.aoa_to_sheet(wsData);
-          XLSX.utils.book_append_sheet(wb, ws, `Zone ${z}`);
+          XLSX.utils.book_append_sheet(wb, ws, `โซน ${z}`);
         }
       }
 
       if (hasData) {
-        XLSX.writeFile(wb, `greenhouse_all_zones_history_${startDate}_to_${endDate}.xlsx`);
+        const zoneLabel = downloadZone === 'all' ? 'ทุกโซน' : `โซน${downloadZone}`;
+        XLSX.writeFile(wb, `ข้อมูลโรงเรือน_${zoneLabel}_${startDate}_ถึง_${endDate}.xlsx`);
       } else {
-        alert('ไม่พบข้อมูลบันทึกในช่วงเวลาที่ระบุ (สำหรับทุกโซน)');
+        setDownloadWarning('ไม่พบข้อมูลในช่วงเวลาที่เลือก');
       }
     } catch (e) {
-      alert('เกิดข้อผิดพลาดในการโหลดไฟล์ข้อมูล');
+      setDownloadWarning('เกิดข้อผิดพลาดในการดาวน์โหลด กรุณาลองใหม่');
     } finally {
       setIsDownloading(false);
     }
@@ -148,10 +166,18 @@ export default function App() {
   const currentLatest = dataList.filter((d) => d.zone === selectedZone).slice(-1)[0] || null;
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-16 font-sans">
+    <div className={`min-h-screen pb-16 font-sans theme-transition ${themePeriod === 'night' ? 'theme-night' : 'theme-day'}`}
+      style={{ backgroundColor: 'var(--bg-page)' }}
+    >
 
-      {/* 💚 แถบหัวกระดาษหน้าเว็บสีเขียวสว่างสดชื่นหรูหราพรีเมียม (Emerald/Teal Gradient) */}
-      <header className="bg-gradient-to-r from-emerald-600 to-teal-500 border-b border-emerald-700 py-4.5 sticky top-0 z-40 shadow-md">
+      {/* แถบหัวเว็บ */}
+      <header
+        className="border-b py-4.5 sticky top-0 z-40 shadow-md theme-transition"
+        style={{
+          background: `linear-gradient(to right, var(--header-from), var(--header-to))`,
+          borderColor: 'var(--header-border)',
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 font-black text-base shadow-md shadow-emerald-700/25">
@@ -159,64 +185,117 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-sm md:text-base font-extrabold text-white tracking-tight leading-none">Greenhouse Live Portal</h1>
-              <p className="text-xs text-emerald-50 mt-1 font-medium">ระบบจัดการโครงงานและคำนวณสรีรวิทยาพืชระดับ Enterprise</p>
+              <p className="text-xs text-emerald-50 mt-1 font-medium">ระบบดูแลโรงเรือนอัจฉริยะ</p>
             </div>
           </div>
 
-          <div className="text-xs text-white bg-emerald-700/40 border border-emerald-550/50 px-3 py-1.5 rounded-xl font-black flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-white animate-ping inline-block"></span>
-            <span>หน้าบ้าน: พร้อมเชื่อมต่อข้อมูลสด</span>
+          <div
+            className="text-xs text-white px-3 py-1.5 rounded-xl font-black flex items-center gap-2 border border-white/20"
+            style={{ backgroundColor: 'var(--header-badge-bg)' }}
+          >
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping inline-block"></span>
+            <span>🟢 Online</span>
           </div>
         </div>
       </header>
 
-      {/* เนื้อหารายละเอียดทั้งหมด */}
+      {/* เนื้อหาทั้งหมด */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-        {/* หน้าปัดคุมโซน */}
-        <ControlPanel selectedZone={selectedZone} onZoneSelect={(z) => setSelectedZone(z)} />
+        {/* เลือกโซน */}
+        <ControlPanel selectedZone={selectedZone} onZoneSelect={(z) => setSelectedZone(z)} theme={themePeriod} />
 
-        {/* การ์ดข้อมูลเซนเซอร์พร้อม Sparklines และคำแนะนำ */}
-        <ClimateCards latestData={currentLatest} history={dataList.filter(d => d.zone === selectedZone)} diagnosticsData={diagnosticsData} />
+        {/* การ์ดข้อมูลเซนเซอร์ */}
+        <ClimateCards latestData={currentLatest} history={dataList.filter(d => d.zone === selectedZone)} diagnosticsData={diagnosticsData} theme={themePeriod} />
 
-        {/* ค่าเฉลี่ยสภาพแวดล้อมแต่ละโซน */}
-        <ZoneAverages dataList={dataList} />
+        {/* ค่าเฉลี่ยรวมโรงเรือน */}
+        <ZoneAverages dataList={dataList} theme={themePeriod} />
 
-        {/* แผงวิเคราะห์และเปรียบเทียบชาร์ตกราฟ — ย้ายขึ้นมาก่อนการประเมิน */}
-        <ZoneComparison dataList={dataList} selectedZone={selectedZone} />
+        {/* กราฟเปรียบเทียบ */}
+        <ZoneComparison dataList={dataList} selectedZone={selectedZone} theme={themePeriod} />
 
-        {/* ฟังก์ชันดาวน์โหลดไฟล์ข้อมูลดิบ */}
-        <section className="bg-white border border-slate-100 rounded-[32px] p-5 shadow-xl shadow-slate-100/30 space-y-4">
+        {/* ดาวน์โหลดข้อมูล */}
+        <section
+          className="border rounded-[32px] p-5 shadow-xl space-y-4 theme-transition"
+          style={{
+            backgroundColor: 'var(--bg-section)',
+            borderColor: 'var(--border-card)',
+            boxShadow: `0 20px 60px ${themePeriod === 'night' ? 'rgba(0,0,0,0.3)' : 'rgba(241,245,249,0.3)'}`,
+          }}
+        >
           <div>
-            <h3 className="text-base md:text-lg font-black text-slate-800 flex items-center gap-2">
-              <Calendar size={18} className="text-slate-500" />
-              <span>ดาวน์โหลดข้อมูลทั้ง 5 โซน (Excel Export)</span>
+            <h3 className="text-base md:text-lg font-black flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+              <Calendar size={18} style={{ color: 'var(--text-muted)' }} />
+              <span>ดาวน์โหลดข้อมูลโรงเรือน</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">เลือกช่วงวันที่ และกดดาวน์โหลดไฟล์ Excel แยกแต่ละโซน</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>เลือกโซนและช่วงวันที่ แล้วกดดาวน์โหลดเป็นไฟล์ Excel</p>
           </div>
 
           <div className="flex flex-col gap-3">
+            {/* เลือกโซน */}
+            <div className="space-y-1">
+              <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>เลือกโซน:</label>
+              <div className="relative">
+                <select
+                  value={downloadZone}
+                  onChange={(e) => setDownloadZone(e.target.value)}
+                  className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 appearance-none cursor-pointer theme-transition"
+                  style={{
+                    backgroundColor: 'var(--bg-input)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  <option value="all">ทุกโซน (1-5)</option>
+                  <option value="1">โซน 1 — ล่างซ้าย</option>
+                  <option value="2">โซน 2 — ล่างขวา</option>
+                  <option value="3">โซน 3 — บนซ้าย</option>
+                  <option value="4">โซน 4 — ตรงกลาง</option>
+                  <option value="5">โซน 5 — บนขวา</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+              </div>
+            </div>
+
+            {/* เลือกวันที่ */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs font-black tracking-wider text-slate-400 block uppercase">วันเริ่มต้น:</label>
+                <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>วันเริ่มต้น:</label>
                 <input
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200/60 rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 font-mono"
+                  onChange={(e) => { setStartDate(e.target.value); setDownloadWarning(''); }}
+                  className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 font-mono theme-transition"
+                  style={{
+                    backgroundColor: 'var(--bg-input)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                  }}
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-black tracking-wider text-slate-400 block uppercase">วันสิ้นสุด:</label>
+                <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>วันสิ้นสุด:</label>
                 <input
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200/60 rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 font-mono"
+                  onChange={(e) => { setEndDate(e.target.value); setDownloadWarning(''); }}
+                  className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 font-mono theme-transition"
+                  style={{
+                    backgroundColor: 'var(--bg-input)',
+                    borderColor: 'var(--border-subtle)',
+                    color: 'var(--text-primary)',
+                  }}
                 />
               </div>
             </div>
+
+            {/* ข้อความเตือน */}
+            {downloadWarning && (
+              <div className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl">
+                {downloadWarning}
+              </div>
+            )}
 
             <button
               onClick={handleDownloadExcel}
@@ -224,7 +303,7 @@ export default function App() {
               className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm md:text-base font-black flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
             >
               {isDownloading ? <RefreshCcw size={16} className="animate-spin" /> : <Download size={16} />}
-              <span>{isDownloading ? 'กำลังดึงข้อมูล...' : 'ดาวน์โหลด Excel (ทุกโซน)'}</span>
+              <span>{isDownloading ? 'กำลังดึงข้อมูล...' : `ดาวน์โหลด Excel (${downloadZone === 'all' ? 'ทุกโซน' : `โซน ${downloadZone}`})`}</span>
             </button>
           </div>
         </section>
