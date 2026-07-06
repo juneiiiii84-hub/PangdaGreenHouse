@@ -365,11 +365,17 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
               </div>
 
               {/* กล่องคำแนะนำ */}
-              <div className={`rounded-xl p-3 shadow-md text-xs flex flex-col gap-1 min-h-[64px] justify-center transition-all hover:shadow-lg ${styles.recBg}`}>
-                <div className={`font-black flex items-center gap-1 text-[10.5px] uppercase tracking-wider ${styles.recTitleColor}`}>
+              <div
+                className="rounded-xl p-3 shadow-md text-xs flex flex-col gap-1 min-h-[64px] justify-center transition-all hover:shadow-lg border theme-transition"
+                style={{
+                  backgroundColor: 'var(--bg-subtle)',
+                  borderColor: 'var(--border-card)',
+                }}
+              >
+                <div className="font-black flex items-center gap-1 text-[10.5px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
                   <span>💡 คำแนะนำ:</span>
                 </div>
-                <p className={`font-semibold leading-relaxed text-xs ${styles.recTextColor}`}>
+                <p className="font-semibold leading-relaxed text-xs" style={{ color: 'var(--text-secondary)' }}>
                   {cardDiag ? simplifyRecommendation(cardDiag.recommendation) : 'กำลังวิเคราะห์...'}
                 </p>
               </div>

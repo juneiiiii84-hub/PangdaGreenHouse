@@ -35,14 +35,14 @@ interface ZoneComparisonProps {
 
 type MetricType = 'temperature' | 'humidity' | 'vpd' | 'lux' | 'ppfd';
 
-// ค่าเหมาะสมสำหรับเส้น annotation (ช่วง "เหมาะสมมาก" ตามตารางประเมิน)
-const optimalRanges: Record<MetricType, { min: number; max: number; label: string }> = {
-  temperature: { min: 25, max: 30, label: 'อุณหภูมิเหมาะสมมาก' },
-  humidity: { min: 60, max: 80, label: 'ความชื้นเหมาะสมมาก' },
-  vpd: { min: 0.4, max: 0.8, label: 'VPD เหมาะสมมาก' },
-  lux: { min: 21600, max: 43200, label: 'Lux เหมาะสมมาก' },
-  ppfd: { min: 400, max: 800, label: 'PPFD เหมาะสมมาก' },
-};
+// // ค่าเหมาะสมสำหรับเส้น annotation (ช่วง "เหมาะสมมาก" ตามตารางประเมิน)
+// const optimalRanges: Record<MetricType, { min: number; max: number; label: string }> = {
+//   temperature: { min: 25, max: 30, label: 'อุณหภูมิเหมาะสมมาก' },
+//   humidity: { min: 60, max: 80, label: 'ความชื้นเหมาะสมมาก' },
+//   vpd: { min: 0.4, max: 0.8, label: 'VPD เหมาะสมมาก' },
+//   lux: { min: 21600, max: 43200, label: 'Lux เหมาะสมมาก' },
+//   ppfd: { min: 400, max: 800, label: 'PPFD เหมาะสมมาก' },
+// };
 
 export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, selectedZone: _selectedZone, theme }) => {
   const [comparisonMode, setComparisonMode] = useState<'zones' | 'metrics'>('zones');
@@ -55,6 +55,32 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
   const [compareMetricA, setCompareMetricA] = useState<MetricType>('temperature');
   const [compareMetricB, setCompareMetricB] = useState<MetricType>('humidity');
   const [metricsZone, setMetricsZone] = useState<number>(1);
+
+  // คำนวณสถิติย้อนหลัง 12 ชั่วโมง (Min, Max, Avg)
+  const getZoneStats = (zoneId: number, metric: MetricType) => {
+    const sortedData = get12HourData();
+    const zoneRecords = sortedData.filter(d => d.zone === zoneId);
+    if (zoneRecords.length === 0) return { min: 0, max: 0, avg: 0, count: 0 };
+
+    const values = zoneRecords.map(r => {
+      if (metric === 'ppfd') return r.lux * 0.0185; // แปลงแสงแดดเฉลี่ย
+      return r[metric];
+    }).filter(v => v !== null && !isNaN(v));
+
+    if (values.length === 0) return { min: 0, max: 0, avg: 0, count: 0 };
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const sum = values.reduce((a, b) => a + b, 0);
+    const avg = sum / values.length;
+
+    return {
+      min: parseFloat(min.toFixed(1)),
+      max: parseFloat(max.toFixed(1)),
+      avg: parseFloat(avg.toFixed(1)),
+      count: values.length
+    };
+  };
 
   const metricTabs: { id: MetricType; label: string; emoji: string; unit: string; color: string }[] = [
     { id: 'temperature', label: 'อุณหภูมิ', emoji: '🌡️', unit: '°C', color: '#f43f5e' },
@@ -135,50 +161,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
       });
 
       // เส้นค่าเหมาะสม (annotation)
-      const range = optimalRanges[selectedMetric];
-      const annotations: Record<string, any> = {
-        optimalMin: {
-          type: 'line',
-          yMin: range.min,
-          yMax: range.min,
-          borderColor: 'rgba(16, 185, 129, 0.5)',
-          borderWidth: 2,
-          borderDash: [6, 4],
-          label: {
-            display: true,
-            content: `ต่ำสุด ${range.min}`,
-            position: 'start',
-            backgroundColor: 'rgba(16, 185, 129, 0.8)',
-            color: '#fff',
-            font: { size: 10, weight: 'bold' },
-            padding: 4,
-          }
-        },
-        optimalMax: {
-          type: 'line',
-          yMin: range.max,
-          yMax: range.max,
-          borderColor: 'rgba(239, 68, 68, 0.5)',
-          borderWidth: 2,
-          borderDash: [6, 4],
-          label: {
-            display: true,
-            content: `สูงสุด ${range.max}`,
-            position: 'start',
-            backgroundColor: 'rgba(239, 68, 68, 0.8)',
-            color: '#fff',
-            font: { size: 10, weight: 'bold' },
-            padding: 4,
-          }
-        },
-        optimalBox: {
-          type: 'box',
-          yMin: range.min,
-          yMax: range.max,
-          backgroundColor: 'rgba(16, 185, 129, 0.05)',
-          borderWidth: 0,
-        }
-      };
+      const annotations: Record<string, any> = {};
 
       const textColor = theme === 'night' ? '#cbd5e1' : '#1e293b';
       const gridColor = theme === 'night' ? 'rgba(51, 65, 85, 0.5)' : 'rgba(241, 245, 249, 0.8)';
@@ -508,25 +491,113 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
           )}
         </div>
 
-        {/* กราฟ */}
-        <div
-          className="flex-1 min-h-[290px] sm:min-h-[340px] border p-4 rounded-2xl relative shadow-inner theme-transition"
-          style={{
-            backgroundColor: theme === 'night' ? 'rgba(15, 23, 42, 0.5)' : 'rgba(248, 250, 252, 0.2)',
-            borderColor: 'var(--border-subtle)',
-          }}
-        >
-          <div
-            className="absolute top-2 right-3 text-xs font-black border px-2.5 py-1 rounded-full shadow-sm"
+        {/* คอนเทนเนอร์แสดงผลกราฟและสถิติ */}
+        <div className="flex-1 flex flex-col gap-3">
+          {/* แผงแสดงสถิติย้อนหลัง 12 ชั่วโมง (Min / Max / Avg) แทนเส้นประบนกราฟ */}
+          <div 
+            className="p-3.5 rounded-2xl border theme-transition flex flex-wrap gap-2 items-center"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border-subtle)',
-              color: 'var(--text-muted)',
             }}
           >
-            หน่วย: {comparisonMode === 'zones' ? currentMetricInfo.unit : '2 แกน'}
+            <div className="text-[10px] font-black uppercase tracking-wider w-full mb-1 flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+              <span>📊 สถิติย้อนหลัง 12 ชั่วโมง (Min / Max / Avg):</span>
+            </div>
+
+            {comparisonMode === 'zones' ? (
+              <div className="flex flex-wrap gap-2">
+                {compareZones.map(zoneId => {
+                  const zc = zoneConfig.find(z => z.id === zoneId);
+                  if (!zc) return null;
+                  const stats = getZoneStats(zoneId, selectedMetric);
+                  if (stats.count === 0) return null;
+                  const unit = currentMetricInfo.unit;
+                  return (
+                    <div 
+                      key={zoneId} 
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-bold theme-transition"
+                      style={{
+                        backgroundColor: 'var(--bg-subtle)',
+                        borderColor: 'var(--border-subtle)',
+                      }}
+                    >
+                      <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${zc.bg}`} />
+                      <span className="font-black" style={{ color: 'var(--text-primary)' }}>{zc.label}:</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>
+                        ต่ำสุด <span className="font-mono font-black text-emerald-500">{stats.min}</span> | 
+                        สูงสุด <span className="font-mono font-black text-rose-500">{stats.max}</span> | 
+                        เฉลี่ย <span className="font-mono font-black text-blue-500">{stats.avg}</span> {unit}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+                {(() => {
+                  const statsA = getZoneStats(metricsZone, compareMetricA);
+                  const statsB = getZoneStats(metricsZone, compareMetricB);
+                  const tabA = metricTabs.find(t => t.id === compareMetricA)!;
+                  const tabB = metricTabs.find(t => t.id === compareMetricB)!;
+                  
+                  return (
+                    <>
+                      <div 
+                        className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-bold theme-transition"
+                        style={{
+                          backgroundColor: 'var(--bg-subtle)',
+                          borderColor: 'var(--border-subtle)',
+                        }}
+                      >
+                        <span className="font-black" style={{ color: tabA.color }}>{tabA.emoji} {tabA.label}:</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>
+                          ต่ำสุด <span className="font-mono font-black text-emerald-500">{statsA.min}</span> | 
+                          สูงสุด <span className="font-mono font-black text-rose-500">{statsA.max}</span> | 
+                          เฉลี่ย <span className="font-mono font-black text-blue-500">{statsA.avg}</span> {tabA.unit}
+                        </span>
+                      </div>
+                      <div 
+                        className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-bold theme-transition"
+                        style={{
+                          backgroundColor: 'var(--bg-subtle)',
+                          borderColor: 'var(--border-subtle)',
+                        }}
+                      >
+                        <span className="font-black" style={{ color: tabB.color }}>{tabB.emoji} {tabB.label}:</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>
+                          ต่ำสุด <span className="font-mono font-black text-emerald-500">{statsB.min}</span> | 
+                          สูงสุด <span className="font-mono font-black text-rose-500">{statsB.max}</span> | 
+                          เฉลี่ย <span className="font-mono font-black text-blue-500">{statsB.avg}</span> {tabB.unit}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
           </div>
-          <Line data={data} options={options} />
+
+          {/* กราฟ */}
+          <div
+            className="flex-1 min-h-[290px] sm:min-h-[340px] border p-4 rounded-2xl relative shadow-inner theme-transition"
+            style={{
+              backgroundColor: theme === 'night' ? 'rgba(15, 23, 42, 0.5)' : 'rgba(248, 250, 252, 0.2)',
+              borderColor: 'var(--border-subtle)',
+            }}
+          >
+            <div
+              className="absolute top-2 right-3 text-xs font-black border px-2.5 py-1 rounded-full shadow-sm"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border-subtle)',
+                color: 'var(--text-muted)',
+              }}
+            >
+              หน่วย: {comparisonMode === 'zones' ? currentMetricInfo.unit : '2 แกน'}
+            </div>
+            <Line data={data} options={options} />
+          </div>
         </div>
 
       </div>
