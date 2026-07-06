@@ -282,11 +282,11 @@ export default function App() {
                   }}
                 >
                   <option value="all">ทุกโซน (A-E)</option>
-                  <option value="5">โซน A — บนขวา</option>
-                  <option value="2">โซน B — ล่างขวา</option>
-                  <option value="4">โซน C — ตรงกลาง</option>
-                  <option value="1">โซน D — ล่างซ้าย</option>
-                  <option value="3">โซน E — ด้านนอกโรงเรือน</option>
+                  <option value="5">โซน A</option>
+                  <option value="2">โซน B</option>
+                  <option value="4">โซน C</option>
+                  <option value="1">โซน D</option>
+                  <option value="3">โซน E</option>
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
               </div>

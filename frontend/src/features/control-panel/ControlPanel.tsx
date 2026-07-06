@@ -11,13 +11,13 @@ interface ControlPanelProps {
 export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZoneSelect, theme }) => {
   const [showMap, setShowMap] = useState(false);
 
-  // แผนที่จับคู่รหัสโซน (หลังบ้าน) กับตัวอักษรและตำแหน่งจริงตามภาพร่าง
+  // แผนที่จับคู่รหัสโซน (หลังบ้าน) กับตัวอักษรและตำแหน่งจริงตามภาพร่าง พร้อมข้อมูลกายภาพ
   const zones = [
-    { id: 5, name: 'โซน A', desc: 'บนขวา (North-East)', color: 'bg-pink-500', hexColor: '#ec4899', activeClass: 'bg-pink-500 text-white border-pink-400 shadow-pink-500/20' },
-    { id: 2, name: 'โซน B', desc: 'ล่างขวา (South-East)', color: 'bg-blue-500', hexColor: '#3b82f6', activeClass: 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20' },
-    { id: 4, name: 'โซน C', desc: 'ตรงกลาง (Center)', color: 'bg-amber-500', hexColor: '#f59e0b', activeClass: 'bg-amber-500 text-white border-amber-400 shadow-amber-500/20' },
-    { id: 1, name: 'โซน D', desc: 'ล่างซ้าย (South-West)', color: 'bg-emerald-500', hexColor: '#10b981', activeClass: 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20' },
-    { id: 3, name: 'โซน E', desc: 'ด้านนอกโรงเรือน (Outside)', color: 'bg-purple-500', hexColor: '#a855f7', activeClass: 'bg-purple-500 text-white border-purple-400 shadow-purple-500/20' },
+    { id: 5, name: 'โซน A', desc: 'บนขวา', color: 'bg-pink-500', hexColor: '#ec4899', activeClass: 'bg-pink-500 text-white border-pink-400 shadow-pink-500/20', details: 'พื้นที่ยกระดับ สูงกว่าโซน B, C, D ประมาณ 80 ซม. (มีความสูงจากพื้นถึงหลังคาประมาณ 2.5 เมตร) และไม่มีมุ้งแสลนกรองแสงแดดด้านบน' },
+    { id: 2, name: 'โซน B', desc: 'ล่างขวา', color: 'bg-blue-500', hexColor: '#3b82f6', activeClass: 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20', details: 'พื้นที่ระดับปกติ ต่ำกว่าโซน A ประมาณ 80 ซม. (มีความสูงจากพื้นถึงหลังคาประมาณ 3.3 เมตร) และไม่มีมุ้งแสลนกรองแสง' },
+    { id: 4, name: 'โซน C', desc: 'ตรงกลาง', color: 'bg-amber-500', hexColor: '#f59e0b', activeClass: 'bg-amber-500 text-white border-amber-400 shadow-amber-500/20', details: 'พื้นที่ระดับปกติ (ความสูงจากพื้นถึงหลังคาเท่ากับโซน B) ติดตั้งมุ้งแสลนกรองแสงทูโทน 2 สี คือ สีเขียวและสีดำ' },
+    { id: 1, name: 'โซน D', desc: 'ล่างซ้าย', color: 'bg-emerald-500', hexColor: '#10b981', activeClass: 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20', details: 'พื้นที่ระดับปกติ (ความสูงจากพื้นถึงหลังคาเท่ากับโซน B) ติดตั้งมุ้งแสลนกรองแสงสีดำ และมีร่มเงาของต้นไม้ใหญ่ข้างเคียงคอยช่วยบังแสงแดด' },
+    { id: 3, name: 'โซน E', desc: 'ด้านนอกโรงเรือน', color: 'bg-purple-500', hexColor: '#a855f7', activeClass: 'bg-purple-500 text-white border-purple-400 shadow-purple-500/20', details: 'เซนเซอร์ตรวจวัดสภาพอากาศภายนอกโรงเรือนโดยตรง (ไม่มีหลังคาหรือสแลนบัง) เพื่อเปรียบเทียบความแตกต่างกับสภาพแวดล้อมภายใน' },
   ];
 
   const currentZone = zones.find(z => z.id === selectedZone);
@@ -194,16 +194,20 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
         ))}
       </div>
 
-      {/* คำอธิบายโซนที่เลือก */}
+      {/* ข้อมูลกายภาพของโซนที่เลือก */}
       <div
-        className="text-xs md:text-sm px-4 py-2.5 rounded-2xl text-center font-black border theme-transition"
+        className="p-4 rounded-2xl border theme-transition flex flex-col gap-1.5 text-left"
         style={{
           backgroundColor: 'var(--bg-subtle)',
           borderColor: 'var(--border-card)',
-          color: 'var(--text-secondary)',
         }}
       >
-        📍 โซนปัจจุบัน: <span style={{ color: currentZone?.hexColor }}>{currentZone?.name} — {currentZone?.desc}</span>
+        <div className="font-black flex items-center gap-1.5 text-xs uppercase tracking-wider">
+          <span style={{ color: currentZone?.hexColor }}>📍 ข้อมูลกายภาพ {currentZone?.name}:</span>
+        </div>
+        <p className="font-semibold text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          {currentZone?.details}
+        </p>
       </div>
     </div>
   );

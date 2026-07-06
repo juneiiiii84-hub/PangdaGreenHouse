@@ -65,11 +65,11 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
   ];
 
   const zoneConfig = [
-    { id: 5, label: 'โซน A', sublabel: 'บนขวา', color: '#ec4899', bg: 'bg-pink-500' },
-    { id: 2, label: 'โซน B', sublabel: 'ล่างขวา', color: '#3b82f6', bg: 'bg-blue-500' },
-    { id: 4, label: 'โซน C', sublabel: 'ตรงกลาง', color: '#f59e0b', bg: 'bg-amber-500' },
-    { id: 1, label: 'โซน D', sublabel: 'ล่างซ้าย', color: '#10b981', bg: 'bg-emerald-500' },
-    { id: 3, label: 'โซน E', sublabel: 'ด้านนอก', color: '#a855f7', bg: 'bg-purple-500' },
+    { id: 5, label: 'โซน A', sublabel: '', color: '#ec4899', bg: 'bg-pink-500' },
+    { id: 2, label: 'โซน B', sublabel: '', color: '#3b82f6', bg: 'bg-blue-500' },
+    { id: 4, label: 'โซน C', sublabel: '', color: '#f59e0b', bg: 'bg-amber-500' },
+    { id: 1, label: 'โซน D', sublabel: '', color: '#10b981', bg: 'bg-emerald-500' },
+    { id: 3, label: 'โซน E', sublabel: '', color: '#a855f7', bg: 'bg-purple-500' },
   ];
 
   const handleZoneToggle = (zone: number) => {
