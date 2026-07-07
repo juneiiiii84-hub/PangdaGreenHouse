@@ -108,14 +108,17 @@ export default function App() {
       dateFormat: 'Y-m-d',
       onChange: (selectedDates) => {
         setDownloadWarning('');
+        const formatDate = (date: Date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
         if (selectedDates.length === 2) {
-          const start = selectedDates[0]!.toISOString().split('T')[0]!;
-          const end = selectedDates[1]!.toISOString().split('T')[0]!;
-          setStartDate(start);
-          setEndDate(end);
+          setStartDate(formatDate(selectedDates[0]!));
+          setEndDate(formatDate(selectedDates[1]!));
         } else if (selectedDates.length === 1) {
-          const start = selectedDates[0]!.toISOString().split('T')[0]!;
-          setStartDate(start);
+          setStartDate(formatDate(selectedDates[0]!));
           setEndDate('');
         } else {
           setStartDate('');
