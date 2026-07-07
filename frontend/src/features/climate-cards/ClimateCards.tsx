@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Line } from 'react-chartjs-2';
 import { Thermometer, Droplets, Wind, Sun, Info, X } from 'lucide-react';
 import { PpfdModal } from './PpfdModal';
 import { DEFAULT_MULTIPLIER } from '../../shared/utils/ppfd';
@@ -127,7 +128,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
   const diagnostics = diagnosticsData?.diagnostics;
 
   const createSparklineData = (metric: 'temperature' | 'humidity' | 'vpd' | 'ppfd', color: string) => {
-    const points = history.slice(-15).map(h => {
+    const points = history.slice(-12).map(h => {
       if (metric === 'ppfd') return h.lux * multiplier;
       return h[metric];
     });
@@ -146,6 +147,16 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
         }
       ]
     };
+  };
+
+  const sparklineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    scales: {
+      x: { display: false },
+      y: { display: false }
+    }
   };
 
   const getDynamicStyles = (key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux') => {
@@ -341,6 +352,19 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                     <span className="text-sm md:text-base font-bold ml-1" style={{ color: 'var(--text-muted)' }}>{card.unit}</span>
                   </div>
                   <div className="text-xs mt-1 font-medium" style={{ color: 'var(--text-muted)' }}>{card.desc}</div>
+                </div>
+
+                {/* Sparkline */}
+                <div className="h-12 w-full mt-2">
+                  <Line 
+                    data={createSparklineData(
+                      card.key === 'temp' ? 'temperature' :
+                      card.key === 'hum' ? 'humidity' :
+                      card.key === 'vpd' ? 'vpd' : 'ppfd', 
+                      card.sparkColor
+                    )} 
+                    options={sparklineOptions} 
+                  />
                 </div>
               </div>
 
