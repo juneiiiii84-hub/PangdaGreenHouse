@@ -288,7 +288,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'vpd' as const,
-      title: 'ความดันไอน้ำ (VPD)',
+      title: 'ความต่างของความดันไอน้ำ (VPD)',
       subtitle: 'ดัชนีชี้วัดการดูดปุ๋ยและคายน้ำ',
       value: `${vpd.toFixed(2)}`,
       unit: 'kPa',
@@ -299,7 +299,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'ppfd' as const,
-      title: 'ความเข้มแสง (PPFD)',
+      title: 'ค่าแสงที่พืชได้รับ (PPFD)',
       subtitle: 'แสงที่ใบพืชนำไปสังเคราะห์ได้จริง',
       value: `${ppfd.toLocaleString()}`,
       unit: 'μmol/m²/s',
@@ -366,7 +366,13 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 <div className="z-10 animate-fade-in">
                   <div className="flex justify-between items-center mb-1.5 gap-1.5">
                     <span 
-                      className="font-black tracking-tight uppercase leading-none whitespace-nowrap text-[10px] xs:text-[11px] md:text-xs"
+                      className={`font-black uppercase leading-none whitespace-nowrap ${
+                        card.title.length > 25 
+                          ? 'text-[8.5px] xs:text-[9.5px] sm:text-[10px] md:text-[10.5px] lg:text-[11.2px] tracking-tighter' 
+                          : card.title.length > 20
+                            ? 'text-[9.2px] xs:text-[10.2px] sm:text-[10.5px] md:text-[11px] lg:text-[11.6px] tracking-tight'
+                            : 'text-[10px] xs:text-[11px] md:text-xs tracking-tight'
+                      }`}
                       style={{ color: 'var(--text-muted)' }}
                     >
                       {card.title}
