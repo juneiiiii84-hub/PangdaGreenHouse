@@ -9,12 +9,10 @@ import { ClimateCards } from './features/climate-cards/ClimateCards';
 import { ZoneComparison } from './features/zone-comparison/ZoneComparison';
 import { ZoneAverages } from './features/zone-averages/ZoneAverages';
 import { useTheme } from './shared/utils/useTheme';
-import { DEFAULT_MULTIPLIER } from './shared/utils/ppfd';
 
 export default function App() {
   const [selectedZone, setSelectedZone] = useState<number>(1);
   const [dataList, setDataList] = useState<SensorData[]>([]);
-  const [ppfdMultiplier, setPpfdMultiplier] = useState(DEFAULT_MULTIPLIER);
   const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(null);
 
   // สเปกสำหรับช่วงวันดาวน์โหลดข้อมูลดิบ
@@ -248,15 +246,13 @@ export default function App() {
           history={dataList.filter(d => d.zone === selectedZone)}
           diagnosticsData={diagnosticsData}
           theme={themePeriod}
-          multiplier={ppfdMultiplier}
-          setMultiplier={setPpfdMultiplier}
         />
 
         {/* ค่าเฉลี่ยรวมโรงเรือน */}
-        <ZoneAverages dataList={dataList} theme={themePeriod} ppfdMultiplier={ppfdMultiplier} />
+        <ZoneAverages dataList={dataList} theme={themePeriod} />
 
         {/* กราฟเปรียบเทียบ */}
-        <ZoneComparison dataList={dataList} selectedZone={selectedZone} theme={themePeriod} ppfdMultiplier={ppfdMultiplier} />
+        <ZoneComparison dataList={dataList} selectedZone={selectedZone} theme={themePeriod} />
 
         {/* ดาวน์โหลดข้อมูล */}
         <section

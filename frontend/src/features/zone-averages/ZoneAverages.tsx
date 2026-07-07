@@ -9,10 +9,9 @@ type AveragePeriod = 'all' | 'day' | 'night';
 interface ZoneAveragesProps {
   dataList: SensorData[];
   theme: ThemePeriod;
-  ppfdMultiplier: number;
 }
 
-export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme, ppfdMultiplier }) => {
+export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) => {
   const [averagePeriod, setAveragePeriod] = useState<AveragePeriod>('all');
 
   // กรองข้อมูลตามช่วงเวลาที่เลือก (คำนวณเฉพาะโซนในร่ม A-D เท่านั้น ไม่นับโซน E ที่อยู่ด้านนอก)
@@ -37,7 +36,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme, ppf
     const sumTemp = filteredData.reduce((s, d) => s + d.temperature, 0);
     const sumHum = filteredData.reduce((s, d) => s + d.humidity, 0);
     const sumVpd = filteredData.reduce((s, d) => s + d.vpd, 0);
-    const sumPpfd = filteredData.reduce((s, d) => s + (d.lux * ppfdMultiplier), 0);
+    const sumPpfd = filteredData.reduce((s, d) => s + (d.lux * 0.0185), 0);
     const count = filteredData.length;
 
     return {

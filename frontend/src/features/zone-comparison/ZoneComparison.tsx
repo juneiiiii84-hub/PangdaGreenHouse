@@ -31,7 +31,6 @@ interface ZoneComparisonProps {
   dataList: SensorData[];
   selectedZone: number;
   theme: ThemePeriod;
-  ppfdMultiplier: number;
 }
 
 type MetricType = 'temperature' | 'humidity' | 'vpd' | 'lux' | 'ppfd';
@@ -45,7 +44,7 @@ type MetricType = 'temperature' | 'humidity' | 'vpd' | 'lux' | 'ppfd';
 //   ppfd: { min: 400, max: 800, label: 'PPFD เหมาะสมมาก' },
 // };
 
-export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, selectedZone: _selectedZone, theme, ppfdMultiplier }) => {
+export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, selectedZone: _selectedZone, theme }) => {
   const [comparisonMode, setComparisonMode] = useState<'zones' | 'metrics'>('zones');
 
   // โหมดเปรียบเทียบข้ามโซน
@@ -64,7 +63,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
     if (zoneRecords.length === 0) return { min: 0, max: 0, avg: 0, count: 0 };
 
     const values = zoneRecords.map(r => {
-      if (metric === 'ppfd') return r.lux * ppfdMultiplier; // แปลงแสงแดดตามตัวคูณปัจจุบัน
+      if (metric === 'ppfd') return r.lux * 0.0185; // แปลงแสงแดดเฉลี่ย
       return r[metric];
     }).filter(v => v !== null && !isNaN(v));
 
@@ -146,7 +145,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
           const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
           const point = zoneData[dataIndex];
           if (!point) return null;
-          if (selectedMetric === 'ppfd') return point.lux * ppfdMultiplier;
+          if (selectedMetric === 'ppfd') return point.lux * 0.0185;
           return point[selectedMetric];
         });
 
@@ -212,7 +211,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
         const point = zoneData[dataIndex];
         if (!point) return null;
-        if (compareMetricA === 'ppfd') return point.lux * ppfdMultiplier;
+        if (compareMetricA === 'ppfd') return point.lux * 0.0185;
         return point[compareMetricA];
       });
 
@@ -221,7 +220,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
         const point = zoneData[dataIndex];
         if (!point) return null;
-        if (compareMetricB === 'ppfd') return point.lux * ppfdMultiplier;
+        if (compareMetricB === 'ppfd') return point.lux * 0.0185;
         return point[compareMetricB];
       });
 
