@@ -49,19 +49,13 @@ export default function App() {
 
     // 2. เชื่อมสายสตรีมสด
     const BACKEND_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${window.location.hostname}:3001` : 'https://pangdagreenhouse.onrender.com');
-    console.log('Connecting to SSE at:', `${BACKEND_URL}/api/sensors/stream`);
     const eventSource = new EventSource(`${BACKEND_URL}/api/sensors/stream`);
-
-    eventSource.onopen = () => {
-      console.log('SSE Connection opened successfully!');
-    };
 
     eventSource.onerror = (err) => {
       console.error('SSE Connection failed or closed:', err);
     };
 
     eventSource.onmessage = (event) => {
-      console.log('SSE raw data received:', event.data);
       try {
         const parsed = JSON.parse(event.data);
         if (!parsed) return;

@@ -117,13 +117,13 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
               <g onClick={() => onZoneSelect(5)} className="cursor-pointer group/zone">
                 <rect x="245" y="30" width="60" height="100" fill={selectedZone === 5 ? 'rgba(236,72,153,0.2)' : 'rgba(0,0,0,0.005)'} stroke="#ec4899" strokeWidth={selectedZone === 5 ? 3.5 : 1.5} rx="4" />
                 <circle cx="275" cy="80" r="14" fill="#ec4899" className="transition-transform group-hover/zone:scale-110" />
-                <text x="275" y="84" fill="#fff" fontSize="11" fontWeight="black" text-anchor="middle">A</text>
+                <text x="275" y="84" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">A</text>
               </g>
 
               {/* โซน E (ด้านนอก) */}
               <g onClick={() => onZoneSelect(3)} className="cursor-pointer group/zone">
                 <circle cx="345" cy="130" r="14" fill="#a855f7" className="transition-transform group-hover/zone:scale-110" stroke={selectedZone === 3 ? '#fff' : 'transparent'} strokeWidth="2.5" />
-                <text x="345" y="134" fill="#fff" fontSize="11" fontWeight="black" text-anchor="middle">E</text>
+                <text x="345" y="134" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">E</text>
                 <text x="345" y="156" fill="var(--text-muted)" fontSize="8.5" fontWeight="black" textAnchor="middle">ด้านนอก</text>
                 
                 {/* ลูกศรชี้เข้าหาโรงเรือน */}

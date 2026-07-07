@@ -159,9 +159,10 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
 
   const diagnostics = diagnosticsData?.diagnostics;
 
-  const createSparklineData = (metric: 'temperature' | 'humidity' | 'vpd' | 'ppfd', color: string) => {
+  const createSparklineData = (metric: 'temperature' | 'humidity' | 'vpd' | 'ppfd' | 'lux', color: string) => {
     const points = history.slice(-12).map(h => {
       if (metric === 'ppfd') return h.lux * multiplier;
+      if (metric === 'lux') return h.lux;
       return h[metric];
     });
 
@@ -244,7 +245,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
       default:
         const defaultMap = {
           temp: { border: 'border-rose-200', glow: 'bg-rose-500/5', ibg: 'bg-rose-50 border-rose-100', tc: 'text-rose-500', vc: 'text-rose-600', rbg: 'bg-rose-50/40 border border-rose-100/70', rtc: 'text-rose-800', rtc2: 'text-rose-600/90' },
-          hum: { border: 'border-blue-200', glow: 'bg-blue-500/5', ibg: 'bg-blue-50 border-blue-100', tc: 'text-blue-500', vc: 'text-blue-600', rbg: 'bg-blue-50/40 border border-blue-100/70', rtc: 'text-rose-800', rtc2: 'text-blue-600/90' },
+          hum: { border: 'border-blue-200', glow: 'bg-blue-500/5', ibg: 'bg-blue-50 border-blue-100', tc: 'text-blue-500', vc: 'text-blue-600', rbg: 'bg-blue-50/40 border border-blue-100/70', rtc: 'text-blue-800', rtc2: 'text-blue-600/90' },
           vpd: { border: 'border-purple-200', glow: 'bg-purple-500/5', ibg: 'bg-purple-50 border-purple-100', tc: 'text-purple-500', vc: 'text-purple-600', rbg: 'bg-purple-50/40 border border-purple-100/70', rtc: 'text-purple-800', rtc2: 'text-purple-600/90' },
           ppfd: { border: 'border-amber-200', glow: 'bg-amber-500/5', ibg: 'bg-amber-50 border-amber-100', tc: 'text-amber-500', vc: 'text-amber-600', rbg: 'bg-amber-50/40 border border-amber-100/70', rtc: 'text-amber-800', rtc2: 'text-amber-600/90' },
           lux: { border: 'border-amber-200', glow: 'bg-amber-500/5', ibg: 'bg-amber-50 border-amber-100', tc: 'text-amber-500', vc: 'text-amber-600', rbg: 'bg-amber-50/40 border border-amber-100/70', rtc: 'text-amber-800', rtc2: 'text-amber-600/90' },
@@ -317,7 +318,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
       desc: 'ระดับความสว่างทั่วไปที่สายตามนุษย์รับรู้',
       icon: <Sun size={16} />,
       sparkColor: '#eab308',
-      sparkline: createSparklineData('ppfd', '#eab308'),
+      sparkline: createSparklineData('lux', '#eab308'),
     }
   ];
 
@@ -392,7 +393,8 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                     data={createSparklineData(
                       card.key === 'temp' ? 'temperature' :
                       card.key === 'hum' ? 'humidity' :
-                      card.key === 'vpd' ? 'vpd' : 'ppfd', 
+                      card.key === 'vpd' ? 'vpd' :
+                      card.key === 'lux' ? 'lux' : 'ppfd', 
                       card.sparkColor
                     )} 
                     options={sparklineOptions} 
