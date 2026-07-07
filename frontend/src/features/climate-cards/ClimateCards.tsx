@@ -357,11 +357,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 <div className="z-10 animate-fade-in">
                   <div className="flex justify-between items-center mb-1.5 gap-1.5">
                     <span 
-                      className={`font-black tracking-tighter uppercase leading-none whitespace-nowrap ${
-                        card.title.length > 20 
-                          ? 'text-[8px] xs:text-[9px] sm:text-[9.8px] md:text-[10.8px]' 
-                          : 'text-[9.5px] xs:text-[10.5px] md:text-xs'
-                      }`}
+                      className="font-black tracking-tighter uppercase leading-none whitespace-nowrap text-[8.8px] xs:text-[9.8px] sm:text-[10.2px] md:text-[11px] lg:text-[11.8px]"
                       style={{ color: 'var(--text-muted)' }}
                     >
                       {card.title}
