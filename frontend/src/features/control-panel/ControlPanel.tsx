@@ -122,12 +122,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
 
               {/* โซน E (ด้านนอก) */}
               <g onClick={() => onZoneSelect(3)} className="cursor-pointer group/zone">
-                <circle cx="375" cy="130" r="14" fill="#a855f7" className="transition-transform group-hover/zone:scale-110" stroke={selectedZone === 3 ? '#fff' : 'transparent'} strokeWidth="2.5" />
-                <text x="375" y="134" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">E</text>
-                <text x="375" y="156" fill="var(--text-muted)" fontSize="8.5" fontWeight="black" textAnchor="middle">ด้านนอก</text>
+                <circle cx="405" cy="130" r="14" fill="#a855f7" className="transition-transform group-hover/zone:scale-110" stroke={selectedZone === 3 ? '#fff' : 'transparent'} strokeWidth="2.5" />
+                <text x="405" y="134" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">E</text>
+                <text x="405" y="156" fill="var(--text-muted)" fontSize="8.5" fontWeight="black" textAnchor="middle">ด้านนอก</text>
                 
                 {/* ลูกศรชี้เข้าหาโรงเรือน */}
-                <path d="M 355 130 L 310 130" stroke="#a855f7" strokeWidth="1.5" fill="none" />
+                <path d="M 385 130 L 310 130" stroke="#a855f7" strokeWidth="1.5" fill="none" />
                 <path d="M 314 126 L 310 130 L 314 134" stroke="#a855f7" strokeWidth="1.5" fill="none" />
               </g>
 
