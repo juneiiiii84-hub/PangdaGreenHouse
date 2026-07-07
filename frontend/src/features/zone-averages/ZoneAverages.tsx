@@ -9,9 +9,10 @@ type AveragePeriod = 'all' | 'day' | 'night';
 interface ZoneAveragesProps {
   dataList: SensorData[];
   theme: ThemePeriod;
+  ppfdMultiplier: number;
 }
 
-export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) => {
+export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme, ppfdMultiplier }) => {
   const [averagePeriod, setAveragePeriod] = useState<AveragePeriod>('all');
 
   // กรองข้อมูลตามช่วงเวลาที่เลือก (คำนวณเฉพาะโซนในร่ม A-D เท่านั้น ไม่นับโซน E ที่อยู่ด้านนอก)
@@ -36,7 +37,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
     const sumTemp = filteredData.reduce((s, d) => s + d.temperature, 0);
     const sumHum = filteredData.reduce((s, d) => s + d.humidity, 0);
     const sumVpd = filteredData.reduce((s, d) => s + d.vpd, 0);
-    const sumPpfd = filteredData.reduce((s, d) => s + d.ppfd, 0);
+    const sumPpfd = filteredData.reduce((s, d) => s + (d.lux * ppfdMultiplier), 0);
     const count = filteredData.length;
 
     return {
@@ -49,7 +50,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
 
   const avg = getGreenhouseAverage();
 
-  const periodLabel = averagePeriod === 'day' ? 'กลางวัน (06:30-18:30)' : averagePeriod === 'night' ? 'กลางคืน (18:30-06:30)' : 'ทั้งหมด';
+  const periodLabel = averagePeriod === 'day' ? ' (กลางวัน 06:30-18:30)' : averagePeriod === 'night' ? ' (กลางคืน 18:30-06:30)' : '';
 
   const metricCards = [
     { label: 'อุณหภูมิอากาศ', value: avg ? `${avg.temp.toFixed(1)}` : '---', unit: '°C', icon: <Thermometer size={18} className="text-rose-500" />, bgIcon: 'bg-rose-50 border-rose-100' },
@@ -74,7 +75,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
             📊 ค่าเฉลี่ยรวมทั้งโรงเรือน
           </h3>
           <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            ค่าเฉลี่ยอากาศและแสงจากโซน A-D ({periodLabel})
+            ค่าเฉลี่ยอากาศและแสงจากโซน A-D{periodLabel}
           </p>
         </div>
 

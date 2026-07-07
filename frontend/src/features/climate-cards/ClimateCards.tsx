@@ -111,18 +111,56 @@ interface ClimateCardsProps {
   history: SensorData[];
   diagnosticsData: DiagnosticsResponse | null;
   theme: ThemePeriod;
+  multiplier: number;
+  setMultiplier: (val: number) => void;
 }
 
-export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history, diagnosticsData, theme }) => {
+export const ClimateCards: React.FC<ClimateCardsProps> = ({
+  latestData,
+  history,
+  diagnosticsData,
+  theme,
+  multiplier,
+  setMultiplier,
+}) => {
   const [activeDetailMetric, setActiveDetailMetric] = useState<'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux' | null>(null);
-  const [multiplier, setMultiplier] = useState(DEFAULT_MULTIPLIER);
-  const [tempMultiplier, setTempMultiplier] = useState(DEFAULT_MULTIPLIER.toString());
+  const [tempMultiplier, setTempMultiplier] = useState(multiplier.toString());
+  const [showPpfdFormula, setShowPpfdFormula] = useState(false);
 
   const handleOpenDetailMetric = (key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux') => {
     if (key === 'ppfd') {
       setTempMultiplier(multiplier.toString());
+      setShowPpfdFormula(false);
     }
     setActiveDetailMetric(key);
+  };
+
+  const getPpfdDiagnostics = (ppfdVal: number) => {
+    if (ppfdVal >= 400 && ppfdVal <= 800) {
+      return {
+        state: 'excellent' as const,
+        status: 'เหมาะสมมาก',
+        color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+      };
+    } else if ((ppfdVal >= 300 && ppfdVal < 400) || (ppfdVal > 800 && ppfdVal <= 950)) {
+      return {
+        state: 'good' as const,
+        status: 'เหมาะสม',
+        color: 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+      };
+    } else if ((ppfdVal >= 200 && ppfdVal < 300) || (ppfdVal > 950 && ppfdVal <= 1100)) {
+      return {
+        state: 'warning' as const,
+        status: 'เฝ้าระวัง',
+        color: 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+      };
+    } else {
+      return {
+        state: 'critical' as const,
+        status: 'ไม่เหมาะสม',
+        color: 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+      };
+    }
   };
 
   const temp = latestData ? latestData.temperature : 0;
@@ -165,10 +203,10 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     }
   };
 
-  const getDynamicStyles = (key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux') => {
+  const getDynamicStyles = (key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux', customState?: 'excellent' | 'good' | 'warning' | 'critical') => {
     const lookupKey = key === 'lux' ? 'ppfd' : key;
     const diag = diagnostics?.[lookupKey];
-    const state = diag?.state;
+    const state = customState || diag?.state;
 
     switch (state) {
       case 'excellent':
@@ -299,9 +337,8 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         {cards.map((card, idx) => {
-          const styles = getDynamicStyles(card.key);
-          const lookupKey = card.key === 'lux' ? 'ppfd' : card.key;
-          const cardDiag = diagnostics?.[lookupKey];
+          const cardDiag = card.key === 'ppfd' ? getPpfdDiagnostics(ppfd) : (diagnostics?.[card.key === 'lux' ? 'ppfd' : card.key] || null);
+          const styles = getDynamicStyles(card.key, cardDiag?.state);
 
           return (
             <div key={idx} className="flex flex-col gap-2">
@@ -329,15 +366,16 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 </div>
 
                 {/* ตัวเลขหลัก + สถานะ */}
-                <div className="z-10 animate-fade-in">
-                  <div className="flex justify-between items-center mb-1.5 gap-1">
-                    <span className="text-xs font-black tracking-wide uppercase leading-none" style={{ color: 'var(--text-muted)' }}>
+                <div className="z-10 animate-fade-in space-y-1.5">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] xs:text-[11px] sm:text-xs md:text-sm font-black tracking-wide uppercase leading-none whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
                       {card.title}
                     </span>
-                    <span className={`px-2 py-0.5 border rounded-full text-[10.5px] font-black shrink-0 transition-colors ${cardDiag ? cardDiag.color : 'bg-slate-100 text-slate-400 border-slate-200'
-                      }`}>
-                      {cardDiag ? cardDiag.status : 'รอข้อมูล...'}
-                    </span>
+                    <div className="flex">
+                      <span className={`px-2 py-0.5 border rounded-full text-[10px] font-black transition-colors ${cardDiag ? cardDiag.color : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                        {cardDiag ? cardDiag.status : 'รอข้อมูล...'}
+                      </span>
+                    </div>
                   </div>
                   <div className={`text-2xl md:text-3xl font-black font-mono tracking-tight leading-none ${styles.valueColor}`}>
                     {latestData ? card.value : '---'}
@@ -446,81 +484,100 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
 
             {/* ส่วนตั้งค่าตัวคูณสูตร PPFD เพิ่มเติมใน Tooltip ของ PPFD */}
             {activeDetailMetric === 'ppfd' && (
-              <div
-                className="border p-4 rounded-2xl space-y-3"
-                style={{
-                  backgroundColor: 'var(--bg-subtle)',
-                  borderColor: 'var(--border-subtle)',
-                }}
-              >
-                <div className="text-[10px] font-extrabold tracking-widest text-amber-500 uppercase">
-                  ⚙️ ตั้งค่าและคำนวณสูตร PPFD
-                </div>
-                <div className="text-xs font-black font-mono" style={{ color: 'var(--text-value)' }}>
-                  สูตร: PPFD (μmol/m²/s) = LUX × ตัวคูณแหล่งแสง
-                </div>
-                
-                <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 p-3 rounded-xl space-y-2 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span style={{ color: 'var(--text-muted)' }}>ค่าความสว่างปัจจุบัน:</span>
-                    <span className="font-black" style={{ color: 'var(--text-primary)' }}>{lux.toLocaleString()} LUX</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span style={{ color: 'var(--text-muted)' }}>ตัวคูณแสงปัจจุบัน:</span>
-                    <span className="font-black" style={{ color: 'var(--text-primary)' }}>× {multiplier}</span>
-                  </div>
-                  <div className="h-px bg-slate-200 dark:bg-slate-800"></div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-amber-600 dark:text-amber-500">ผลลัพธ์ PPFD ปัจจุบัน:</span>
-                    <span className="font-black text-amber-600 dark:text-amber-500">{ppfd.toLocaleString()} μmol/m²/s</span>
-                  </div>
-                </div>
+              <div className="space-y-3">
+                {!showPpfdFormula ? (
+                  <button
+                    onClick={() => setShowPpfdFormula(true)}
+                    className="w-full py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 dark:text-amber-500 rounded-xl text-xs font-black transition-all border border-amber-200 dark:border-amber-500/30 cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <span>⚙️ ตั้งค่าและสูตรคำนวณ PPFD</span>
+                  </button>
+                ) : (
+                  <div
+                    className="border p-4 rounded-2xl space-y-3"
+                    style={{
+                      backgroundColor: 'var(--bg-subtle)',
+                      borderColor: 'var(--border-subtle)',
+                    }}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="text-[10px] font-extrabold tracking-widest text-amber-500 uppercase">
+                        ⚙️ ตั้งค่าและคำนวณสูตร PPFD
+                      </div>
+                      <button
+                        onClick={() => setShowPpfdFormula(false)}
+                        className="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                      >
+                        ซ่อนเมนู
+                      </button>
+                    </div>
+                    <div className="text-xs font-black font-mono" style={{ color: 'var(--text-value)' }}>
+                      สูตร: PPFD (μmol/m²/s) = LUX × ตัวคูณแหล่งแสง
+                    </div>
+                    
+                    <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 p-3 rounded-xl space-y-2 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span style={{ color: 'var(--text-muted)' }}>ค่าความสว่างปัจจุบัน:</span>
+                        <span className="font-black" style={{ color: 'var(--text-primary)' }}>{lux.toLocaleString()} LUX</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span style={{ color: 'var(--text-muted)' }}>ตัวคูณแสงปัจจุบัน:</span>
+                        <span className="font-black" style={{ color: 'var(--text-primary)' }}>× {multiplier}</span>
+                      </div>
+                      <div className="h-px bg-slate-200 dark:bg-slate-800"></div>
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-amber-600 dark:text-amber-500">ผลลัพธ์ PPFD ปัจจุบัน:</span>
+                        <span className="font-black text-amber-600 dark:text-amber-500">{ppfd.toLocaleString()} μmol/m²/s</span>
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-extrabold tracking-widest text-slate-400 block">
-                    แก้ไขตัวคูณแหล่งแสง (Multiplier):
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      step="0.0001"
-                      value={tempMultiplier}
-                      onChange={(e) => setTempMultiplier(e.target.value)}
-                      className="flex-1 px-3 py-2 border rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500 font-mono"
-                      style={{
-                        backgroundColor: 'var(--bg-input)',
-                        borderColor: 'var(--border-subtle)',
-                        color: 'var(--text-primary)',
-                      }}
-                      placeholder="เช่น 0.0185"
-                    />
-                    <button
-                      onClick={() => {
-                        setTempMultiplier(DEFAULT_MULTIPLIER.toString());
-                        setMultiplier(DEFAULT_MULTIPLIER);
-                      }}
-                      className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer border dark:border-slate-700"
-                    >
-                      รีเซ็ต
-                    </button>
-                    <button
-                      onClick={() => {
-                        const val = parseFloat(tempMultiplier);
-                        if (!isNaN(val) && val > 0) {
-                          setMultiplier(val);
-                        } else {
-                          alert("กรุณากรอกตัวเลขทศนิยมที่มากกว่า 0");
-                        }
-                      }}
-                      className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition-all cursor-pointer"
-                    >
-                      บันทึก
-                    </button>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-extrabold tracking-widest text-slate-400 block">
+                        แก้ไขตัวคูณแหล่งแสง (Multiplier):
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          step="0.0001"
+                          value={tempMultiplier}
+                          onChange={(e) => setTempMultiplier(e.target.value)}
+                          className="flex-1 px-3 py-2 border rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500 font-mono"
+                          style={{
+                            backgroundColor: 'var(--bg-input)',
+                            borderColor: 'var(--border-subtle)',
+                            color: 'var(--text-primary)',
+                          }}
+                          placeholder="เช่น 0.0185"
+                        />
+                        <button
+                          onClick={() => {
+                            setTempMultiplier(DEFAULT_MULTIPLIER.toString());
+                            setMultiplier(DEFAULT_MULTIPLIER);
+                          }}
+                          className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer border dark:border-slate-700"
+                        >
+                          รีเซ็ต
+                        </button>
+                        <button
+                          onClick={() => {
+                            const val = parseFloat(tempMultiplier);
+                            if (!isNaN(val) && val > 0) {
+                              setMultiplier(val);
+                            } else {
+                              alert("กรุณากรอกตัวเลขทศนิยมที่มากกว่า 0");
+                            }
+                          }}
+                          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition-all cursor-pointer"
+                        >
+                          บันทึก
+                        </button>
+                      </div>
+                      <p className="text-[9px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                        * ค่ามาตรฐานแสงแดดธรรมชาติคือ 0.0185 หากใช้ไฟปลูกประเภทอื่น สามารถปรับให้เหมาะสมได้
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-[9px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                    * ค่ามาตรฐานแสงแดดธรรมชาติคือ 0.0185 หากใช้ไฟปลูกประเภทอื่น สามารถปรับให้เหมาะสมได้
-                  </p>
-                </div>
+                )}
               </div>
             )}
 

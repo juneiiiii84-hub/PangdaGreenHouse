@@ -31,6 +31,7 @@ interface ZoneComparisonProps {
   dataList: SensorData[];
   selectedZone: number;
   theme: ThemePeriod;
+  ppfdMultiplier: number;
 }
 
 type MetricType = 'temperature' | 'humidity' | 'vpd' | 'lux' | 'ppfd';
@@ -44,7 +45,7 @@ type MetricType = 'temperature' | 'humidity' | 'vpd' | 'lux' | 'ppfd';
 //   ppfd: { min: 400, max: 800, label: 'PPFD เหมาะสมมาก' },
 // };
 
-export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, selectedZone: _selectedZone, theme }) => {
+export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, selectedZone: _selectedZone, theme, ppfdMultiplier }) => {
   const [comparisonMode, setComparisonMode] = useState<'zones' | 'metrics'>('zones');
 
   // โหมดเปรียบเทียบข้ามโซน
@@ -63,7 +64,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
     if (zoneRecords.length === 0) return { min: 0, max: 0, avg: 0, count: 0 };
 
     const values = zoneRecords.map(r => {
-      if (metric === 'ppfd') return r.lux * 0.0185; // แปลงแสงแดดเฉลี่ย
+      if (metric === 'ppfd') return r.lux * ppfdMultiplier; // แปลงแสงแดดตามตัวคูณปัจจุบัน
       return r[metric];
     }).filter(v => v !== null && !isNaN(v));
 
@@ -144,7 +145,9 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
           if (zoneData.length === 0) return null;
           const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
           const point = zoneData[dataIndex];
-          return point ? point[selectedMetric] : null;
+          if (!point) return null;
+          if (selectedMetric === 'ppfd') return point.lux * ppfdMultiplier;
+          return point[selectedMetric];
         });
 
         return {
@@ -208,14 +211,18 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         if (zoneData.length === 0) return null;
         const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
         const point = zoneData[dataIndex];
-        return point ? point[compareMetricA] : null;
+        if (!point) return null;
+        if (compareMetricA === 'ppfd') return point.lux * ppfdMultiplier;
+        return point[compareMetricA];
       });
 
       const dataB = labels.map((_, i) => {
         if (zoneData.length === 0) return null;
         const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
         const point = zoneData[dataIndex];
-        return point ? point[compareMetricB] : null;
+        if (!point) return null;
+        if (compareMetricB === 'ppfd') return point.lux * ppfdMultiplier;
+        return point[compareMetricB];
       });
 
       const tabA = metricTabs.find(t => t.id === compareMetricA)!;
