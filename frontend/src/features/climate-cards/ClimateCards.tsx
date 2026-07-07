@@ -347,39 +347,39 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 {/* แสงหัวการ์ด */}
                 <div className={`absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl -mr-4 -mt-4 ${cardBgGlow}`} />
 
-                {/* หัวการ์ด: ไอคอน + ปุ่มข้อมูล (ย้ายมาขวาบน) */}
-                <div className="flex justify-between items-start z-10">
+                {/* หัวการ์ด: ไอคอน + สถานะประเมิน */}
+                <div className="flex justify-between items-center z-10">
                   <div className={`p-2 rounded-xl border ${styles.iconBg} ${styles.textColor}`}>
                     {card.icon}
                   </div>
-                  {/* ปุ่ม Info สำหรับเปิดดูเกณฑ์ (ภาษาคน) ย้ายมาด้านบนขวา */}
-                  <button
-                    onClick={() => handleOpenDetailMetric(card.key)}
-                    title="ดูคำอธิบายเกณฑ์ความเหมาะสม"
-                    className={`p-1.5 rounded-lg cursor-pointer transition-colors ${theme === 'night' ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}
-                  >
-                    <Info size={14} style={{ color: 'var(--text-muted)' }} />
-                  </button>
+                  <span className={`px-2 py-0.5 border rounded-full text-[9px] sm:text-[9.5px] md:text-[10px] font-black shrink-0 transition-colors whitespace-nowrap ${badgeColor}`}>
+                    {badgeStatus}
+                  </span>
                 </div>
 
-                {/* ตัวเลขหลัก + สถานะ */}
+                {/* ตัวเลขหลัก + ชื่อหัวข้อ + ปุ่มข้อมูล */}
                 <div className="z-10 animate-fade-in">
-                  <div className="flex justify-between items-center mb-1.5 gap-1.5">
+                  <div className="flex items-center mb-1.5 gap-1.5">
                     <span 
                       className={`font-black uppercase leading-none whitespace-nowrap ${
                         card.title.length > 25 
-                          ? 'text-[6.5px] sm:text-[7.5px] md:text-[8.2px] lg:text-[9px] xl:text-[9.8px] tracking-tighter' 
+                          ? 'text-[8.5px] sm:text-[9.5px] md:text-[10.2px] lg:text-[11px] xl:text-[11.8px] tracking-tighter' 
                           : card.title.length > 20
-                            ? 'text-[8.2px] sm:text-[8.8px] md:text-[9.5px] lg:text-[10.5px] xl:text-[11px] tracking-tight'
-                            : 'text-[9.8px] sm:text-[10.5px] md:text-xs tracking-tight'
+                            ? 'text-[9.2px] sm:text-[10px] md:text-[10.8px] lg:text-[11.5px] xl:text-[12px] tracking-tight'
+                            : 'text-[10.2px] sm:text-[11px] md:text-xs tracking-tight'
                       }`}
                       style={{ color: 'var(--text-muted)' }}
                     >
                       {card.title}
                     </span>
-                    <span className={`px-1.5 py-0.5 border rounded-full text-[8.2px] sm:text-[9px] md:text-[9.5px] font-black shrink-0 transition-colors whitespace-nowrap ${badgeColor}`}>
-                      {badgeStatus}
-                    </span>
+                    {/* ปุ่ม Info สำหรับเปิดดูเกณฑ์ (ภาษาคน) ย้ายมาด้านข้างหัวข้อ */}
+                    <button
+                      onClick={() => handleOpenDetailMetric(card.key)}
+                      title="ดูคำอธิบายเกณฑ์ความเหมาะสม"
+                      className={`p-1 rounded-md cursor-pointer transition-colors shrink-0 ${theme === 'night' ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}
+                    >
+                      <Info size={12} style={{ color: 'var(--text-muted)' }} />
+                    </button>
                   </div>
                   <div className={`text-2xl md:text-3xl font-black font-mono tracking-tight leading-none ${styles.valueColor}`}>
                     {latestData ? card.value : '---'}
@@ -413,8 +413,8 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 <div className="font-black flex items-center gap-1 text-[10.5px] uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
                   <span>💡 คำแนะนำ:</span>
                 </div>
-                <p className="font-semibold leading-relaxed text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  {isNight ? 'ไม่มีการประเมินช่วงกลางคืน' : (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...')}
+                <p className="font-semibold leading-relaxed text-[10px] sm:text-[11px] md:text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  {isNight ? 'ระบบงดการประเมินในช่วงเวลากลางคืน' : (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...')}
                 </p>
               </div>
             </div>
