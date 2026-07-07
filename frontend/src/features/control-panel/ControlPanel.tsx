@@ -158,8 +158,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
                 <text x="66" y="178" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(-90 66 178)">16 m</text>
 
                 {/* 32m (ความสูงรวมฝั่งขวา) */}
-                <line x1="320" y1="30" x2="320" y2="220" />
-                <text x="329" y="125" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(90 329 125)">32 m</text>
+                <line x1="340" y1="30" x2="340" y2="220" />
+                <text x="349" y="125" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(90 349 125)">32 m</text>
               </g>
             </svg>
           </div>
