@@ -83,11 +83,11 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
   };
 
   const metricTabs: { id: MetricType; label: string; emoji: string; unit: string; color: string }[] = [
-    { id: 'temperature', label: 'อุณหภูมิ', emoji: '🌡️', unit: '°C', color: '#f43f5e' },
-    { id: 'humidity', label: 'ความชื้น', emoji: '💧', unit: '%RH', color: '#3b82f6' },
-    { id: 'vpd', label: 'ระดับความแห้ง/ชื้น (VPD)', emoji: '💨', unit: 'kPa', color: '#a855f7' },
-    { id: 'lux', label: 'ระดับความสว่าง (Lux)', emoji: '🔆', unit: 'Lux', color: '#eab308' },
-    { id: 'ppfd', label: 'ปริมาณแสงพืช (PPFD)', emoji: '☀️', unit: 'μmol', color: '#f97316' },
+    { id: 'temperature', label: 'อุณหภูมิอากาศ', emoji: '🌡️', unit: '°C', color: '#f43f5e' },
+    { id: 'humidity', label: 'ความชื้นสัมพัทธ์ (%RH)', emoji: '💧', unit: '%RH', color: '#3b82f6' },
+    { id: 'vpd', label: 'ความต่างของความดันไอน้ำ (VPD)', emoji: '💨', unit: 'kPa', color: '#a855f7' },
+    { id: 'lux', label: 'ความส่องสว่าง (Lux)', emoji: '🔆', unit: 'Lux', color: '#eab308' },
+    { id: 'ppfd', label: 'ค่าแสงที่พืชได้รับ (PPFD)', emoji: '☀️', unit: 'μmol', color: '#f97316' },
   ];
 
   const zoneConfig = [

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Thermometer, Droplets, Wind, Sun, Info, X } from 'lucide-react';
-import { PpfdModal } from './PpfdModal';
 import { DEFAULT_MULTIPLIER } from '../../shared/utils/ppfd';
 import type { SensorData, DiagnosticsResponse } from '../../services/api';
 import type { ThemePeriod } from '../../shared/utils/useTheme';
@@ -14,34 +13,34 @@ const getHumanFriendlyRecommendation = (
 
   switch (key) {
     case 'temp':
-      if (state === 'excellent') return '✅ ดีที่สุดต่อการเติบโตและการคายน้ำของใบพืช';
-      if (state === 'good') return '👍 พืชสังเคราะห์แสงและทำงานได้ปกติไม่มีปัญหา';
-      if (state === 'warning') return '⚠️ อากาศเริ่มเย็นหรือร้อนเกินไป พืชอาจเติบโตช้าลงเล็กน้อย';
-      return '🚨 ร้อนจัดจนเหี่ยวเฉาใบไหม้ หรือเย็นจัดจนต้นพืชหยุดชะงัก';
+      if (state === 'excellent') return 'ดีที่สุดต่อการเติบโตและการคายน้ำของใบพืช';
+      if (state === 'good') return 'พืชสังเคราะห์แสงและทำงานได้ปกติไม่มีปัญหา';
+      if (state === 'warning') return 'อากาศเริ่มเย็นหรือร้อนเกินไป พืชอาจเติบโตช้าลงเล็กน้อย';
+      return 'ร้อนจัดจนเหี่ยวเฉาใบไหม้ หรือเย็นจัดจนต้นพืชหยุดชะงัก';
 
     case 'hum':
-      if (state === 'excellent') return '✅ ปากใบเปิดพอดี พืชดูดปุ๋ยและคายน้ำได้ดีที่สุด';
-      if (state === 'good') return '👍 ความชื้นปานกลาง พืชเจริญเติบโตได้ปกติ';
-      if (state === 'warning') return '⚠️ อากาศเริ่มแห้งทำให้คายน้ำเร็วเกินไป หรือชื้นเกินจนจำกัดการคายน้ำ';
-      return '🚨 ชื้นจัดจนเสี่ยงโรคราใบไม้ระบาด หรือแห้งจัดจนต้นพืชขาดน้ำ';
+      if (state === 'excellent') return 'ปากใบเปิดพอดี พืชดูดปุ๋ยและคายน้ำได้ดีที่สุด';
+      if (state === 'good') return 'ความชื้นปานกลาง พืชเจริญเติบโตได้ปกติ';
+      if (state === 'warning') return 'อากาศเริ่มแห้งทำให้คายน้ำเร็วเกินไป หรือชื้นเกินจนจำกัดการคายน้ำ';
+      return 'ชื้นจัดจนเสี่ยงโรคราใบไม้ระบาด หรือแห้งจัดจนต้นพืชขาดน้ำ';
 
     case 'vpd':
-      if (state === 'excellent') return '✅ แรงดันไอน้ำดีเยี่ยม พืชลำเลียงน้ำและปุ๋ยขึ้นจากดินได้สูงที่สุด';
-      if (state === 'good') return '👍 พืชคายน้ำได้ปกติและลำเลียงอาหารไปเลี้ยงยอดได้สม่ำเสมอ';
-      if (state === 'warning') return '⚠️ คายน้ำได้ช้าเพราะอากาศชื้นเกิน หรือคายน้ำเร็วเกินเพราะอากาศแห้ง';
-      return '🚨 พืชจะปิดปากใบสนิท ทำให้ไม่สามารถดูดซึมปุ๋ยไปเลี้ยงต้นได้';
+      if (state === 'excellent') return 'แรงดันไอน้ำดีเยี่ยม พืชลำเลียงน้ำและปุ๋ยขึ้นจากดินได้สูงที่สุด';
+      if (state === 'good') return 'พืชคายน้ำได้ปกติและลำเลียงอาหารไปเลี้ยงยอดได้สม่ำเสมอ';
+      if (state === 'warning') return 'คายน้ำได้ช้าเพราะอากาศชื้นเกิน หรือคายน้ำเร็วเกินเพราะอากาศแห้ง';
+      return 'พืชจะปิดปากใบสนิท ทำให้ไม่สามารถดูดซึมปุ๋ยไปเลี้ยงต้นได้';
 
     case 'ppfd':
-      if (state === 'excellent') return '✅ ความเข้มแสงกำลังพอดี พืชสังเคราะห์อาหารและเติบโตได้เร็วที่สุด';
-      if (state === 'good') return '👍 ความเข้มแสงเพียงพอต่อการเจริญเติบโตได้อย่างแข็งแรงปกติ';
-      if (state === 'warning') return '⚠️ แสงน้อยไปจนต้นพืชยืดหาแสง หรือแสงแดดแรงไปจนพืชเครียดสะสมความร้อน';
-      return '🚨 มืดเกินไปจนไม่เติบโต หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย';
+      if (state === 'excellent') return 'ความเข้มแสงกำลังพอดี พืชสังเคราะห์อาหารและเติบโตได้เร็วที่สุด';
+      if (state === 'good') return 'ความเข้มแสงเพียงพอต่อการเจริญเติบโตได้อย่างแข็งแรงปกติ';
+      if (state === 'warning') return 'แสงน้อยไปจนต้นพืชยืดหาแสง หรือแสงแดดแรงไปจนพืชเครียดสะสมความร้อน';
+      return 'มืดเกินไปจนไม่เติบโต หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย';
 
     case 'lux':
-      if (state === 'excellent') return '✅ ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์';
-      if (state === 'good') return '👍 ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น';
-      if (state === 'warning') return '⚠️ แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง';
-      return '🚨 มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย';
+      if (state === 'excellent') return 'ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์';
+      if (state === 'good') return 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น';
+      if (state === 'warning') return 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง';
+      return 'มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย';
 
     default:
       return 'กำลังวิเคราะห์...';
@@ -51,7 +50,7 @@ const getHumanFriendlyRecommendation = (
 // คำอธิบายเกณฑ์ความเหมาะสมอ้างอิงตารางประเมิน แปลเป็นภาษาคนพูดเข้าใจง่าย
 const detailExplanations: Record<string, { title: string; description: string; unit: string; list: { status: string; color: string; range: string; effect: string }[] }> = {
   temp: {
-    title: 'เกณฑ์อุณหภูมิที่เหมาะสม',
+    title: 'เกณฑ์ความเหมาะสมอุณหภูมิอากาศ',
     description: 'ระดับความร้อนเย็นในโรงเรือน ส่งผลโดยตรงต่อการระเหยน้ำและการเติบโตของยอดพืช',
     unit: '°C',
     list: [
@@ -62,7 +61,7 @@ const detailExplanations: Record<string, { title: string; description: string; u
     ]
   },
   hum: {
-    title: 'เกณฑ์ความชื้นที่เหมาะสม',
+    title: 'เกณฑ์ความเหมาะสมความชื้นสัมพัทธ์ (%RH)',
     description: 'ปริมาณไอน้ำในอากาศ ช่วยควบคุมการเปิดปากใบพืชเพื่อให้ดูดซึมปุ๋ยและสารอาหารได้อย่างราบรื่น',
     unit: '%RH',
     list: [
@@ -73,7 +72,7 @@ const detailExplanations: Record<string, { title: string; description: string; u
     ]
   },
   vpd: {
-    title: 'เกณฑ์ระดับความแห้ง/ชื้นที่เหมาะสม (VPD)',
+    title: 'เกณฑ์ความเหมาะสมความต่างของความดันไอน้ำ (VPD)',
     description: 'ดัชนีวัดระดับความแห้งแล้งรอบใบพืช ช่วยระบุประสิทธิภาพการคายน้ำและการลำเลียงปุ๋ยขึ้นจากดิน',
     unit: 'kPa',
     list: [
@@ -84,7 +83,7 @@ const detailExplanations: Record<string, { title: string; description: string; u
     ]
   },
   ppfd: {
-    title: 'เกณฑ์ปริมาณแสงพืชที่เหมาะสม (PPFD)',
+    title: 'เกณฑ์ความเหมาะสมค่าแสงที่พืชได้รับ (PPFD)',
     description: 'ความเข้มแสงแดดหรือไฟช่วยปลูกเฉพาะช่วงคลื่นแสงที่พืชสามารถนำไปใช้สังเคราะห์แสงเจริญเติบโตได้โดยตรง',
     unit: 'μmol/m²/s',
     list: [
@@ -95,7 +94,7 @@ const detailExplanations: Record<string, { title: string; description: string; u
     ]
   },
   lux: {
-    title: 'เกณฑ์ระดับความสว่างที่เหมาะสม (Lux)',
+    title: 'เกณฑ์ความเหมาะสมความส่องสว่าง (Lux)',
     description: 'ระดับความสว่างรวมรอบๆ เซนเซอร์ เพื่อประเมินความสว่างรวมในโรงเรือน',
     unit: 'Lux',
     list: [
@@ -115,9 +114,16 @@ interface ClimateCardsProps {
 }
 
 export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history, diagnosticsData, theme }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeDetailMetric, setActiveDetailMetric] = useState<'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux' | null>(null);
   const [multiplier, setMultiplier] = useState(DEFAULT_MULTIPLIER);
+  const [tempMultiplier, setTempMultiplier] = useState(DEFAULT_MULTIPLIER.toString());
+
+  const handleOpenDetailMetric = (key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux') => {
+    if (key === 'ppfd') {
+      setTempMultiplier(multiplier.toString());
+    }
+    setActiveDetailMetric(key);
+  };
 
   const temp = latestData ? latestData.temperature : 0;
   const hum = latestData ? latestData.humidity : 0;
@@ -234,66 +240,55 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
   const cards = [
     {
       key: 'temp' as const,
-      title: 'อุณหภูมิ',
+      title: 'อุณหภูมิอากาศ',
       subtitle: 'เซนเซอร์ DHT22',
       value: `${temp.toFixed(1)}`,
       unit: '°C',
-      desc: 'ระดับความร้อน-เย็นในโรงเรือน',
+      desc: 'ระดับความร้อน-เย็นภายในโรงเรือน',
       icon: <Thermometer size={16} />,
       sparkColor: '#f43f5e',
       sparkline: createSparklineData('temperature', '#f43f5e'),
     },
     {
       key: 'hum' as const,
-      title: 'ความชื้น',
+      title: 'ความชื้นสัมพัทธ์ (%RH)',
       subtitle: 'เซนเซอร์ DHT22',
       value: `${hum.toFixed(1)}`,
       unit: '%RH',
-      desc: 'ปริมาณไอน้ำในอากาศ',
+      desc: 'ปริมาณไอน้ำที่มีอยู่ในอากาศ',
       icon: <Droplets size={16} />,
       sparkColor: '#3b82f6',
       sparkline: createSparklineData('humidity', '#3b82f6'),
     },
     {
       key: 'vpd' as const,
-      title: 'ระดับความแห้ง/ชื้น (VPD)',
+      title: 'ความต่างของความดันไอน้ำ (VPD)',
       subtitle: 'ดัชนีชี้วัดการดูดปุ๋ยและคายน้ำ',
       value: `${vpd.toFixed(2)}`,
       unit: 'kPa',
-      desc: 'แรงดันไออากาศรอบใบพืช (ค่ายิ่งต่ำยิ่งอับชื้น ค่ายิ่งสูงยิ่งแห้งแล้ง)',
+      desc: 'ดัชนีชี้วัดการคายน้ำและอัตราการดูดปุ๋ยของต้นไม้',
       icon: <Wind size={16} />,
       sparkColor: '#a855f7',
       sparkline: createSparklineData('vpd', '#a855f7'),
     },
     {
       key: 'ppfd' as const,
-      title: 'ปริมาณแสงพืช (PPFD)',
+      title: 'ค่าแสงที่พืชได้รับ (PPFD)',
       subtitle: 'แสงที่ใบพืชนำไปสังเคราะห์ได้จริง',
       value: `${ppfd.toLocaleString()}`,
       unit: 'μmol/m²/s',
-      desc: 'ปริมาณความเข้มแสงที่มีประโยชน์ต่อพืช',
+      desc: 'ปริมาณแสงที่พืชนำไปใช้สังเคราะห์แสงได้จริง',
       icon: <Sun size={16} />,
       sparkColor: '#f59e0b',
       sparkline: createSparklineData('ppfd', '#f59e0b'),
-      action: (
-        <button
-          id="ppfd-info-btn"
-          onClick={(e) => { e.stopPropagation(); setIsModalOpen(true); }}
-          title="ดูรายละเอียดการคำนวณ PPFD"
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-amber-500 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-all cursor-pointer text-xs font-bold"
-        >
-          <Info size={11} />
-          <span>สูตรคำนวณ</span>
-        </button>
-      )
     },
     {
       key: 'lux' as const,
-      title: 'ระดับความสว่าง (Lux)',
+      title: 'ความส่องสว่าง (Lux)',
       subtitle: 'เซนเซอร์แสง BH1750',
       value: `${lux.toLocaleString()}`,
       unit: 'Lux',
-      desc: 'ระดับความสว่างของแสงโดยรวมทั้งหมด',
+      desc: 'ระดับความสว่างทั่วไปที่สายตามนุษย์รับรู้',
       icon: <Sun size={16} />,
       sparkColor: '#eab308',
       sparkline: createSparklineData('ppfd', '#eab308'),
@@ -318,22 +313,19 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 {/* แสงหัวการ์ด */}
                 <div className={`absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl -mr-4 -mt-4 ${styles.bgGlow}`} />
 
-                {/* หัวการ์ด: ไอคอน + ปุ่มข้อมูล (เมื่อคลิกจะเปิด Modal แสดงเกณฑ์) */}
+                {/* หัวการ์ด: ไอคอน + ปุ่มข้อมูล (ย้ายมาขวาบน) */}
                 <div className="flex justify-between items-start z-10">
-                  <div className="flex items-center gap-2">
-                    <div className={`p-2 rounded-xl border ${styles.iconBg} ${styles.textColor}`}>
-                      {card.icon}
-                    </div>
-                    {/* ปุ่ม Info สำหรับเปิดดูเกณฑ์ (ภาษาคน) */}
-                    <button
-                      onClick={() => setActiveDetailMetric(card.key)}
-                      title="ดูคำอธิบายเกณฑ์ความเหมาะสม"
-                      className={`p-1.5 rounded-lg cursor-pointer transition-colors ${theme === 'night' ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}
-                    >
-                      <Info size={14} style={{ color: 'var(--text-muted)' }} />
-                    </button>
+                  <div className={`p-2 rounded-xl border ${styles.iconBg} ${styles.textColor}`}>
+                    {card.icon}
                   </div>
-                  {card.action}
+                  {/* ปุ่ม Info สำหรับเปิดดูเกณฑ์ (ภาษาคน) ย้ายมาด้านบนขวา */}
+                  <button
+                    onClick={() => handleOpenDetailMetric(card.key)}
+                    title="ดูคำอธิบายเกณฑ์ความเหมาะสม"
+                    className={`p-1.5 rounded-lg cursor-pointer transition-colors ${theme === 'night' ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}
+                  >
+                    <Info size={14} style={{ color: 'var(--text-muted)' }} />
+                  </button>
                 </div>
 
                 {/* ตัวเลขหลัก + สถานะ */}
@@ -387,14 +379,6 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
           );
         })}
       </div>
-
-      <PpfdModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        currentLux={lux}
-        currentMultiplier={multiplier}
-        onMultiplierChange={(val) => setMultiplier(val)}
-      />
 
       {/* หน้าต่างแสดงคำอธิบายเกณฑ์ประเมินอัจฉริยะ (ภาษาคนเข้าใจง่าย) */}
       {activeDetailMetric && (
@@ -459,6 +443,86 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 </div>
               ))}
             </div>
+
+            {/* ส่วนตั้งค่าตัวคูณสูตร PPFD เพิ่มเติมใน Tooltip ของ PPFD */}
+            {activeDetailMetric === 'ppfd' && (
+              <div
+                className="border p-4 rounded-2xl space-y-3"
+                style={{
+                  backgroundColor: 'var(--bg-subtle)',
+                  borderColor: 'var(--border-subtle)',
+                }}
+              >
+                <div className="text-[10px] font-extrabold tracking-widest text-amber-500 uppercase">
+                  ⚙️ ตั้งค่าและคำนวณสูตร PPFD
+                </div>
+                <div className="text-xs font-black font-mono" style={{ color: 'var(--text-value)' }}>
+                  สูตร: PPFD (μmol/m²/s) = LUX × ตัวคูณแหล่งแสง
+                </div>
+                
+                <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 p-3 rounded-xl space-y-2 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span style={{ color: 'var(--text-muted)' }}>ค่าความสว่างปัจจุบัน:</span>
+                    <span className="font-black" style={{ color: 'var(--text-primary)' }}>{lux.toLocaleString()} LUX</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span style={{ color: 'var(--text-muted)' }}>ตัวคูณแสงปัจจุบัน:</span>
+                    <span className="font-black" style={{ color: 'var(--text-primary)' }}>× {multiplier}</span>
+                  </div>
+                  <div className="h-px bg-slate-200 dark:bg-slate-800"></div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-amber-600 dark:text-amber-500">ผลลัพธ์ PPFD ปัจจุบัน:</span>
+                    <span className="font-black text-amber-600 dark:text-amber-500">{ppfd.toLocaleString()} μmol/m²/s</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-extrabold tracking-widest text-slate-400 block">
+                    แก้ไขตัวคูณแหล่งแสง (Multiplier):
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      step="0.0001"
+                      value={tempMultiplier}
+                      onChange={(e) => setTempMultiplier(e.target.value)}
+                      className="flex-1 px-3 py-2 border rounded-xl text-xs font-bold focus:outline-none focus:border-amber-500 font-mono"
+                      style={{
+                        backgroundColor: 'var(--bg-input)',
+                        borderColor: 'var(--border-subtle)',
+                        color: 'var(--text-primary)',
+                      }}
+                      placeholder="เช่น 0.0185"
+                    />
+                    <button
+                      onClick={() => {
+                        setTempMultiplier(DEFAULT_MULTIPLIER.toString());
+                        setMultiplier(DEFAULT_MULTIPLIER);
+                      }}
+                      className="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer border dark:border-slate-700"
+                    >
+                      รีเซ็ต
+                    </button>
+                    <button
+                      onClick={() => {
+                        const val = parseFloat(tempMultiplier);
+                        if (!isNaN(val) && val > 0) {
+                          setMultiplier(val);
+                        } else {
+                          alert("กรุณากรอกตัวเลขทศนิยมที่มากกว่า 0");
+                        }
+                      }}
+                      className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black transition-all cursor-pointer"
+                    >
+                      บันทึก
+                    </button>
+                  </div>
+                  <p className="text-[9px] leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                    * ค่ามาตรฐานแสงแดดธรรมชาติคือ 0.0185 หากใช้ไฟปลูกประเภทอื่น สามารถปรับให้เหมาะสมได้
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* ปุ่มปิด */}
             <button
