@@ -16,7 +16,7 @@ export interface OverallEvaluation {
 }
 
 export class ClimateService {
-  constructor(private sensorRepo: ISensorRepository) {}
+  constructor(private sensorRepo: ISensorRepository) { }
 
   calculateVPD(temp: number, rh: number): number {
     const svp = 0.61078 * Math.exp((17.27 * temp) / (temp + 237.3));
@@ -50,7 +50,7 @@ export class ClimateService {
           status: 'เฝ้าระวัง',
           color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
           desc: `อุณหภูมิ ${value.toFixed(1)}°C อยู่ในเกณฑ์เฝ้าระวัง อุณหภูมิเบี่ยงเบนเล็กน้อย พืชอาจมีอัตราการเติบโตช้าลง`,
-          recommendation: value >= 33 
+          recommendation: value >= 33
             ? '⚠️ อุณหภูมิค่อนข้างสูง: แนะนำให้เปิดพัดลมระบายอากาศ (Exhaust Fan) หรือเพิ่มการไหลเวียนของลม'
             : '⚠️ อุณหภูมิค่อนข้างต่ำ: ควรลดระดับพัดลมระบายอากาศเพื่อสะสมความร้อนภายในโรงเรือน'
         };

@@ -210,7 +210,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-sm sm:text-base md:text-lg font-black text-white tracking-tight leading-none">ระบบตรวจวัดสภาวะอากาศในโรงเรือนเพาะพันธ์ไม้ผล</h1>
+              <h1 className="text-sm sm:text-base md:text-lg font-black text-white tracking-tight leading-none">ระบบตรวจวัดสภาวะอากาศในโรงเรือนเพาะพันธุ์ไม้ผล</h1>
               <p className="text-xs text-emerald-50 mt-1.5 font-bold">(สถานีเกษตรหลวงปางดะ)</p>
             </div>
           </div>
