@@ -137,8 +137,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
                 <line x1="95" y1="130" x2="115" y2="130" />
                 {/* ประตูล่าง (โซน D) */}
                 <line x1="95" y1="220" x2="115" y2="220" />
-                {/* ประตูข้างซ้าย (โซน A) */}
-                <line x1="245" y1="50" x2="245" y2="70" />
+                {/* ประตูข้างซ้าย (โซน A) - ขอบล่างโซน A */}
+                <line x1="245" y1="115" x2="245" y2="135" />
                 {/* ประตูทางขวา (โซน B) */}
                 <line x1="305" y1="170" x2="305" y2="190" />
               </g>
@@ -158,8 +158,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
                 <text x="66" y="178" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(-90 66 178)">16 m</text>
 
                 {/* 32m (ความสูงรวมฝั่งขวา) */}
-                <line x1="340" y1="30" x2="340" y2="220" />
-                <text x="349" y="125" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(90 349 125)">32 m</text>
+                <line x1="370" y1="30" x2="370" y2="220" />
+                <text x="379" y="125" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(90 379 125)">32 m</text>
               </g>
             </svg>
           </div>
