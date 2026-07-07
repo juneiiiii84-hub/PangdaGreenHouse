@@ -356,10 +356,17 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 {/* ตัวเลขหลัก + สถานะ */}
                 <div className="z-10 animate-fade-in">
                   <div className="flex justify-between items-center mb-1.5 gap-1.5">
-                    <span className="text-[10px] xs:text-[11px] md:text-xs font-black tracking-tight uppercase leading-none whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>
+                    <span 
+                      className={`font-black tracking-tighter uppercase leading-none whitespace-nowrap ${
+                        card.title.length > 20 
+                          ? 'text-[8px] xs:text-[9px] sm:text-[9.8px] md:text-[10.8px]' 
+                          : 'text-[9.5px] xs:text-[10.5px] md:text-xs'
+                      }`}
+                      style={{ color: 'var(--text-muted)' }}
+                    >
                       {card.title}
                     </span>
-                    <span className={`px-1.5 py-0.5 border rounded-full text-[9px] xs:text-[10px] font-black shrink-0 transition-colors whitespace-nowrap ${cardDiag ? cardDiag.color : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
+                    <span className={`px-1.5 py-0.5 border rounded-full text-[8.2px] xs:text-[9px] font-black shrink-0 transition-colors whitespace-nowrap ${cardDiag ? cardDiag.color : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
                       {cardDiag ? cardDiag.status : 'รอข้อมูล...'}
                     </span>
                   </div>
