@@ -288,7 +288,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'vpd' as const,
-      title: 'ความต่างของความดันไอน้ำ (VPD)',
+      title: 'ความดันไอน้ำ (VPD)',
       subtitle: 'ดัชนีชี้วัดการดูดปุ๋ยและคายน้ำ',
       value: `${vpd.toFixed(2)}`,
       unit: 'kPa',
@@ -299,7 +299,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'ppfd' as const,
-      title: 'ค่าแสงที่พืชได้รับ (PPFD)',
+      title: 'ความเข้มแสง (PPFD)',
       subtitle: 'แสงที่ใบพืชนำไปสังเคราะห์ได้จริง',
       value: `${ppfd.toLocaleString()}`,
       unit: 'μmol/m²/s',
@@ -310,7 +310,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'lux' as const,
-      title: 'ความส่องสว่าง (Lux)',
+      title: 'ความส่องสว่าง (LUX)',
       subtitle: 'เซนเซอร์แสง BH1750',
       value: `${lux.toLocaleString()}`,
       unit: 'Lux',
@@ -366,12 +366,12 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 <div className="z-10 animate-fade-in">
                   <div className="flex justify-between items-center mb-1.5 gap-1.5">
                     <span 
-                      className="font-black tracking-tighter uppercase leading-none whitespace-nowrap text-[8.8px] xs:text-[9.8px] sm:text-[10.2px] md:text-[11px] lg:text-[11.8px]"
+                      className="font-black tracking-tight uppercase leading-none whitespace-nowrap text-[10px] xs:text-[11px] md:text-xs"
                       style={{ color: 'var(--text-muted)' }}
                     >
                       {card.title}
                     </span>
-                    <span className={`px-1.5 py-0.5 border rounded-full text-[8.2px] xs:text-[9px] font-black shrink-0 transition-colors whitespace-nowrap ${badgeColor}`}>
+                    <span className={`px-2 py-0.5 border rounded-full text-[9.5px] xs:text-[10px] font-black shrink-0 transition-colors whitespace-nowrap ${badgeColor}`}>
                       {badgeStatus}
                     </span>
                   </div>
@@ -408,7 +408,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                   <span>💡 คำแนะนำ:</span>
                 </div>
                 <p className="font-semibold leading-relaxed text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  {isNight ? 'ไม่มีการประเมินสภาพแวดล้อมในช่วงกลางคืน' : (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...')}
+                  {isNight ? 'ไม่มีการประเมินช่วงกลางคืน' : (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...')}
                 </p>
               </div>
             </div>
