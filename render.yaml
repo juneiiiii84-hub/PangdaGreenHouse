@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: PangdaGreenHouse
+    env: node
+    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build
+    startCommand: cd backend && node dist/server.js
+    autoDeploy: true
