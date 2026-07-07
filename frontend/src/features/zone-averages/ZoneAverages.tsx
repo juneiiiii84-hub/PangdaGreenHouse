@@ -52,10 +52,10 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
   const periodLabel = averagePeriod === 'day' ? 'กลางวัน (06:30-18:30)' : averagePeriod === 'night' ? 'กลางคืน (18:30-06:30)' : 'ทั้งหมด';
 
   const metricCards = [
-    { label: 'อุณหภูมิอากาศ', value: avg ? `${avg.temp.toFixed(1)}` : '---', unit: '°C', icon: <Thermometer size={18} className="text-rose-500" />, bgIcon: 'bg-rose-50 border-rose-100' },
-    { label: 'ความชื้นสัมพัทธ์', value: avg ? `${avg.humidity.toFixed(1)}` : '---', unit: '%RH', icon: <Droplets size={18} className="text-blue-500" />, bgIcon: 'bg-blue-50 border-blue-100' },
-    { label: 'ระดับความแห้ง-อับชื้น (VPD)', value: avg ? `${avg.vpd.toFixed(2)}` : '---', unit: 'kPa', icon: <Wind size={18} className="text-purple-500" />, bgIcon: 'bg-purple-50 border-purple-100' },
-    { label: 'ความเข้มแสงพืช (PPFD)', value: avg ? `${avg.ppfd.toFixed(1)}` : '---', unit: 'μmol/m²/s', icon: <Sun size={18} className="text-amber-500" />, bgIcon: 'bg-amber-50 border-amber-100' },
+    { label: 'อุณหภูมิ', value: avg ? `${avg.temp.toFixed(1)}` : '---', unit: '°C', icon: <Thermometer size={18} className="text-rose-500" />, bgIcon: 'bg-rose-50 border-rose-100' },
+    { label: 'ความชื้น', value: avg ? `${avg.humidity.toFixed(1)}` : '---', unit: '%RH', icon: <Droplets size={18} className="text-blue-500" />, bgIcon: 'bg-blue-50 border-blue-100' },
+    { label: 'ระดับความแห้ง/ชื้น (VPD)', value: avg ? `${avg.vpd.toFixed(2)}` : '---', unit: 'kPa', icon: <Wind size={18} className="text-purple-500" />, bgIcon: 'bg-purple-50 border-purple-100' },
+    { label: 'ปริมาณแสงพืช (PPFD)', value: avg ? `${avg.ppfd.toFixed(1)}` : '---', unit: 'μmol/m²/s', icon: <Sun size={18} className="text-amber-500" />, bgIcon: 'bg-amber-50 border-amber-100' },
   ];
 
   return (

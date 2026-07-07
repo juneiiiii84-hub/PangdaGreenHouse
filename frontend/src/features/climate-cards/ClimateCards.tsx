@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Line } from 'react-chartjs-2';
 import { Thermometer, Droplets, Wind, Sun, Info, X } from 'lucide-react';
 import { PpfdModal } from './PpfdModal';
 import { DEFAULT_MULTIPLIER } from '../../shared/utils/ppfd';
@@ -14,34 +13,34 @@ const getHumanFriendlyRecommendation = (
 
   switch (key) {
     case 'temp':
-      if (state === 'excellent') return '✅ อุณหภูมิอากาศดีเยี่ยม (25—30 °C): ดีต่อการเจริญเติบโตและการคายน้ำของใบพืชได้ดีที่สุด';
-      if (state === 'good') return '👍 อุณหภูมิอากาศเหมาะสม (22—24 °C หรือ 31—32 °C): พืชสังเคราะห์แสงและทำงานได้เป็นปกติ';
-      if (state === 'warning') return '⚠️ อุณหภูมิอากาศอยู่ในเกณฑ์เฝ้าระวัง (20—21 °C หรือ 33—35 °C): พืชอาจมีอัตราการเติบโตช้าลงเล็กน้อย';
-      return '🚨 อุณหภูมิอากาศไม่เหมาะสม (ต่ำกว่า 20 °C หรือสูงกว่า 35 °C): ร้อนจัดจนเหี่ยวเฉาใบไหม้ หรือเย็นจัดจนหยุดชะงัก';
+      if (state === 'excellent') return '✅ ดีที่สุดต่อการเติบโตและการคายน้ำของใบพืช';
+      if (state === 'good') return '👍 พืชสังเคราะห์แสงและทำงานได้ปกติไม่มีปัญหา';
+      if (state === 'warning') return '⚠️ อากาศเริ่มเย็นหรือร้อนเกินไป พืชอาจเติบโตช้าลงเล็กน้อย';
+      return '🚨 ร้อนจัดจนเหี่ยวเฉาใบไหม้ หรือเย็นจัดจนต้นพืชหยุดชะงัก';
 
     case 'hum':
-      if (state === 'excellent') return '✅ ความชื้นสัมพัทธ์ดีเยี่ยม (60—80 %RH): ปากใบเปิดพอดี พืชดูดปุ๋ยและคายน้ำได้ดีที่สุด';
-      if (state === 'good') return '👍 ความชื้นสัมพัทธ์เหมาะสม (50—59 %RH หรือ 81—85 %RH): ความชื้นปานกลาง พืชเจริญเติบโตได้ตามปกติ';
-      if (state === 'warning') return '⚠️ ความชื้นสัมพัทธ์อยู่ในเกณฑ์เฝ้าระวัง (40—49 %RH หรือ 86—90 %RH): อากาศเริ่มแห้งไปหรือเริ่มชื้นเกินไป';
-      return '🚨 ความชื้นสัมพัทธ์ไม่เหมาะสม (ต่ำกว่า 40 %RH หรือสูงกว่า 90 %RH): ชื้นจัดเสี่ยงเกิดโรครา หรือแห้งจัดเสี่ยงขาดน้ำ';
+      if (state === 'excellent') return '✅ ปากใบเปิดพอดี พืชดูดปุ๋ยและคายน้ำได้ดีที่สุด';
+      if (state === 'good') return '👍 ความชื้นปานกลาง พืชเจริญเติบโตได้ปกติ';
+      if (state === 'warning') return '⚠️ อากาศเริ่มแห้งทำให้คายน้ำเร็วเกินไป หรือชื้นเกินจนจำกัดการคายน้ำ';
+      return '🚨 ชื้นจัดจนเสี่ยงโรคราใบไม้ระบาด หรือแห้งจัดจนต้นพืชขาดน้ำ';
 
     case 'vpd':
-      if (state === 'excellent') return '✅ แรงดันไอดีเลิศ (0.4—0.8 kPa): พืชลำเลียงน้ำและปุ๋ยขึ้นจากดินไปเลี้ยงใบได้สูงที่สุด';
-      if (state === 'good') return '👍 แรงดันไอปกติ (0.3 kPa หรือ 0.9—1.2 kPa): พืชคายน้ำและส่งอาหารเลี้ยงยอดได้สม่ำเสมอ';
-      if (state === 'warning') return '⚠️ แรงดันไออยู่ในเกณฑ์เฝ้าระวัง (0.2 kPa หรือ 1.3—1.6 kPa): อากาศอับชื้นคายน้ำช้า หรืออากาศแห้งคายน้ำเร็วเกินไป';
-      return '🚨 แรงดันไอไม่เหมาะสม (ต่ำกว่า 0.2 kPa หรือสูงกว่า 1.6 kPa): ปากใบพืชปิดสนิท ทำให้ไม่สามารถดูดซึมปุ๋ยได้';
+      if (state === 'excellent') return '✅ แรงดันไอน้ำดีเยี่ยม พืชลำเลียงน้ำและปุ๋ยขึ้นจากดินได้สูงที่สุด';
+      if (state === 'good') return '👍 พืชคายน้ำได้ปกติและลำเลียงอาหารไปเลี้ยงยอดได้สม่ำเสมอ';
+      if (state === 'warning') return '⚠️ คายน้ำได้ช้าเพราะอากาศชื้นเกิน หรือคายน้ำเร็วเกินเพราะอากาศแห้ง';
+      return '🚨 พืชจะปิดปากใบสนิท ทำให้ไม่สามารถดูดซึมปุ๋ยไปเลี้ยงต้นได้';
 
     case 'ppfd':
-      if (state === 'excellent') return '✅ ความเข้มแสงพืชดีเยี่ยม (400—800 μmol): ความเข้มแสงพอดี พืชสร้างอาหารและโตเร็วที่สุด';
-      if (state === 'good') return '👍 ความเข้มแสงพืชเหมาะสม (300—399 μmol หรือ 801—950 μmol): พืชสังเคราะห์แสงเจริญเติบโตได้แข็งแรงดี';
-      if (state === 'warning') return '⚠️ ความเข้มแสงพืชอยู่ในเกณฑ์เฝ้าระวัง (200—299 μmol หรือ 951—1100 μmol): แสงน้อยไปจนต้นยืดหาแสง หรือแดดแรงไปพืชเครียด';
-      return '🚨 ความเข้มแสงพืชไม่เหมาะสม (ต่ำกว่า 200 μmol หรือสูงกว่า 1100 μmol): มืดเกินจนไม่เติบโต หรือแดดแรงเผาผิวใบไหม้';
+      if (state === 'excellent') return '✅ ความเข้มแสงกำลังพอดี พืชสังเคราะห์อาหารและเติบโตได้เร็วที่สุด';
+      if (state === 'good') return '👍 ความเข้มแสงเพียงพอต่อการเจริญเติบโตได้อย่างแข็งแรงปกติ';
+      if (state === 'warning') return '⚠️ แสงน้อยไปจนต้นพืชยืดหาแสง หรือแสงแดดแรงไปจนพืชเครียดสะสมความร้อน';
+      return '🚨 มืดเกินไปจนไม่เติบโต หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย';
 
     case 'lux':
-      if (state === 'excellent') return '✅ ความสว่างดีเลิศ (21,600—43,200 Lux): ความสว่างดีมาก พืชสังเคราะห์แสงได้สมบูรณ์รอบด้าน';
-      if (state === 'good') return '👍 ความสว่างปกติ (16,200—21,599 Lux หรือ 43,201—51,350 Lux): พืชสังเคราะห์แสงและเติบโตได้ราบรื่น';
-      if (state === 'warning') return '⚠️ ความสว่างอยู่ในเกณฑ์เฝ้าระวัง (10,800—16,199 Lux หรือ 51,351—59,450 Lux): แสงสลัวพืชโตช้า หรือแดดเริ่มแรงขึ้น';
-      return '🚨 ความสว่างไม่เหมาะสม (ต่ำกว่า 10,800 Lux หรือสูงกว่า 59,450 Lux): มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดจนใบพืชเครียด';
+      if (state === 'excellent') return '✅ ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์';
+      if (state === 'good') return '👍 ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น';
+      if (state === 'warning') return '⚠️ แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง';
+      return '🚨 มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย';
 
     default:
       return 'กำลังวิเคราะห์...';
@@ -51,7 +50,7 @@ const getHumanFriendlyRecommendation = (
 // คำอธิบายเกณฑ์ความเหมาะสมอ้างอิงตารางประเมิน แปลเป็นภาษาคนพูดเข้าใจง่าย
 const detailExplanations: Record<string, { title: string; description: string; unit: string; list: { status: string; color: string; range: string; effect: string }[] }> = {
   temp: {
-    title: 'เกณฑ์ความเหมาะสมอุณหภูมิอากาศ',
+    title: 'เกณฑ์อุณหภูมิที่เหมาะสม',
     description: 'ระดับความร้อนเย็นในโรงเรือน ส่งผลโดยตรงต่อการระเหยน้ำและการเติบโตของยอดพืช',
     unit: '°C',
     list: [
@@ -62,7 +61,7 @@ const detailExplanations: Record<string, { title: string; description: string; u
     ]
   },
   hum: {
-    title: 'เกณฑ์ความเหมาะสมความชื้นสัมพัทธ์ (RH)',
+    title: 'เกณฑ์ความชื้นที่เหมาะสม',
     description: 'ปริมาณไอน้ำในอากาศ ช่วยควบคุมการเปิดปากใบพืชเพื่อให้ดูดซึมปุ๋ยและสารอาหารได้อย่างราบรื่น',
     unit: '%RH',
     list: [
@@ -73,7 +72,7 @@ const detailExplanations: Record<string, { title: string; description: string; u
     ]
   },
   vpd: {
-    title: 'เกณฑ์ความเหมาะสมแรงดันไอน้ำ (VPD)',
+    title: 'เกณฑ์ระดับความแห้ง/ชื้นที่เหมาะสม (VPD)',
     description: 'ดัชนีวัดระดับความแห้งแล้งรอบใบพืช ช่วยระบุประสิทธิภาพการคายน้ำและการลำเลียงปุ๋ยขึ้นจากดิน',
     unit: 'kPa',
     list: [
@@ -84,18 +83,18 @@ const detailExplanations: Record<string, { title: string; description: string; u
     ]
   },
   ppfd: {
-    title: 'เกณฑ์ความเหมาะสมแสงพืช (PPFD)',
+    title: 'เกณฑ์ปริมาณแสงพืชที่เหมาะสม (PPFD)',
     description: 'ความเข้มแสงแดดหรือไฟช่วยปลูกเฉพาะช่วงคลื่นแสงที่พืชสามารถนำไปใช้สังเคราะห์แสงเจริญเติบโตได้โดยตรง',
     unit: 'μmol/m²/s',
     list: [
       { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '400 — 800 μmol', effect: 'ความเข้มแสงกำลังพอดี พืชสังเคราะห์อาหารและเติบโตได้เร็วที่สุด' },
       { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '300 — 399 μmol หรือ 801 — 950 μmol', effect: 'ความเข้มแสงเพียงพอต่อการเจริญเติบโตได้อย่างแข็งแรงปกติ' },
       { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '200 — 299 μmol หรือ 951 — 1100 μmol', effect: 'แสงน้อยไปจนต้นพืชยืดหาแสง หรือแสงแดดแรงไปจนพืชเครียดสะสมความร้อน' },
-      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 200 μmol หรือสูงกว่า 1100 μmol', effect: 'มืดเกินไปจนโตไม่ได้ หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย' },
+      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 200 μmol หรือสูงกว่า 1100 μmol', effect: 'มืดเกินไปจนไม่เติบโต หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย' },
     ]
   },
   lux: {
-    title: 'เกณฑ์ความเหมาะสมความสว่าง (Lux)',
+    title: 'เกณฑ์ระดับความสว่างที่เหมาะสม (Lux)',
     description: 'ระดับความสว่างรวมรอบๆ เซนเซอร์ เพื่อประเมินความสว่างรวมในโรงเรือน',
     unit: 'Lux',
     list: [
@@ -147,16 +146,6 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
         }
       ]
     };
-  };
-
-  const sparklineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-    scales: {
-      x: { display: false },
-      y: { display: false }
-    }
   };
 
   const getDynamicStyles = (key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux') => {
@@ -234,7 +223,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
   const cards = [
     {
       key: 'temp' as const,
-      title: 'อุณหภูมิอากาศ',
+      title: 'อุณหภูมิ',
       subtitle: 'เซนเซอร์ DHT22',
       value: `${temp.toFixed(1)}`,
       unit: '°C',
@@ -245,7 +234,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'hum' as const,
-      title: 'ความชื้นสัมพัทธ์',
+      title: 'ความชื้น',
       subtitle: 'เซนเซอร์ DHT22',
       value: `${hum.toFixed(1)}`,
       unit: '%RH',
@@ -256,7 +245,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'vpd' as const,
-      title: 'ความอับชื้น-แห้งแล้ง (VPD)',
+      title: 'ระดับความแห้ง/ชื้น (VPD)',
       subtitle: 'ดัชนีชี้วัดการดูดปุ๋ยและคายน้ำ',
       value: `${vpd.toFixed(2)}`,
       unit: 'kPa',
@@ -267,7 +256,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'ppfd' as const,
-      title: 'ความเข้มแสงพืช (PPFD)',
+      title: 'ปริมาณแสงพืช (PPFD)',
       subtitle: 'แสงที่ใบพืชนำไปสังเคราะห์ได้จริง',
       value: `${ppfd.toLocaleString()}`,
       unit: 'μmol/m²/s',
@@ -289,7 +278,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     },
     {
       key: 'lux' as const,
-      title: 'ความสว่างรอบข้าง (Lux)',
+      title: 'ระดับความสว่าง (Lux)',
       subtitle: 'เซนเซอร์แสง BH1750',
       value: `${lux.toLocaleString()}`,
       unit: 'Lux',
@@ -352,19 +341,6 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                     <span className="text-sm md:text-base font-bold ml-1" style={{ color: 'var(--text-muted)' }}>{card.unit}</span>
                   </div>
                   <div className="text-xs mt-1 font-medium" style={{ color: 'var(--text-muted)' }}>{card.desc}</div>
-                </div>
-
-                {/* Sparkline */}
-                <div className="h-12 w-full">
-                  <Line 
-                    data={createSparklineData(
-                      card.key === 'temp' ? 'temperature' :
-                      card.key === 'hum' ? 'humidity' :
-                      card.key === 'vpd' ? 'vpd' : 'ppfd', 
-                      card.sparkColor
-                    )} 
-                    options={sparklineOptions} 
-                  />
                 </div>
               </div>
 
