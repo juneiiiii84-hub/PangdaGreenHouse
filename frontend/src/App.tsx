@@ -219,8 +219,8 @@ export default function App() {
               G
             </div>
             <div>
-              <h1 className="text-sm md:text-base font-extrabold text-white tracking-tight leading-none">Greenhouse Live Portal</h1>
-              <p className="text-xs text-emerald-50 mt-1 font-medium">ระบบดูแลโรงเรือนอัจฉริยะ</p>
+              <h1 className="text-sm sm:text-base md:text-lg font-black text-white tracking-tight leading-none">ระบบตรวจวัดสภาวะอากาศในโรงเรือนเพาะพันธ์ไม้ผล</h1>
+              <p className="text-xs text-emerald-50 mt-1.5 font-bold">(สถานีเกษตรหลวงปางดะ)</p>
             </div>
           </div>
 

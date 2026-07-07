@@ -325,18 +325,27 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     <>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         {cards.map((card, idx) => {
-          const cardDiag = card.key === 'ppfd' ? getPpfdDiagnostics(ppfd) : (diagnostics?.[card.key === 'lux' ? 'ppfd' : card.key] || null);
+          const isNight = theme === 'night';
+          const cardDiag = isNight ? null : (card.key === 'ppfd' ? getPpfdDiagnostics(ppfd) : (diagnostics?.[card.key === 'lux' ? 'ppfd' : card.key] || null));
           const styles = getDynamicStyles(card.key, cardDiag?.state);
+
+          const badgeStatus = isNight ? 'ไม่มีการประเมิน' : (cardDiag ? cardDiag.status : 'รอข้อมูล...');
+          const badgeColor = isNight 
+            ? 'bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-800' 
+            : (cardDiag ? cardDiag.color : 'bg-slate-100 text-slate-400 border-slate-200');
+
+          const cardBorderColor = isNight ? 'border-slate-200 dark:border-slate-800/80 shadow-none' : styles.borderColor;
+          const cardBgGlow = isNight ? 'opacity-0' : styles.bgGlow;
 
           return (
             <div key={idx} className="flex flex-col gap-2">
               {/* การ์ดหลักแสดงค่าตัวเลข */}
               <div
-                className={`border-2 ${styles.borderColor} rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 relative overflow-hidden flex-grow theme-transition`}
+                className={`border-2 ${cardBorderColor} rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 relative overflow-hidden flex-grow theme-transition`}
                 style={{ backgroundColor: 'var(--bg-card)' }}
               >
                 {/* แสงหัวการ์ด */}
-                <div className={`absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl -mr-4 -mt-4 ${styles.bgGlow}`} />
+                <div className={`absolute top-0 right-0 w-20 h-20 rounded-full blur-2xl -mr-4 -mt-4 ${cardBgGlow}`} />
 
                 {/* หัวการ์ด: ไอคอน + ปุ่มข้อมูล (ย้ายมาขวาบน) */}
                 <div className="flex justify-between items-start z-10">
@@ -362,8 +371,8 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                     >
                       {card.title}
                     </span>
-                    <span className={`px-1.5 py-0.5 border rounded-full text-[8.2px] xs:text-[9px] font-black shrink-0 transition-colors whitespace-nowrap ${cardDiag ? cardDiag.color : 'bg-slate-100 text-slate-400 border-slate-200'}`}>
-                      {cardDiag ? cardDiag.status : 'รอข้อมูล...'}
+                    <span className={`px-1.5 py-0.5 border rounded-full text-[8.2px] xs:text-[9px] font-black shrink-0 transition-colors whitespace-nowrap ${badgeColor}`}>
+                      {badgeStatus}
                     </span>
                   </div>
                   <div className={`text-2xl md:text-3xl font-black font-mono tracking-tight leading-none ${styles.valueColor}`}>
@@ -399,7 +408,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                   <span>💡 คำแนะนำ:</span>
                 </div>
                 <p className="font-semibold leading-relaxed text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  {cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...'}
+                  {isNight ? 'ไม่มีการประเมินสภาพแวดล้อมในช่วงกลางคืน' : (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...')}
                 </p>
               </div>
             </div>
