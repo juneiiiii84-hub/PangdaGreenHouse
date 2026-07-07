@@ -14,22 +14,23 @@ interface ZoneAveragesProps {
 export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) => {
   const [averagePeriod, setAveragePeriod] = useState<AveragePeriod>('all');
 
-  // กรองข้อมูลตามช่วงเวลาที่เลือก
+  // กรองข้อมูลตามช่วงเวลาที่เลือก (คำนวณเฉพาะโซนในร่ม A-D เท่านั้น ไม่นับโซน E ที่อยู่ด้านนอก)
   const getFilteredData = () => {
+    const insideData = dataList.filter(d => [1, 2, 4, 5].includes(Number(d.zone)));
     switch (averagePeriod) {
       case 'day':
-        return dataList.filter(d => isDayTime(d.created_at));
+        return insideData.filter(d => isDayTime(d.created_at));
       case 'night':
-        return dataList.filter(d => isNightTime(d.created_at));
+        return insideData.filter(d => isNightTime(d.created_at));
       default:
-        return dataList;
+        return insideData;
     }
   };
 
   const filteredData = getFilteredData();
 
   const getGreenhouseAverage = () => {
-    // รวมโซน 1-5 และเฉลี่ยตรงๆ จากข้อมูลทั้งหมดที่กรองแล้วตามช่วงเวลา
+    // รวมโซน A-D (ยกเว้นโซน E ที่อยู่ด้านนอก) และเฉลี่ยตรงๆ จากข้อมูลทั้งหมดที่กรองแล้วตามช่วงเวลา
     if (filteredData.length === 0) return null;
 
     const sumTemp = filteredData.reduce((s, d) => s + d.temperature, 0);
@@ -51,10 +52,10 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
   const periodLabel = averagePeriod === 'day' ? 'กลางวัน (06:30-18:30)' : averagePeriod === 'night' ? 'กลางคืน (18:30-06:30)' : 'ทั้งหมด';
 
   const metricCards = [
-    { label: 'อุณหภูมิ', value: avg ? `${avg.temp.toFixed(1)}` : '---', unit: '°C', icon: <Thermometer size={18} className="text-rose-500" />, bgIcon: 'bg-rose-50 border-rose-100' },
-    { label: 'ความชื้น', value: avg ? `${avg.humidity.toFixed(1)}` : '---', unit: '%RH', icon: <Droplets size={18} className="text-blue-500" />, bgIcon: 'bg-blue-50 border-blue-100' },
-    { label: 'VPD', value: avg ? `${avg.vpd.toFixed(2)}` : '---', unit: 'kPa', icon: <Wind size={18} className="text-purple-500" />, bgIcon: 'bg-purple-50 border-purple-100' },
-    { label: 'PPFD', value: avg ? `${avg.ppfd.toFixed(1)}` : '---', unit: 'μmol/m²/s', icon: <Sun size={18} className="text-amber-500" />, bgIcon: 'bg-amber-50 border-amber-100' },
+    { label: 'อุณหภูมิอากาศ', value: avg ? `${avg.temp.toFixed(1)}` : '---', unit: '°C', icon: <Thermometer size={18} className="text-rose-500" />, bgIcon: 'bg-rose-50 border-rose-100' },
+    { label: 'ความชื้นสัมพัทธ์', value: avg ? `${avg.humidity.toFixed(1)}` : '---', unit: '%RH', icon: <Droplets size={18} className="text-blue-500" />, bgIcon: 'bg-blue-50 border-blue-100' },
+    { label: 'ระดับความแห้ง-อับชื้น (VPD)', value: avg ? `${avg.vpd.toFixed(2)}` : '---', unit: 'kPa', icon: <Wind size={18} className="text-purple-500" />, bgIcon: 'bg-purple-50 border-purple-100' },
+    { label: 'ความเข้มแสงพืช (PPFD)', value: avg ? `${avg.ppfd.toFixed(1)}` : '---', unit: 'μmol/m²/s', icon: <Sun size={18} className="text-amber-500" />, bgIcon: 'bg-amber-50 border-amber-100' },
   ];
 
   return (
@@ -73,7 +74,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
             📊 ค่าเฉลี่ยรวมทั้งโรงเรือน
           </h3>
           <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            ค่าเฉลี่ยอากาศและแสงจากโซน A-E ({periodLabel})
+            ค่าเฉลี่ยอากาศและแสงจากโซน A-D ({periodLabel})
           </p>
         </div>
 

@@ -83,11 +83,11 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
   };
 
   const metricTabs: { id: MetricType; label: string; emoji: string; unit: string; color: string }[] = [
-    { id: 'temperature', label: 'อุณหภูมิ', emoji: '🌡️', unit: '°C', color: '#f43f5e' },
-    { id: 'humidity', label: 'ความชื้น', emoji: '💧', unit: '%RH', color: '#3b82f6' },
-    { id: 'vpd', label: 'VPD', emoji: '💨', unit: 'kPa', color: '#a855f7' },
-    { id: 'lux', label: 'Lux', emoji: '🔆', unit: 'Lux', color: '#eab308' },
-    { id: 'ppfd', label: 'PPFD', emoji: '☀️', unit: 'μmol', color: '#f97316' },
+    { id: 'temperature', label: 'อุณหภูมิอากาศ', emoji: '🌡️', unit: '°C', color: '#f43f5e' },
+    { id: 'humidity', label: 'ความชื้นสัมพัทธ์', emoji: '💧', unit: '%RH', color: '#3b82f6' },
+    { id: 'vpd', label: 'ความอับชื้น-แห้งแล้ง (VPD)', emoji: '💨', unit: 'kPa', color: '#a855f7' },
+    { id: 'lux', label: 'ความสว่างรอบข้าง (Lux)', emoji: '🔆', unit: 'Lux', color: '#eab308' },
+    { id: 'ppfd', label: 'ความเข้มแสงพืช (PPFD)', emoji: '☀️', unit: 'μmol', color: '#f97316' },
   ];
 
   const zoneConfig = [
