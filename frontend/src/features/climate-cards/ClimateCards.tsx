@@ -361,7 +361,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 <div className="z-10 animate-fade-in">
                   <div className="flex items-center mb-1.5 gap-1.5">
                     <span 
-                      className="font-black uppercase leading-none whitespace-nowrap text-[10px] sm:text-[11px] md:text-[11.8px] lg:text-[12.5px] xl:text-[13px] tracking-tight"
+                      className="font-black uppercase leading-tight whitespace-normal sm:whitespace-nowrap text-[11.5px] sm:text-[12px] md:text-[12.5px] lg:text-[13px] xl:text-[13.5px] tracking-tight"
                       style={{ color: 'var(--text-muted)' }}
                     >
                       {card.title}
@@ -379,7 +379,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                     {latestData ? card.value : '---'}
                     <span className="text-sm md:text-base font-bold ml-1" style={{ color: 'var(--text-muted)' }}>{card.unit}</span>
                   </div>
-                  <div className="text-xs mt-1 font-medium" style={{ color: 'var(--text-muted)' }}>{card.desc}</div>
+                  <div className="text-[10px] sm:text-[10.5px] md:text-xs mt-1 font-medium leading-relaxed" style={{ color: 'var(--text-muted)' }}>{card.desc}</div>
                 </div>
 
                 {/* Sparkline */}
