@@ -14,9 +14,9 @@ interface ZoneAveragesProps {
 export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) => {
   const [averagePeriod, setAveragePeriod] = useState<AveragePeriod>('all');
 
-  // กรองข้อมูลตามช่วงเวลาที่เลือก (คำนวณเฉพาะโซนในร่ม A-D เท่านั้น ไม่นับโซน E ที่อยู่ด้านนอก)
+  // กรองข้อมูลตามช่วงเวลาที่เลือก (คำนวณเฉพาะโซนในร่ม A-C เท่านั้น ไม่นับโซน D และ E ที่เป็นพื้นที่ภายนอก)
   const getFilteredData = () => {
-    const insideData = dataList.filter(d => [1, 2, 4, 5].includes(Number(d.zone)));
+    const insideData = dataList.filter(d => [2, 4, 5].includes(Number(d.zone)));
     switch (averagePeriod) {
       case 'day':
         return insideData.filter(d => isDayTime(d.created_at));
@@ -30,7 +30,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
   const filteredData = getFilteredData();
 
   const getGreenhouseAverage = () => {
-    // รวมโซน A-D (ยกเว้นโซน E ที่อยู่ด้านนอก) และเฉลี่ยตรงๆ จากข้อมูลทั้งหมดที่กรองแล้วตามช่วงเวลา
+    // รวมโซน A-C (ยกเว้นโซน D และ E ที่เป็นพื้นที่ภายนอก) และเฉลี่ยตรงๆ จากข้อมูลทั้งหมดที่กรองแล้วตามช่วงเวลา
     if (filteredData.length === 0) return null;
 
     const sumTemp = filteredData.reduce((s, d) => s + d.temperature, 0);
@@ -74,7 +74,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
             📊 ค่าเฉลี่ยรวมทั้งโรงเรือน
           </h3>
           <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            ค่าเฉลี่ยอากาศและแสงจากโซน A-D ({periodLabel})
+            ค่าเฉลี่ยอากาศและแสงเฉพาะภายในโรงเรือน (โซน A, B, C) ({periodLabel})
           </p>
         </div>
 
@@ -147,6 +147,9 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
           </div>
         ))}
       </div>
+      <p className="text-[10px] md:text-xs font-bold leading-normal mt-2" style={{ color: 'var(--text-muted)' }}>
+        *หมายเหตุ: คำนวณเฉพาะจากพื้นที่ภายในโรงเรือน (โซน A, B, C) โดยไม่นำโซน D และ E มาร่วมคำนวณเนื่องจากเป็นพื้นที่เปรียบเทียบภายนอก
+      </p>
     </section>
   );
 };
