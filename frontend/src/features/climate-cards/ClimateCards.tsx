@@ -368,16 +368,16 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                     <span 
                       className={`font-black uppercase leading-none whitespace-nowrap ${
                         card.title.length > 25 
-                          ? 'text-[7.2px] sm:text-[8.2px] md:text-[9px] lg:text-[9.8px] xl:text-[10.5px] tracking-tighter' 
+                          ? 'text-[6.5px] sm:text-[7.5px] md:text-[8.2px] lg:text-[9px] xl:text-[9.8px] tracking-tighter' 
                           : card.title.length > 20
-                            ? 'text-[8.5px] sm:text-[9px] md:text-[10px] lg:text-[11px] xl:text-[11.6px] tracking-tight'
-                            : 'text-[10px] sm:text-[11px] md:text-xs tracking-tight'
+                            ? 'text-[8.2px] sm:text-[8.8px] md:text-[9.5px] lg:text-[10.5px] xl:text-[11px] tracking-tight'
+                            : 'text-[9.8px] sm:text-[10.5px] md:text-xs tracking-tight'
                       }`}
                       style={{ color: 'var(--text-muted)' }}
                     >
                       {card.title}
                     </span>
-                    <span className={`px-2 py-0.5 border rounded-full text-[8.5px] sm:text-[9.5px] md:text-[10px] font-black shrink-0 transition-colors whitespace-nowrap ${badgeColor}`}>
+                    <span className={`px-1.5 py-0.5 border rounded-full text-[8.2px] sm:text-[9px] md:text-[9.5px] font-black shrink-0 transition-colors whitespace-nowrap ${badgeColor}`}>
                       {badgeStatus}
                     </span>
                   </div>
