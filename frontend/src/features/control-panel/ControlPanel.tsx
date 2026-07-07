@@ -13,10 +13,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
 
   // แผนที่จับคู่รหัสโซน (หลังบ้าน) กับตัวอักษรและตำแหน่งจริงตามภาพร่าง พร้อมข้อมูลกายภาพ
   const zones = [
-    { id: 5, name: 'โซน A', desc: 'บนขวา', color: 'bg-pink-500', hexColor: '#ec4899', activeClass: 'bg-pink-500 text-white border-pink-400 shadow-pink-500/20', details: 'พื้นที่ยกระดับ สูงกว่าโซน B, C, D ประมาณ 80 ซม. (มีความสูงจากพื้นถึงหลังคาประมาณ 2.5 เมตร) และไม่มีมุ้งแสลนกรองแสงแดดด้านบน' },
-    { id: 2, name: 'โซน B', desc: 'ล่างขวา', color: 'bg-blue-500', hexColor: '#3b82f6', activeClass: 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20', details: 'พื้นที่ระดับปกติ ต่ำกว่าโซน A ประมาณ 80 ซม. (มีความสูงจากพื้นถึงหลังคาประมาณ 3.3 เมตร) และไม่มีมุ้งแสลนกรองแสง' },
-    { id: 4, name: 'โซน C', desc: 'ตรงกลาง', color: 'bg-amber-500', hexColor: '#f59e0b', activeClass: 'bg-amber-500 text-white border-amber-400 shadow-amber-500/20', details: 'พื้นที่ระดับปกติ (ความสูงจากพื้นถึงหลังคาเท่ากับโซน B) ติดตั้งมุ้งแสลนกรองแสงทูโทน 2 สี คือ สีเขียวและสีดำ' },
-    { id: 1, name: 'โซน D', desc: 'ล่างซ้าย', color: 'bg-emerald-500', hexColor: '#10b981', activeClass: 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20', details: 'พื้นที่ระดับปกติ (ความสูงจากพื้นถึงหลังคาเท่ากับโซน B) ติดตั้งมุ้งแสลนกรองแสงสีดำ และมีร่มเงาของต้นไม้ใหญ่ข้างเคียงคอยช่วยบังแสงแดด' },
+    { id: 5, name: 'โซน A', desc: 'บนขวา', color: 'bg-pink-500', hexColor: '#ec4899', activeClass: 'bg-pink-500 text-white border-pink-400 shadow-pink-500/20', details: 'พื้นที่ยกระดับ สูงกว่าโซน B, C, D ประมาณ 80 ซม. (มีความสูงจากพื้นถึงหลังคาประมาณ 2.5 เมตร) และไม่มีมุ้งสแลนกรองแสงแดดด้านบน' },
+    { id: 2, name: 'โซน B', desc: 'ล่างขวา', color: 'bg-blue-500', hexColor: '#3b82f6', activeClass: 'bg-blue-500 text-white border-blue-400 shadow-blue-500/20', details: 'พื้นที่ระดับปกติ ต่ำกว่าโซน A ประมาณ 80 ซม. (มีความสูงจากพื้นถึงหลังคาประมาณ 3.3 เมตร) และไม่มีมุ้งสแลนกรองแสง' },
+    { id: 4, name: 'โซน C', desc: 'ตรงกลาง', color: 'bg-amber-500', hexColor: '#f59e0b', activeClass: 'bg-amber-500 text-white border-amber-400 shadow-amber-500/20', details: 'พื้นที่ระดับปกติ (ความสูงจากพื้นถึงหลังคาเท่ากับโซน B) ติดตั้งมุ้งสแลนกรองแสงทูโทน 2 สี คือ สีเขียวและสีดำ' },
+    { id: 1, name: 'โซน D', desc: 'ล่างซ้าย', color: 'bg-emerald-500', hexColor: '#10b981', activeClass: 'bg-emerald-500 text-white border-emerald-400 shadow-emerald-500/20', details: 'พื้นที่ระดับปกติ (ความสูงจากพื้นถึงหลังคาเท่ากับโซน B) ติดตั้งมุ้งสแลนกรองแสงสีดำ และมีร่มเงาของต้นไม้ใหญ่ข้างเคียงคอยช่วยบังแสงแดด' },
     { id: 3, name: 'โซน E', desc: 'ด้านนอกโรงเรือน', color: 'bg-purple-500', hexColor: '#a855f7', activeClass: 'bg-purple-500 text-white border-purple-400 shadow-purple-500/20', details: 'เซนเซอร์ตรวจวัดสภาพอากาศภายนอกโรงเรือนโดยตรง (ไม่มีหลังคาหรือสแลนบัง) เพื่อเปรียบเทียบความแตกต่างกับสภาพแวดล้อมภายใน' },
   ];
 
@@ -125,10 +125,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
                 <circle cx="360" cy="130" r="14" fill="#a855f7" className="transition-transform group-hover/zone:scale-110" stroke={selectedZone === 3 ? '#fff' : 'transparent'} strokeWidth="2.5" />
                 <text x="360" y="134" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">E</text>
                 <text x="360" y="155" fill="var(--text-muted)" fontSize="8.5" fontWeight="black" textAnchor="middle">ด้านนอก</text>
-                
-                {/* ลูกศรชี้เข้าหาโรงเรือน */}
-                <path d="M 340 130 L 310 130" stroke="#a855f7" strokeWidth="1.5" fill="none" />
-                <path d="M 314 126 L 310 130 L 314 134" stroke="#a855f7" strokeWidth="1.5" fill="none" />
               </g>
 
               {/* ประตูทางเดินและหน้าต่างอิงภาพสเก็ตช์ */}
