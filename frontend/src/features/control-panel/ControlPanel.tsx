@@ -122,12 +122,12 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
 
               {/* โซน E (ด้านนอก) */}
               <g onClick={() => onZoneSelect(3)} className="cursor-pointer group/zone">
-                <circle cx="405" cy="130" r="14" fill="#a855f7" className="transition-transform group-hover/zone:scale-110" stroke={selectedZone === 3 ? '#fff' : 'transparent'} strokeWidth="2.5" />
-                <text x="405" y="134" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">E</text>
-                <text x="405" y="156" fill="var(--text-muted)" fontSize="8.5" fontWeight="black" textAnchor="middle">ด้านนอก</text>
+                <circle cx="360" cy="130" r="14" fill="#a855f7" className="transition-transform group-hover/zone:scale-110" stroke={selectedZone === 3 ? '#fff' : 'transparent'} strokeWidth="2.5" />
+                <text x="360" y="134" fill="#fff" fontSize="11" fontWeight="black" textAnchor="middle">E</text>
+                <text x="360" y="155" fill="var(--text-muted)" fontSize="8.5" fontWeight="black" textAnchor="middle">ด้านนอก</text>
                 
                 {/* ลูกศรชี้เข้าหาโรงเรือน */}
-                <path d="M 385 130 L 310 130" stroke="#a855f7" strokeWidth="1.5" fill="none" />
+                <path d="M 340 130 L 310 130" stroke="#a855f7" strokeWidth="1.5" fill="none" />
                 <path d="M 314 126 L 310 130 L 314 134" stroke="#a855f7" strokeWidth="1.5" fill="none" />
               </g>
 
@@ -158,8 +158,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
                 <text x="66" y="178" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(-90 66 178)">16 m</text>
 
                 {/* 32m (ความสูงรวมฝั่งขวา) */}
-                <line x1="370" y1="30" x2="370" y2="220" />
-                <text x="379" y="125" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(90 379 125)">32 m</text>
+                <line x1="320" y1="30" x2="320" y2="220" />
+                <text x="329" y="125" fill="var(--text-muted)" fontSize="8" fontWeight="bold" textAnchor="middle" transform="rotate(90 329 125)">32 m</text>
               </g>
             </svg>
           </div>
