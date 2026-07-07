@@ -162,7 +162,7 @@ export class SensorController {
   // ช่องทางรับค่ารายงานผ่าน HTTP POST สำหรับบอร์ด ESP32 จริง
   async reportData(req: Request, res: Response) {
     try {
-      const { temperature, humidity, lux, zone } = req.body;
+      const { temperature, humidity, lux, zone, created_at, timestamp } = req.body;
       if (temperature === undefined || humidity === undefined || lux === undefined || zone === undefined) {
         return res.status(400).json({ success: false, error: 'ข้อมูล Temp, Hum, Lux และ Zone จำเป็นต้องมีให้ครบ' });
       }
@@ -175,6 +175,25 @@ export class SensorController {
       const vpd = climateService.calculateVPD(tempNum, humNum);
       const ppfd = parseFloat((luxNum * 0.0185).toFixed(2));
       
+      const customTime = created_at || timestamp;
+      
+      if (customTime) {
+        // ประวัติย้อนหลัง (ข้อมูลกู้คืนจาก SD card ตอนเน็ตหลุด)
+        const tick = {
+          temperature: tempNum,
+          humidity: humNum,
+          vpd,
+          lux: luxNum,
+          ppfd,
+          zone: zoneNum,
+          created_at: new Date(customTime).toISOString()
+        };
+        
+        await climateService.addLog(tick);
+        return res.json({ success: true, message: 'บันทึกข้อมูลย้อนหลังลงฐานข้อมูลเรียบร้อยแล้ว' });
+      }
+
+      // ข้อมูลเรียลไทม์ปกติ
       const tick = {
         id: Date.now() + zoneNum,
         created_at: new Date().toISOString(),
@@ -186,7 +205,7 @@ export class SensorController {
         zone: zoneNum
       };
 
-      // 1. ยิงขึ้นบอร์ดสด
+      // 1. ยิงขึ้นหน้าเว็บสด
       dispatchSSETicks([tick]);
 
       // 2. พักในบัฟเฟอร์เตรียมเฉลี่ย 5 นาที

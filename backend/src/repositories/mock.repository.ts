@@ -77,23 +77,25 @@ export class MockRepository implements ISensorRepository {
     });
   }
 
-  async insert(data: Omit<SensorData, 'id' | 'created_at'>): Promise<SensorData> {
+  async insert(data: Omit<SensorData, 'id' | 'created_at'> & { created_at?: string }): Promise<SensorData> {
+    const { created_at, ...rest } = data;
     const newLog: SensorData = {
       id: -Date.now(),
-      created_at: new Date().toISOString(),
-      ...data
-    };
+      created_at: created_at || new Date().toISOString(),
+      ...rest
+    } as SensorData;
     this.mockLogs.push(newLog);
     return newLog;
   }
 
-  async insertMany(data: Omit<SensorData, 'id' | 'created_at'>[]): Promise<void> {
+  async insertMany(data: (Omit<SensorData, 'id' | 'created_at'> & { created_at?: string })[]): Promise<void> {
     data.forEach((d, idx) => {
+      const { created_at, ...rest } = d;
       this.mockLogs.push({
         id: -Date.now() - idx,
-        created_at: new Date().toISOString(),
-        ...d
-      });
+        created_at: created_at || new Date().toISOString(),
+        ...rest
+      } as SensorData);
     });
   }
 
