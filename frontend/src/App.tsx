@@ -195,7 +195,11 @@ export default function App() {
     }
   };
 
-  const currentLatest = dataList.filter((d) => d.zone === selectedZone).slice(-1)[0] || null;
+  const rawLatest = dataList.filter((d) => d.zone === selectedZone).slice(-1)[0] || null;
+  // กรองข้อมูลล่าสุดที่รับเข้ามาไม่เกิน 15 นาที เพื่อตรวจจับเซนเซอร์ออฟไลน์/ไม่มีเซนเซอร์เชื่อมต่อจริง
+  const currentLatest = rawLatest && (new Date().getTime() - new Date(rawLatest.created_at).getTime() < 15 * 60 * 1000)
+    ? rawLatest
+    : null;
 
   return (
     <div className={`min-h-screen pb-16 font-sans theme-transition ${themePeriod === 'night' ? 'theme-night' : 'theme-day'}`}

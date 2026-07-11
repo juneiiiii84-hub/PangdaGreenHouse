@@ -90,8 +90,8 @@ String getISOTimeString() {
     return "";
   }
   char timeStringBuff[50];
-  // รูปแบบ ISO8601 สำหรับ Node.js backend
-  strftime(timeStringBuff, sizeof(timeStringBuff), "%Y-%m-%dT%H:%M:%SZ", &timeinfo);
+  // รูปแบบ ISO8601 พร้อม Offset +07:00 สำหรับเวลาประเทศไทย
+  strftime(timeStringBuff, sizeof(timeStringBuff), "%Y-%m-%dT%H:%M:%S+07:00", &timeinfo);
   return String(timeStringBuff);
 }
 

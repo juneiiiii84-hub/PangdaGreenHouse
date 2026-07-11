@@ -17,7 +17,10 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
 
   // กรองข้อมูลตามช่วงเวลาที่เลือก (คำนวณเฉพาะโซนในร่ม A-D เท่านั้น ไม่นับโซน E ที่อยู่ด้านนอก)
   const getFilteredData = () => {
-    const insideData = dataList.filter(d => [1, 2, 4, 5].includes(Number(d.zone)));
+    const now = new Date().getTime();
+    // กรองเฉพาะข้อมูลที่รายงานเข้ามาภายใน 15 นาทีล่าสุด (ป้องกันข้อมูลเก่าจากเซนเซอร์ที่ออฟไลน์หรือข้อมูลจำลองในอดีต)
+    const activeData = dataList.filter(d => (now - new Date(d.created_at).getTime()) < 15 * 60 * 1000);
+    const insideData = activeData.filter(d => [1, 2, 4, 5].includes(Number(d.zone)));
     switch (averagePeriod) {
       case 'day':
         return insideData.filter(d => isDayTime(d.created_at));
