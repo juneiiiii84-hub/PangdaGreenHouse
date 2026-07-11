@@ -13,6 +13,7 @@ import {
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { Layers, RefreshCw, TrendingUp, BarChart2 } from 'lucide-react';
 import type { SensorData } from '../../services/api';
+import { DEFAULT_MULTIPLIER } from '../../shared/utils/ppfd';
 import type { ThemePeriod } from '../../shared/utils/useTheme';
 
 // ลงทะเบียนปลั๊กอินไลบรารี Chart.js
@@ -63,7 +64,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
     if (zoneRecords.length === 0) return { min: 0, max: 0, avg: 0, count: 0 };
 
     const values = zoneRecords.map(r => {
-      if (metric === 'ppfd') return r.lux * 0.0185; // แปลงแสงแดดเฉลี่ย
+      if (metric === 'ppfd') return r.lux * DEFAULT_MULTIPLIER; // แปลงแสงแดดเฉลี่ย
       return r[metric];
     }).filter(v => v !== null && !isNaN(v));
 
@@ -145,7 +146,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
           const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
           const point = zoneData[dataIndex];
           if (!point) return null;
-          if (selectedMetric === 'ppfd') return point.lux * 0.0185;
+          if (selectedMetric === 'ppfd') return point.lux * DEFAULT_MULTIPLIER;
           return point[selectedMetric];
         });
 
@@ -211,7 +212,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
         const point = zoneData[dataIndex];
         if (!point) return null;
-        if (compareMetricA === 'ppfd') return point.lux * 0.0185;
+        if (compareMetricA === 'ppfd') return point.lux * DEFAULT_MULTIPLIER;
         return point[compareMetricA];
       });
 
@@ -220,7 +221,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
         const point = zoneData[dataIndex];
         if (!point) return null;
-        if (compareMetricB === 'ppfd') return point.lux * 0.0185;
+        if (compareMetricB === 'ppfd') return point.lux * DEFAULT_MULTIPLIER;
         return point[compareMetricB];
       });
 

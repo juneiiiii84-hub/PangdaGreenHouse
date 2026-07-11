@@ -39,7 +39,7 @@ export class MockRepository implements ISensorRepository {
         const humidity = parseFloat(Math.min(100, Math.max(10, baseHum - timeFactor * 5 + Math.random() * 1.5 - 0.75)).toFixed(2));
         const vpd = this.calculateVPD(temp, humidity);
         const lux = Math.max(0, Math.round(baseLux + timeFactor * 8000 + Math.random() * 1500 - 750));
-        const ppfd = parseFloat((lux * 0.0185).toFixed(2));
+        const ppfd = parseFloat((lux * 0.0299).toFixed(2));
 
         this.mockLogs.push({
           id: -(zone * 1000 + i),
@@ -115,7 +115,7 @@ export class MockRepository implements ISensorRepository {
       
       const luxChange = Math.round(Math.random() * 600 - 300);
       const lux = Math.max(0, lastPoint ? Math.round(lastPoint.lux + luxChange) : 25000 + luxChange);
-      const ppfd = parseFloat((lux * 0.0185).toFixed(2));
+      const ppfd = parseFloat((lux * 0.0299).toFixed(2));
       
       const tick = {
         id: -Date.now() - zone,

@@ -6,7 +6,7 @@ export class SupabaseRepository implements ISensorRepository {
     // ตาราง Supabase เดิมมีคอลัมน์ ppfd ซึ่งเก็บค่า LUX ดิบ
     const rawVal = Number(dbRow.ppfd || 0);
     const lux = rawVal;
-    const ppfd = parseFloat((lux * 0.0185).toFixed(2)); // แปลงแสงแดดเฉลี่ย
+    const ppfd = parseFloat((lux * 0.0299).toFixed(2)); // แปลงแสงแดดเฉลี่ย
 
     return {
       id: dbRow.id,

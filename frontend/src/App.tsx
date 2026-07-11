@@ -11,7 +11,7 @@ import { ZoneAverages } from './features/zone-averages/ZoneAverages';
 import { useTheme } from './shared/utils/useTheme';
 
 export default function App() {
-  const [selectedZone, setSelectedZone] = useState<number>(1);
+  const [selectedZone, setSelectedZone] = useState<number>(5);
   const [dataList, setDataList] = useState<SensorData[]>([]);
   const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(null);
 

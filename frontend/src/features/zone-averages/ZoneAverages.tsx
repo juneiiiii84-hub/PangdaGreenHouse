@@ -3,6 +3,7 @@ import { Thermometer, Droplets, Wind, Sun, SunMedium, Moon } from 'lucide-react'
 import type { SensorData } from '../../services/api';
 import type { ThemePeriod } from '../../shared/utils/useTheme';
 import { isDayTime, isNightTime } from '../../shared/utils/useTheme';
+import { DEFAULT_MULTIPLIER } from '../../shared/utils/ppfd';
 
 type AveragePeriod = 'all' | 'day' | 'night';
 
@@ -36,7 +37,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
     const sumTemp = filteredData.reduce((s, d) => s + d.temperature, 0);
     const sumHum = filteredData.reduce((s, d) => s + d.humidity, 0);
     const sumVpd = filteredData.reduce((s, d) => s + d.vpd, 0);
-    const sumPpfd = filteredData.reduce((s, d) => s + (d.lux * 0.0185), 0);
+    const sumPpfd = filteredData.reduce((s, d) => s + (d.lux * DEFAULT_MULTIPLIER), 0);
     const count = filteredData.length;
 
     return {

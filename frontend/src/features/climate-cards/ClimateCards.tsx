@@ -414,7 +414,9 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                   <span>💡 คำแนะนำ:</span>
                 </div>
                 <p className="font-semibold leading-relaxed text-[10px] sm:text-[11px] md:text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  {isNight ? 'ระบบงดการประเมินในช่วงเวลากลางคืน' : (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...')}
+                  {isNight 
+                    ? 'ระบบงดการประเมินในช่วงเวลากลางคืน' 
+                    : (diagnostics?.[card.key === 'lux' ? 'ppfd' : card.key]?.recommendation || (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...'))}
                 </p>
               </div>
             </div>
@@ -466,7 +468,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                   }}
                 >
                   <div className="text-xs font-black font-mono" style={{ color: 'var(--text-value)' }}>
-                    สูตร: PPFD (μmol/m²/s) = LUX × 0.0185 (ตัวคูณสำหรับแสงแดดธรรมชาติ)
+                    สูตร: PPFD (μmol/m²/s) = LUX × {multiplier} (ตัวคูณปรับจูนค่าแสงพืช)
                   </div>
                   
                   <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 p-4 rounded-xl space-y-3 text-xs">
@@ -475,8 +477,8 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                       <span className="font-black text-sm" style={{ color: 'var(--text-primary)' }}>{lux.toLocaleString()} LUX</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span style={{ color: 'var(--text-muted)' }}>ตัวคูณแปลงค่าแสงแดด (Daylight Factor):</span>
-                      <span className="font-black text-sm" style={{ color: 'var(--text-primary)' }}>× 0.0185</span>
+                      <span style={{ color: 'var(--text-muted)' }}>ตัวคูณแปลงค่าแสง (Calibration Factor):</span>
+                      <span className="font-black text-sm" style={{ color: 'var(--text-primary)' }}>× {multiplier}</span>
                     </div>
                     <div className="h-px bg-slate-200 dark:bg-slate-800"></div>
                     <div className="flex justify-between items-center">
@@ -486,7 +488,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                   </div>
 
                   <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                    ตัวคูณแสงธรรมชาติแบบคงที่อ้างอิงจากมาตรฐานโรงเรือนคือ <strong>0.0185</strong> เพื่อแปลงจากระดับความสว่างทั่วไปที่ตาคนรับรู้ (Lux) ไปเป็นปริมาณโฟตอนแสงที่ใบพืชนำไปใช้สังเคราะห์แสงได้จริง (PPFD)
+                    ตัวคูณปรับจูนค่าแสงที่จูนให้ตรงกับเครื่องวัดมาตรฐานคือ <strong>{multiplier}</strong> เพื่อแปลงจากระดับความสว่าง (Lux) ไปเป็นปริมาณโฟตอนแสงที่ใบพืชนำไปใช้สังเคราะห์แสงได้จริง (PPFD)
                   </p>
                 </div>
               </div>

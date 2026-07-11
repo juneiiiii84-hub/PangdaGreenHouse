@@ -6,9 +6,7 @@ import type { DiagnosticResult, OverallEvaluation } from '../services/climate.se
 import type { SensorData } from '../repositories/sensor.repository.interface.js';
 
 // ตรวจหาค่าความต้องการโหมดจำลองพารามิเตอร์
-const useMock = !process.env.SUPABASE_URL || 
-                !process.env.SUPABASE_ANON_KEY || 
-                process.env.USE_MOCK !== 'false';
+const useMock = process.env.USE_MOCK === 'true';
 
 export const sensorRepo = useMock ? new MockRepository() : new SupabaseRepository();
 export const climateService = new ClimateService(sensorRepo);
@@ -29,6 +27,186 @@ const zoneBuffers: Record<number, ZoneBuffer> = {
   4: { temperature: [], humidity: [], lux: [] },
   5: { temperature: [], humidity: [], lux: [] }
 };
+
+// เก็บสถิติระยะเวลาที่ค่าพารามิเตอร์อยู่นอกเกณฑ์มาตรฐาน เพื่อทำดีเลย์แจ้งเตือนสะสมเกิน 30 นาที
+interface ParameterState {
+  firstEnteredTime: number | null;
+  lastState: 'normal' | 'unfavorable';
+  alreadyAlerted: boolean;
+}
+
+interface ZoneState {
+  temp: ParameterState;
+  hum: ParameterState;
+  vpd: ParameterState;
+  ppfd: ParameterState;
+}
+
+const zoneParameterStates: Record<number, ZoneState> = {
+  1: {
+    temp: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    hum: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    vpd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    ppfd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false }
+  },
+  2: {
+    temp: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    hum: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    vpd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    ppfd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false }
+  },
+  3: {
+    temp: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    hum: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    vpd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    ppfd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false }
+  },
+  4: {
+    temp: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    hum: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    vpd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    ppfd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false }
+  },
+  5: {
+    temp: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    hum: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    vpd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false },
+    ppfd: { firstEnteredTime: null, lastState: 'normal', alreadyAlerted: false }
+  }
+};
+
+// ฟังก์ชันสำหรับส่งการแจ้งเตือนเข้า Discord Webhook
+async function sendDiscordNotify(payload: any) {
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.log(`📢 [Discord Simulation] (ไม่ได้กำหนด DISCORD_WEBHOOK_URL): ${JSON.stringify(payload)}`);
+    return;
+  }
+  try {
+    const body = typeof payload === 'string' ? { content: payload } : payload;
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+      console.error(`❌ ส่ง Discord Webhook ล้มเหลว: ${response.statusText}`);
+    } else {
+      console.log(`🚀 ส่งการแจ้งเตือนเข้า Discord สำเร็จ`);
+    }
+  } catch (err) {
+    console.error(`❌ เกิดข้อผิดพลาดในการส่ง Discord Webhook:`, err);
+  }
+}
+
+// รายชื่อโซนและรายละเอียดตำแหน่งเพื่อความสมจริง
+const zoneNames: Record<number, string> = {
+  1: 'โซน 1: โรงเรือนหลัก (กล้วยไม้/ไม้ดอก)',
+  2: 'โซน 2: โรงเรือนชำ (ฝั่งพัดลม Exhaust)',
+  3: 'โซน 3: ห้องเพาะชำเนื้อเยื่อ (Propagation)',
+  4: 'โซน 4: ฝั่งทางเข้าโรงเรือนหลัก (Entrance)',
+  5: 'โซน 5: พื้นที่กรองแสงพิเศษ (Shaded Area)'
+};
+
+// ฟังก์ชันประเมินความเหมาะสมของสภาพอากาศและยิงแจ้งเตือนเชิงรุก
+export function evaluateAndTriggerAlert(zone: number, temp: number, hum: number, lux: number) {
+  // 1. ตรวจสอบเงื่อนไขเวลา: 06:30 - 18:30 (เวลาประเทศไทย GMT+7)
+  const now = new Date();
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const bangkokTime = new Date(utc + (3600000 * 7));
+  const hours = bangkokTime.getHours();
+  const minutes = bangkokTime.getMinutes();
+  const timeInMinutes = hours * 60 + minutes;
+  
+  const startMins = 6 * 60 + 30; // 06:30
+  const endMins = 18 * 60 + 30;  // 18:30
+  
+  if (timeInMinutes < startMins || timeInMinutes > endMins) {
+    console.log(`[ระบบแจ้งเตือน] ขณะนี้เวลา ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} น. (อยู่นอกช่วงเวลาแจ้งเตือน 18:30 - 06:30 น.) งดแจ้งเตือน`);
+    return;
+  }
+
+  // 2. ประเมินค่าความเหมาะสมของสภาพอากาศ
+  const ppfd = parseFloat((lux * 0.0299).toFixed(2));
+  const tempDiag = climateService.getDiagnosticStatus(temp, 'temp');
+  const humDiag = climateService.getDiagnosticStatus(hum, 'hum');
+  const vpd = climateService.calculateVPD(temp, hum);
+  const vpdDiag = climateService.getDiagnosticStatus(vpd, 'vpd');
+  const ppfdDiag = climateService.getDiagnosticStatus(ppfd, 'ppfd');
+
+  const alerts: string[] = [];
+  
+  const checkParam = (
+    param: 'temp' | 'hum' | 'vpd' | 'ppfd',
+    diag: any,
+    valueStr: string,
+    label: string
+  ): string | null => {
+    const zState = zoneParameterStates[zone];
+    if (!zState) return null;
+    const pState = zState[param];
+    const isUnfavorable = diag.state === 'critical' || diag.state === 'warning';
+
+    if (isUnfavorable) {
+      if (pState.lastState === 'normal') {
+        pState.firstEnteredTime = Date.now();
+        pState.lastState = 'unfavorable';
+        pState.alreadyAlerted = false;
+        console.log(`⏱️ [ระบบตรวจจับ] ${zoneNames[zone] || `โซน ${zone}`} -> ${label} เริ่มเข้าสู่สภาวะไม่เหมาะสม (${diag.status})`);
+      } else {
+        // เช็คระยะเวลาสะสม
+        if (!pState.alreadyAlerted && pState.firstEnteredTime) {
+          const elapsed = Date.now() - pState.firstEnteredTime;
+          // เกณฑ์เวลา: สามารถกำหนดระยะเวลาสะสมใน .env ผ่าน ALERT_DURATION_MS ได้ (ค่าเริ่มต้น: 30 นาทีสำหรับการทำงานจริง, 30 วินาทีในโหมดจำลอง)
+          const envLimit = process.env.ALERT_DURATION_MS ? parseInt(process.env.ALERT_DURATION_MS) : null;
+          const limit = envLimit !== null && !isNaN(envLimit) ? envLimit : (useMock ? 30000 : 1800000);
+          if (elapsed >= limit) {
+            pState.alreadyAlerted = true;
+            const durationText = limit === 30000 ? '30 วินาที' : (limit === 1800000 ? '30 นาที' : `${Math.round(limit / 60000)} นาที`);
+            const mention = process.env.DISCORD_MENTION ? `${process.env.DISCORD_MENTION}\n` : '';
+            const alertMsg = `${mention}⚠️ **[แจ้งเตือนสภาวะผิดปกติสะสมเกิน ${durationText}]**\n` +
+                             `📌 **ตำแหน่ง:** ${zoneNames[zone] || `โซน ${zone}`}\n` +
+                             `▪️ **พารามิเตอร์:** ${label}\n` +
+                             `▪️ **ค่าที่วัดได้:** ${valueStr} (${diag.status})\n` +
+                             `▪️ **รายละเอียด:** ${diag.desc}\n` +
+                             `👉 **คำแนะนำ:** ${diag.recommendation.replace('✅ ', '').replace('👍 ', '').replace('⚠️ ', '').replace('🚨 ', '')}`;
+            return alertMsg;
+          }
+        }
+      }
+    } else {
+      if (pState.lastState === 'unfavorable') {
+        console.log(`🌿 [ระบบตรวจจับ] ${zoneNames[zone] || `โซน ${zone}`} -> ${label} กลับสู่สภาวะปกติแล้ว`);
+      }
+      pState.firstEnteredTime = null;
+      pState.lastState = 'normal';
+      pState.alreadyAlerted = false;
+    }
+    return null;
+  };
+
+  const tempAlert = checkParam('temp', tempDiag, `${temp.toFixed(1)}°C`, '🌡️ อุณหภูมิ');
+  if (tempAlert) alerts.push(tempAlert);
+
+  const humAlert = checkParam('hum', humDiag, `${hum.toFixed(1)}%RH`, '💧 ความชื้นสัมพัทธ์');
+  if (humAlert) alerts.push(humAlert);
+
+  const vpdAlert = checkParam('vpd', vpdDiag, `${vpd.toFixed(2)} kPa`, '💨 ค่า VPD');
+  if (vpdAlert) alerts.push(vpdAlert);
+
+  const ppfdAlert = checkParam('ppfd', ppfdDiag, `${ppfd.toFixed(1)} μmol/m²/s`, '☀️ ความเข้มแสง (PPFD)');
+  if (ppfdAlert) alerts.push(ppfdAlert);
+
+  // 4. ส่งข้อมูลเข้า Discord Webhook ในรูปแบบข้อความธรรมดาหากมีรายการเตือนสะสมครบตามเวลา
+  if (alerts.length > 0) {
+    const combinedMessage = alerts.join('\n\n====================\n\n');
+    sendDiscordNotify(combinedMessage);
+  }
+}
+
+
 
 // ดันตัวข้อมูลขึ้นท่อส่งผลเรียลไทม์หาเว็บหน้าจอ
 export function dispatchSSETicks(ticks: any[]) {
@@ -56,7 +234,7 @@ setInterval(async () => {
       const avgLux = buf.lux.reduce((a, b) => a + b, 0) / buf.lux.length;
       
       const vpd = climateService.calculateVPD(avgTemp, avgHum);
-      const ppfd = parseFloat((avgLux * 0.0185).toFixed(2));
+      const ppfd = parseFloat((avgLux * 0.0299).toFixed(2));
       
       snapshots.push({
         temperature: parseFloat(avgTemp.toFixed(2)),
@@ -88,55 +266,114 @@ setInterval(async () => {
 if (useMock) {
   console.log('⚡ ระบบทำงานในโหมดจำลองพารามิเตอร์ (Simulation Mode)');
   
-  const simulatorState: Record<number, { temp: number; hum: number; lux: number }> = {
-    1: { temp: 26, hum: 75, lux: 22000 },
-    2: { temp: 32, hum: 52, lux: 38000 },
-    3: { temp: 21, hum: 85, lux: 12000 },
-    4: { temp: 27, hum: 68, lux: 24324 },
-    5: { temp: 30, hum: 60, lux: 48000 }
+  const mockAnomalies: Record<number, { type: string; label: string; duration: number } | null> = {
+    1: null, 2: null, 3: null, 4: null, 5: null
   };
 
   setInterval(() => {
     const ticks: any[] = [];
-    const nowIso = new Date().toISOString();
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const bangkokTime = new Date(utc + (3600000 * 7));
+    const hour = bangkokTime.getHours();
+    const nowIso = now.toISOString();
+
+    const configs: Record<number, { minTemp: number; maxTemp: number; minHum: number; maxHum: number; maxLux: number }> = {
+      1: { minTemp: 22.0, maxTemp: 30.5, minHum: 60.0, maxHum: 85.0, maxLux: 30000 },
+      2: { minTemp: 21.5, maxTemp: 33.5, minHum: 50.0, maxHum: 80.0, maxLux: 35000 },
+      3: { minTemp: 23.0, maxTemp: 27.5, minHum: 75.0, maxHum: 92.0, maxLux: 8000  },
+      4: { minTemp: 22.0, maxTemp: 32.0, minHum: 55.0, maxHum: 82.0, maxLux: 28000 },
+      5: { minTemp: 21.0, maxTemp: 28.5, minHum: 65.0, maxHum: 88.0, maxLux: 12000 }
+    };
     
     for (let zone = 1; zone <= 5; zone++) {
-      const state = simulatorState[zone]!;
-      const tempChange = (Math.random() * 0.4 - 0.2);
-      const humChange = (Math.random() * 2 - 1);
+      const cfg = configs[zone]!;
       
-      state.temp = parseFloat((state.temp + tempChange).toFixed(2));
-      state.hum = parseFloat(Math.min(100, Math.max(10, state.hum + humChange)).toFixed(2));
-      
-      const luxChange = Math.round(Math.random() * 600 - 300);
-      state.lux = Math.max(0, Math.round(state.lux + luxChange));
-      
-      const vpd = climateService.calculateVPD(state.temp, state.hum);
-      const ppfd = parseFloat((state.lux * 0.0185).toFixed(2));
+      // 1. คำนวณความเข้มแสงแดด (Lux) ตามเวลากลางวัน-กลางคืน (ระฆังคว่ำ)
+      let baseLux = 0;
+      if (hour >= 6 && hour <= 18) {
+        const rad = Math.PI * (hour - 6) / 12;
+        baseLux = Math.sin(rad) * cfg.maxLux;
+      }
+
+      // 2. คำนวณอุณหภูมิอากาศ (Temp) ต่ำสุด 05:00 และสูงสุด 14:00
+      const tempCycle = Math.cos(2 * Math.PI * (hour - 14) / 24);
+      let baseTemp = cfg.minTemp + ((tempCycle + 1) / 2) * (cfg.maxTemp - cfg.minTemp);
+
+      // 3. คำนวณความชื้นสัมพัทธ์ (Hum) ผกผันกับอุณหภูมิ
+      let baseHum = cfg.maxHum - ((baseTemp - cfg.minTemp) / (cfg.maxTemp - cfg.minTemp)) * (cfg.maxHum - cfg.minHum);
+
+      // สุ่มเกิดเหตุการณ์ผิดปกติ 1.5% ในแต่ละรอบสำหรับการจำลองแบบ mock
+      if (!mockAnomalies[zone] && Math.random() < 0.015) {
+        const eventTypes = [
+          { type: 'FAN_FAILURE', label: '🚨 พัดลมระบายอากาศขัดข้อง (อุณหภูมิพุ่งสูง)', duration: 36 },
+          { type: 'MIST_SYSTEM_OFF', label: '💧 เครื่องพ่นหมอกหยุดทำงาน (ความชื้นต่ำมาก)', duration: 24 },
+          { type: 'SUN_GLARE', label: '☀️ เมฆเปิดแดดจัดฉับพลัน (แสงแดดสูงเกิน)', duration: 18 },
+          { type: 'DOOR_OPENED', label: '🚪 ประตูโรงเรือนถูกเปิดค้างไว้ (ความชื้นลด)', duration: 12 }
+        ];
+        let selectedEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)]!;
+        if (zone === 3 && selectedEvent.type === 'FAN_FAILURE') {
+          selectedEvent = eventTypes[1]!;
+        }
+        mockAnomalies[zone] = { type: selectedEvent.type, label: selectedEvent.label, duration: selectedEvent.duration };
+        console.log(`\n[Simulation] เกิดเหตุการณ์ผิดปกติ: ${selectedEvent.label} ที่โซน ${zone}`);
+      }
+
+      let tempMod = 0;
+      let humMod = 0;
+      let luxMod = 0;
+
+      const anomaly = mockAnomalies[zone];
+      if (anomaly) {
+        anomaly.duration--;
+        if (anomaly.type === 'FAN_FAILURE') {
+          tempMod = 4.5 + Math.random() * 1.5;
+          humMod = -10 - Math.random() * 5;
+        } else if (anomaly.type === 'MIST_SYSTEM_OFF') {
+          humMod = -25 - Math.random() * 10;
+          tempMod = 1.0 + Math.random() * 1.0;
+        } else if (anomaly.type === 'SUN_GLARE') {
+          luxMod = 12000 + Math.random() * 5000;
+          tempMod = 2.0 + Math.random() * 1.0;
+        } else if (anomaly.type === 'DOOR_OPENED') {
+          humMod = -15 - Math.random() * 5;
+          tempMod = 1.5 + Math.random() * 1.0;
+        }
+
+        if (anomaly.duration <= 0) {
+          console.log(`\n[Simulation] เหตุการณ์คลี่คลาย: ${anomaly.label} ที่โซน ${zone} สิ้นสุดลง`);
+          mockAnomalies[zone] = null;
+        }
+      }
+
+      const finalTemp = parseFloat((baseTemp + tempMod + (Math.random() * 0.4 - 0.2)).toFixed(2));
+      const finalHum = parseFloat(Math.max(5, Math.min(100, baseHum + humMod + (Math.random() * 2.0 - 1.0))).toFixed(2));
+      const finalLux = Math.max(0, Math.round(baseLux + luxMod + (Math.random() * 1000 - 500)));
+
+      const vpd = climateService.calculateVPD(finalTemp, finalHum);
+      const ppfd = parseFloat((finalLux * 0.0299).toFixed(2));
       
       const tick = {
         id: -Date.now() - zone,
         created_at: nowIso,
-        temperature: state.temp,
-        humidity: state.hum,
+        temperature: finalTemp,
+        humidity: finalHum,
         vpd,
-        lux: state.lux,
+        lux: finalLux,
         ppfd,
         zone
       };
       
       ticks.push(tick);
       
-      // ส่งข้อมูลดิบเข้าแรมเพื่อเตรียมบันทึก 5 นาที
       const buf = zoneBuffers[zone];
       if (buf) {
-        buf.temperature.push(state.temp);
-        buf.humidity.push(state.hum);
-        buf.lux.push(state.lux);
+        buf.temperature.push(finalTemp);
+        buf.humidity.push(finalHum);
+        buf.lux.push(finalLux);
       }
     }
     
-    // ยิงสตรีมมิ่งสด
     dispatchSSETicks(ticks);
   }, 5000);
 }
@@ -173,11 +410,13 @@ export class SensorController {
       const luxNum = parseFloat(lux);
       
       const vpd = climateService.calculateVPD(tempNum, humNum);
-      const ppfd = parseFloat((luxNum * 0.0185).toFixed(2));
+      const ppfd = parseFloat((luxNum * 0.0299).toFixed(2));
       
       const customTime = created_at || timestamp;
+      // หากมีเวลาส่งมา และห่างจากเวลาเซิร์ฟเวอร์เกิน 2 นาที (120,000 ms) จะถือเป็นประวัติย้อนหลัง (Data Recovery)
+      const isHistorical = customTime && (Math.abs(Date.now() - new Date(customTime).getTime()) > 120000);
       
-      if (customTime) {
+      if (isHistorical) {
         // ประวัติย้อนหลัง (ข้อมูลกู้คืนจาก SD card ตอนเน็ตหลุด)
         const tick = {
           temperature: tempNum,
@@ -196,7 +435,7 @@ export class SensorController {
       // ข้อมูลเรียลไทม์ปกติ
       const tick = {
         id: Date.now() + zoneNum,
-        created_at: new Date().toISOString(),
+        created_at: customTime ? new Date(customTime).toISOString() : new Date().toISOString(),
         temperature: tempNum,
         humidity: humNum,
         vpd,
@@ -215,6 +454,9 @@ export class SensorController {
         buf.humidity.push(humNum);
         buf.lux.push(luxNum);
       }
+
+      // 3. ประเมินความเหมาะสมสภาพอากาศเพื่อแจ้งเตือนทาง Discord (เฉพาะการรายงานสดปกติเท่านั้น)
+      evaluateAndTriggerAlert(zoneNum, tempNum, humNum, luxNum);
 
       res.json({ success: true, message: 'บันทึกเรียบร้อย' });
     } catch (e: any) {
