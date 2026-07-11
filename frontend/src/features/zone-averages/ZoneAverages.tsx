@@ -19,7 +19,7 @@ interface DiagnosticResult {
 }
 
 const getAverageDiagnostics = (
-  key: 'temp' | 'hum' | 'vpd' | 'ppfd',
+  key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux',
   value: number
 ): DiagnosticResult => {
   if (key === 'temp') {
@@ -40,10 +40,16 @@ const getAverageDiagnostics = (
     if ((value >= 0.2 && value < 0.3) || (value > 1.2 && value <= 1.6)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
     return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
   }
-  // PPFD
-  if (value >= 400 && value <= 800) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
-  if ((value >= 300 && value < 400) || (value > 800 && value <= 950)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
-  if ((value >= 200 && value < 300) || (value > 950 && value <= 1100)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+  if (key === 'ppfd') {
+    if (value >= 400 && value <= 800) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+    if ((value >= 300 && value < 400) || (value > 800 && value <= 950)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
+    if ((value >= 200 && value < 300) || (value > 950 && value <= 1100)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+    return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
+  }
+  // LUX
+  if (value >= 21600 && value <= 43200) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+  if ((value >= 16200 && value < 21600) || (value > 43200 && value <= 51350)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
+  if ((value >= 10800 && value < 16200) || (value > 51350 && value <= 59450)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
   return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
 };
 
@@ -76,6 +82,43 @@ const getDynamicValueColor = (state?: 'excellent' | 'good' | 'warning' | 'critic
     case 'critical': return 'text-rose-600 dark:text-rose-400';
     default: return 'text-slate-700 dark:text-slate-200';
   }
+};
+
+const getGreenhouseSummary = (avg: any) => {
+  if (!avg) return '📴 ขณะนี้ระบบยังไม่มีข้อมูลเซ็นเซอร์ที่เปิดใช้งานอยู่จริงในโรงเรือน (กรุณาเปิดสัญญาณจากบอร์ดเพื่อเริ่มตรวจสอบ)';
+
+  const temp = avg.temp;
+  const hum = avg.humidity;
+  const vpd = avg.vpd;
+  const lux = avg.lux;
+
+  let tempText = '';
+  if (temp > 35) tempText = '🌡️ อุณหภูมิในโรงเรือนตอนนี้ร้อนจัด (สูงกว่า 35°C) ซึ่งอาจทำให้พืชเกิดความเครียดสะสม';
+  else if (temp >= 31) tempText = '🌡️ อุณหภูมิในโรงเรือนค่อนข้างร้อน (31-35°C) ควรคอยเปิดพัดลมระบายอากาศช่วย';
+  else if (temp >= 25) tempText = '🌡️ อุณหภูมิอากาศกำลังอุ่นสบายพอเหมาะดีมาก (25-30°C) เอื้อต่อการเจริญเติบโตของใบไม้';
+  else if (temp >= 20) tempText = '🌡️ อุณหภูมิอากาศเย็นสบายกำลังดี (20-24°C) พืชยังสังเคราะห์แสงได้ปกติ';
+  else tempText = '🌡️ อุณหภูมิอากาศเย็นจัด (ต่ำกว่า 20°C) พืชอาจจะชะงักการเติบโตชั่วคราว';
+
+  let humText = '';
+  if (hum > 90) humText = '💧 ส่วนความชื้นสัมพัทธ์ตอนนี้สูงแฉะเกินไป (เกิน 90%RH) ซึ่งมีความเสี่ยงสูงที่จะเกิดเชื้อราสะสมตามใบ';
+  else if (hum >= 81) humText = '💧 ส่วนความชื้นสัมพัทธ์ในอากาศค่อนข้างสูง (81-90%RH) อากาศมีความอิ่มตัวของไอน้ำเยอะ';
+  else if (hum >= 60) humText = '💧 ส่วนความชื้นในอากาศอยู่ในจุดที่พอดีมาก (60-80%RH) ปากใบเปิดสวยงามช่วยให้ต้นไม้ดูดซึมอาหารได้ดีที่สุด';
+  else if (hum >= 40) humText = '💧 ส่วนอากาศภายในค่อนข้างแห้ง (40-59%RH) ต้นไม้จะคายน้ำเร็วขึ้นเพื่อปรับตัว';
+  else humText = '💧 ส่วนอากาศแห้งแล้งผิดปกติ (ต่ำกว่า 40%RH) ควรรดน้ำหรือเปิดพ่นหมอกด่วนเพื่อประคองใบไม่ให้แห้งไหม้';
+
+  let vpdText = '';
+  if (vpd > 1.2) vpdText = '💨 ด้านแรงดันไอ VPD ถือว่าสูงเกินเกณฑ์ปกติ (เกิน 1.2 kPa) อากาศดึงน้ำจากใบเร็วเกินไป ต้นไม้จึงอาจรีบปิดปากใบเพื่อป้องกันการเฉา ทำให้หยุดดูดสารอาหาร';
+  else if (vpd >= 0.4 && vpd <= 0.8) vpdText = '💨 ด้านแรงดันไอ VPD อยู่ในจุดที่สมบูรณ์แบบที่สุด (0.4-0.8 kPa) ต้นไม้จะคายน้ำและปั๊มปุ๋ยแร่ธาตุขึ้นจากดินมาเลี้ยงยอดได้เต็มกำลังร้อยเปอร์เซ็นต์';
+  else if (vpd < 0.4) vpdText = '💨 ด้านแรงดันไอ VPD ต่ำเกินไป (ต่ำกว่า 0.4 kPa) เพราะอากาศชื้นจัด ต้นไม้คายน้ำไม่ได้ ส่งผลให้การดูดสารอาหารและปุ๋ยทางรากเกือบหยุดชะงัก';
+  else vpdText = '💨 ด้านแรงดันไอ VPD อยู่ในเกณฑ์ปานกลางทั่วไป (0.9-1.2 kPa) พืชยังลำเลียงสารอาหารได้เรื่อยๆ ตามปกติ';
+
+  let lightText = '';
+  if (lux > 43200) lightText = '☀️ สุดท้ายคือแสงแดดจัดจ้ามากเกินความจำเป็น (เกิน 43,200 Lux) แนะนำให้กางสแลนกรองแสงบังแดดเพื่อป้องกันใบไม้เกรียมไหม้';
+  else if (lux >= 21600) lightText = '☀️ สุดท้ายคือความสว่างแสงแดดส่องสว่างดีเยี่ยม (21,600-43,200 Lux) ใบพืชได้รับพลังงานโฟตอนอย่างเพียงพอสำหรับการผลิตอาหารสังเคราะห์แสง';
+  else if (lux >= 10800) lightText = '☀️ สุดท้ายคือสภาพแสงสลัวปานกลาง (10,800-21,599 Lux) หากเป็นวันฟ้าครึ้มหรือช่วงเย็น พืชจะผลิตอาหารช้าลงเล็กน้อย';
+  else lightText = '☀️ สุดท้ายคือสภาพแสงมืดสลัวเกินไป (ต่ำกว่า 10,800 Lux) หากไม่ใช่เวลากลางคืน แนะนำให้เปิดไฟช่วยปลูกเสริมประสิทธิภาพเพื่อให้พืชสังเคราะห์แสงต่อได้';
+
+  return `${tempText} ${humText}\n${vpdText} ${lightText}`;
 };
 
 const detailExplanations: Record<string, { title: string; description: string; unit: string; list: { status: string; color: string; range: string; effect: string }[] }> = {
@@ -122,12 +165,23 @@ const detailExplanations: Record<string, { title: string; description: string; u
       { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '200 — 299 μmol หรือ 951 — 1100 μmol', effect: 'แสงน้อยไปจนต้นพืชยืดหาแสง หรือแสงแดดแรงไปจนพืชเครียดสะสมความร้อน' },
       { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 200 μmol หรือสูงกว่า 1100 μmol', effect: 'มืดเกินไปจนไม่เติบโต หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย' },
     ]
+  },
+  lux: {
+    title: 'เกณฑ์ความเหมาะสมความส่องสว่าง (Lux)',
+    description: 'ระดับความสว่างรวมรอบๆ เซนเซอร์ เพื่อประเมินความสว่างรวมในโรงเรือน',
+    unit: 'Lux',
+    list: [
+      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '21,600 — 43,200 Lux', effect: 'ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '16,200—21,599 Lux หรือ 43,201—51,350 Lux', effect: 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น' },
+      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '10,800—16,199 Lux หรือ 51,351—59,450 Lux', effect: 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง' },
+      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 10,800 Lux หรือสูงกว่า 59,450 Lux', effect: 'มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย' },
+    ]
   }
 };
 
 export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) => {
   const [averagePeriod, setAveragePeriod] = useState<AveragePeriod>('all');
-  const [activeDetailMetric, setActiveDetailMetric] = useState<'temp' | 'hum' | 'vpd' | 'ppfd' | null>(null);
+  const [activeDetailMetric, setActiveDetailMetric] = useState<'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux' | null>(null);
 
   // กรองข้อมูลตามช่วงเวลาที่เลือก (คำนวณเฉพาะโซนในร่ม A-D เท่านั้น ไม่นับโซน E ที่อยู่ด้านนอก)
   const getFilteredData = () => {
@@ -166,6 +220,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
       const sumHum = activeLatestRecords.reduce((s, d) => s + d.humidity, 0);
       const sumVpd = activeLatestRecords.reduce((s, d) => s + d.vpd, 0);
       const sumPpfd = activeLatestRecords.reduce((s, d) => s + (d.lux * DEFAULT_MULTIPLIER), 0);
+      const sumLux = activeLatestRecords.reduce((s, d) => s + d.lux, 0);
       const count = activeLatestRecords.length;
 
       return {
@@ -173,6 +228,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
         humidity: sumHum / count,
         vpd: sumVpd / count,
         ppfd: sumPpfd / count,
+        lux: sumLux / count,
       };
     } else {
       if (filteredData.length === 0) return null;
@@ -181,6 +237,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
       const sumHum = filteredData.reduce((s, d) => s + d.humidity, 0);
       const sumVpd = filteredData.reduce((s, d) => s + d.vpd, 0);
       const sumPpfd = filteredData.reduce((s, d) => s + (d.lux * DEFAULT_MULTIPLIER), 0);
+      const sumLux = filteredData.reduce((s, d) => s + d.lux, 0);
       const count = filteredData.length;
 
       return {
@@ -188,6 +245,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
         humidity: sumHum / count,
         vpd: sumVpd / count,
         ppfd: sumPpfd / count,
+        lux: sumLux / count,
       };
     }
   };
@@ -227,6 +285,14 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
       value: avg ? `${avg.ppfd.toFixed(1)}` : '---', 
       rawVal: avg ? avg.ppfd : null,
       unit: 'μmol/m²/s', 
+      icon: <Sun size={18} />, 
+    },
+    { 
+      key: 'lux' as const,
+      label: 'ความส่องสว่าง (LUX)', 
+      value: avg ? `${Math.round(avg.lux).toLocaleString()}` : '---', 
+      rawVal: avg ? avg.lux : null,
+      unit: 'Lux', 
       icon: <Sun size={18} />, 
     },
   ];
@@ -295,7 +361,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
       </div>
 
       {/* การ์ดค่าเฉลี่ยรวม — แสดงเต็มความกว้างพร้อมสถานะประเมินและปุ่มข้อมูล */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {metricCards.map((m, idx) => {
           const isNight = theme === 'night';
           const diag = (isNight || m.rawVal === null) ? null : getAverageDiagnostics(m.key, m.rawVal);
@@ -329,7 +395,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
               {/* ตัวเลข + ชื่อหัวข้อ + ปุ่มข้อมูล */}
               <div className="z-10 animate-fade-in">
                 <div className="flex items-center mb-1.5 gap-1.5">
-                  <span className="text-[11.5px] sm:text-[12px] md:text-[12.5px] font-black uppercase tracking-tight" style={{ color: 'var(--text-muted)' }}>
+                  <span className="text-[11px] sm:text-[11.5px] md:text-[12px] font-black uppercase tracking-tight" style={{ color: 'var(--text-muted)' }}>
                     {m.label}
                   </span>
                   <button
@@ -349,6 +415,25 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
           );
         })}
       </div>
+
+      {/* คำอธิบายภาพรวมสภาพแวดล้อม */}
+      {avg && (
+        <div 
+          className="border p-4.5 rounded-2xl space-y-2.5 theme-transition"
+          style={{
+            backgroundColor: 'var(--bg-subtle)',
+            borderColor: 'var(--border-subtle)',
+          }}
+        >
+          <h4 className="text-xs md:text-sm font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+            📢 วิเคราะห์ภาพรวมสภาพแวดล้อมในโรงเรือน (ภาษาชาวบ้านเข้าใจง่าย):
+          </h4>
+          <div className="text-xs md:text-sm font-semibold leading-relaxed space-y-2 whitespace-pre-line" style={{ color: 'var(--text-secondary)' }}>
+            {getGreenhouseSummary(avg)}
+          </div>
+        </div>
+      )}
+
       <p className="text-[10px] md:text-xs font-bold leading-normal mt-2" style={{ color: 'var(--text-muted)' }}>
         *หมายเหตุ: คำนวณจากโซนภายในโรงเรือน (A, B, C, D) โดยไม่นำโซน E มาร่วมคำนวณเนื่องจากเป็นพื้นที่เปรียบเทียบภายนอก
       </p>
