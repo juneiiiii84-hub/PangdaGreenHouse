@@ -326,7 +326,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         {cards.map((card, idx) => {
           const isNight = theme === 'night';
-          const cardDiag = isNight ? null : (card.key === 'ppfd' ? getPpfdDiagnostics(ppfd) : (diagnostics?.[card.key] || null));
+          const cardDiag = (isNight || !latestData) ? null : (card.key === 'ppfd' ? getPpfdDiagnostics(ppfd) : (diagnostics?.[card.key] || null));
           const styles = getDynamicStyles(card.key, cardDiag?.state);
 
           const badgeStatus = isNight ? 'ไม่มีการประเมิน' : (cardDiag ? cardDiag.status : 'รอข้อมูล...');
