@@ -12,8 +12,35 @@ import { useTheme } from './shared/utils/useTheme';
 
 export default function App() {
   const [selectedZone, setSelectedZone] = useState<number>(5);
-  const [dataList, setDataList] = useState<SensorData[]>([]);
-  const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(null);
+  const [dataList, setDataList] = useState<SensorData[]>(() => {
+    try {
+      const cached = localStorage.getItem('pangda_greenhouse_data');
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(() => {
+    try {
+      const cached = localStorage.getItem('pangda_greenhouse_diagnostics');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // บันทึกข้อมูลลง Cache เมื่อมีการอัปเดตเพื่อลดการกระพริบหน้าจอตอนโหลดใหม่
+  useEffect(() => {
+    if (dataList.length > 0) {
+      localStorage.setItem('pangda_greenhouse_data', JSON.stringify(dataList));
+    }
+  }, [dataList]);
+
+  useEffect(() => {
+    if (diagnosticsData) {
+      localStorage.setItem('pangda_greenhouse_diagnostics', JSON.stringify(diagnosticsData));
+    }
+  }, [diagnosticsData]);
 
   // สเปกสำหรับช่วงวันดาวน์โหลดข้อมูลดิบ
   const [startDate, setStartDate] = useState<string>('');

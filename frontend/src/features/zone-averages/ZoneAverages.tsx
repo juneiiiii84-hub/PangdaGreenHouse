@@ -404,7 +404,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
               </div>
 
               {/* ตัวเลข + ชื่อหัวข้อ + ปุ่มข้อมูล */}
-              <div className="z-10 animate-fade-in">
+              <div className="z-10">
                 <div className="flex items-center mb-1.5 gap-1.5">
                   <span className="text-[11px] sm:text-[11.5px] md:text-[12px] font-black uppercase tracking-tight" style={{ color: 'var(--text-muted)' }}>
                     {m.label}
@@ -430,7 +430,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
       {/* คำอธิบายภาพรวมสภาพแวดล้อม */}
       {avg && (
         <div 
-          className="border p-4.5 rounded-2xl space-y-2.5 theme-transition animate-fade-in"
+          className="border p-4.5 rounded-2xl space-y-2.5 theme-transition"
           style={{
             backgroundColor: 'var(--bg-subtle)',
             borderColor: 'var(--border-subtle)',

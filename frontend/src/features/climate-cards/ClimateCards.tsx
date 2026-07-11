@@ -358,7 +358,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 </div>
 
                 {/* ตัวเลขหลัก + ชื่อหัวข้อ + ปุ่มข้อมูล */}
-                <div className="z-10 animate-fade-in">
+                <div className="z-10">
                   <div className="flex items-center mb-1.5 gap-1.5">
                     <span 
                       className={`font-black uppercase leading-tight whitespace-normal sm:whitespace-nowrap ${
