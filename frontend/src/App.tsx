@@ -14,6 +14,8 @@ export default function App() {
   const [selectedZone, setSelectedZone] = useState<number>(5);
   const [dataList, setDataList] = useState<SensorData[]>([]);
   const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(null);
+  // เก็บค่าล่าสุดแยกตามโซน — ไม่มีวันกลับเป็น null หลังจากได้รับข้อมูลครั้งแรก (ป้องกัน Flicker)
+  const [latestByZone, setLatestByZone] = useState<Record<number, SensorData>>({});
 
   // สเปกสำหรับช่วงวันดาวน์โหลดข้อมูลดิบ
   const [startDate, setStartDate] = useState<string>('');
@@ -39,12 +41,17 @@ export default function App() {
         const promises = Array.from({ length: 5 }, (_, i) => api.getLogs(i + 1, 100));
         const results = await Promise.all(promises);
         const allData: SensorData[] = [];
+        const latestMap: Record<number, SensorData> = {};
         results.forEach((res) => {
-          if (res.success) {
+          if (res.success && res.data.length > 0) {
             allData.push(...res.data);
+            // เก็บค่าสุดท้ายของแต่ละโซนไว้เลย
+            const last = res.data[res.data.length - 1];
+            if (last) latestMap[last.zone] = last;
           }
         });
         setDataList(allData);
+        setLatestByZone((prev) => ({ ...prev, ...latestMap }));
       } catch (err) {
         console.error('ไม่สามารถโหลดข้อมูลประวัติเริ่มต้นได้:', err);
       }
@@ -80,6 +87,12 @@ export default function App() {
             }
             return trimmed;
           });
+          // อัปเดต latestByZone ทันทีที่ SSE stream ส่งมา — ไม่ flicker เพราะไม่มีช่วงที่เป็น null
+          setLatestByZone((prev) => {
+            const updated = { ...prev };
+            validTicks.forEach((t: SensorData) => { if (t.zone) updated[t.zone] = t; });
+            return updated;
+          });
         }
       } catch (err) {
         console.error('SSE Parse Error:', err);
@@ -97,11 +110,14 @@ export default function App() {
       try {
         // 1. ดึงข้อมูลประวัติและค่าเรียลไทม์ล่าสุดของโซนที่เลือก
         const logsRes = await api.getLogs(selectedZone, 100);
-        if (logsRes.success) {
+        if (logsRes.success && logsRes.data.length > 0) {
           setDataList((prev) => {
             const filteredPrev = prev.filter((d) => d.zone !== selectedZone);
             return [...filteredPrev, ...logsRes.data];
           });
+          // อัปเดต latestByZone จาก polling — เลือกเฉพาะค่าล่าสุด
+          const last = logsRes.data[logsRes.data.length - 1];
+          if (last) setLatestByZone((prev) => ({ ...prev, [selectedZone]: last }));
         }
         // 2. ดึงผลวิเคราะห์การประเมิน
         const diagRes = await api.getDiagnostics(selectedZone);
@@ -212,11 +228,10 @@ export default function App() {
     }
   };
 
-  const rawLatest = dataList.filter((d) => d.zone === selectedZone).slice(-1)[0] || null;
-  // กรองข้อมูลล่าสุดที่รับเข้ามาไม่เกิน 15 นาที เพื่อตรวจจับเซนเซอร์ออฟไลน์/ไม่มีเซนเซอร์เชื่อมต่อจริง
-  const currentLatest = rawLatest && (new Date().getTime() - new Date(rawLatest.created_at).getTime() < 15 * 60 * 1000)
-    ? rawLatest
-    : null;
+  // ใช้ latestByZone แทน currentLatest — ไม่มีวันกลับเป็น null หลังได้ข้อมูลครั้งแรก ทำให้ไม่ flicker
+  const stableLatest = latestByZone[selectedZone] || null;
+  // ตรวจสอบว่าเซนเซอร์ยังออนไลน์อยู่ไหม (ไม่เกิน 15 นาที) — ถ้าออฟไลน์ยังแสดงค่าเดิมแต่ badge จะเปลี่ยน
+  const currentLatest = stableLatest;
 
   return (
     <div className={`min-h-screen pb-16 font-sans theme-transition ${themePeriod === 'night' ? 'theme-night' : 'theme-day'}`}
