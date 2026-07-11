@@ -17,6 +17,7 @@ export interface DiagnosticsResponse {
     hum: DiagnosticItem;
     vpd: DiagnosticItem;
     ppfd: DiagnosticItem;
+    lux?: DiagnosticItem;
   } | null;
   overall: {
     text: string;

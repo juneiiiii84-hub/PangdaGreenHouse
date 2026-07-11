@@ -193,8 +193,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
   };
 
   const getDynamicStyles = (key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux', customState?: 'excellent' | 'good' | 'warning' | 'critical') => {
-    const lookupKey = key === 'lux' ? 'ppfd' : key;
-    const diag = diagnostics?.[lookupKey];
+    const diag = diagnostics?.[key];
     const state = customState || diag?.state;
 
     switch (state) {
@@ -327,7 +326,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         {cards.map((card, idx) => {
           const isNight = theme === 'night';
-          const cardDiag = isNight ? null : (card.key === 'ppfd' ? getPpfdDiagnostics(ppfd) : (diagnostics?.[card.key === 'lux' ? 'ppfd' : card.key] || null));
+          const cardDiag = isNight ? null : (card.key === 'ppfd' ? getPpfdDiagnostics(ppfd) : (diagnostics?.[card.key] || null));
           const styles = getDynamicStyles(card.key, cardDiag?.state);
 
           const badgeStatus = isNight ? 'ไม่มีการประเมิน' : (cardDiag ? cardDiag.status : 'รอข้อมูล...');
@@ -416,7 +415,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 <p className="font-semibold leading-relaxed text-[10px] sm:text-[11px] md:text-xs" style={{ color: 'var(--text-secondary)' }}>
                   {isNight 
                     ? 'ระบบงดการประเมินในช่วงเวลากลางคืน' 
-                    : (diagnostics?.[card.key === 'lux' ? 'ppfd' : card.key]?.recommendation || (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...'))}
+                    : (diagnostics?.[card.key]?.recommendation || (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...'))}
                 </p>
               </div>
             </div>

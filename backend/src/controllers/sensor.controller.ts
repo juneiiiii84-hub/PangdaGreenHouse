@@ -528,6 +528,7 @@ export class SensorController {
       const humDiag = climateService.getDiagnosticStatus(latest.humidity, 'hum');
       const vpdDiag = climateService.getDiagnosticStatus(latest.vpd, 'vpd');
       const ppfdDiag = climateService.getDiagnosticStatus(latest.ppfd, 'ppfd');
+      const luxDiag = climateService.getDiagnosticStatus(latest.lux, 'lux');
       const overall = climateService.getOverallEvaluation(latest);
 
       res.json({
@@ -537,7 +538,8 @@ export class SensorController {
           temp: tempDiag,
           hum: humDiag,
           vpd: vpdDiag,
-          ppfd: ppfdDiag
+          ppfd: ppfdDiag,
+          lux: luxDiag
         },
         overall
       });

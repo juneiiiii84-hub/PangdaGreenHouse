@@ -24,7 +24,7 @@ export class ClimateService {
     return parseFloat(vpd.toFixed(2));
   }
 
-  getDiagnosticStatus(value: number, type: 'temp' | 'hum' | 'vpd' | 'ppfd'): DiagnosticResult {
+  getDiagnosticStatus(value: number, type: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux'): DiagnosticResult {
     if (type === 'temp') {
       if (value >= 25 && value <= 30) {
         return {
@@ -187,6 +187,48 @@ export class ClimateService {
         recommendation: value > 1100
           ? '🚨 แสงแดดจัดแผดเผาเกรียม: แนะนำกางสแลนกรองแสงอย่างน้อย 50% หรือสเปรย์หมอกน้ำกำบังความร้อนเฉียบพลันด่วน'
           : '🚨 แสงมืดสลัวรุนแรง: อัตราแลกธาตุพืชหยุดชะงัก แนะนำเปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมประสิทธิภาพแสงสูงสุดทันที'
+      };
+    }
+
+    // LUX
+    if (type === 'lux') {
+      if (value >= 21600 && value <= 43200) {
+        return {
+          state: 'excellent',
+          status: 'เหมาะสมมาก',
+          color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+          desc: `ความสว่าง ${value.toLocaleString()} Lux อยู่ในเกณฑ์เหมาะสมมาก ซึ่งเป็นเกณฑ์ดีที่สุดต่อการเติบโตและการสังเคราะห์แสงของพืช`,
+          recommendation: '✅ ระดับแสงเหมาะสมมากสำหรับการเจริญเติบโตของพืช'
+        };
+      }
+      if ((value >= 16200 && value < 21600) || (value > 43200 && value <= 51350)) {
+        return {
+          state: 'good',
+          status: 'เหมาะสม',
+          color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+          desc: `ความสว่าง ${value.toLocaleString()} Lux อยู่ในเกณฑ์เหมาะสม พืชสังเคราะห์แสงได้ปกติ`,
+          recommendation: '👍 ระดับแสงปกติ สังเกตแนวโน้มของแสงแดดในช่วงกลางวัน'
+        };
+      }
+      if ((value >= 10800 && value < 16200) || (value > 51350 && value <= 59450)) {
+        return {
+          state: 'warning',
+          status: 'เฝ้าระวัง',
+          color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+          desc: `ความสว่าง ${value.toLocaleString()} Lux อยู่ในเกณฑ์เฝ้าระวัง แสงแดดอาจน้อยเกินไปหรือร้อนแรงเกินไป`,
+          recommendation: value > 51350
+            ? '⚠️ แสงเริ่มแรงเกินไป: แนะนำให้เตรียมกางสแลนกรองแสงเพื่อชะลอความร้อนสะสม'
+            : '⚠️ แสงค่อนข้างสลัว: พืชสังเคราะห์แสงได้ช้าลงเล็กน้อย'
+        };
+      }
+      return {
+        state: 'critical',
+        status: 'ไม่เหมาะสม',
+        color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+        desc: `ความสว่าง ${value.toLocaleString()} Lux อยู่ในเกณฑ์ไม่เหมาะสม มืดเกินไปหรือสว่างจ้าเกินไป`,
+        recommendation: value > 59450
+          ? '🚨 แสงแดดจัดแผดเผา: แนะนำให้กางสแลนกรองแสงอย่างน้อย 50% หรือเปิดพัดลมสเปรย์หมอกน้ำเพื่อกำบังความร้อนเฉียบพลันด่วน'
+          : '🚨 แสงมืดสลัวรุนแรง: อัตราแลกธาตุพืชหยุดชะงัก แนะนำเปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมประสิทธิภาพแสงสังเคราะห์'
       };
     }
 

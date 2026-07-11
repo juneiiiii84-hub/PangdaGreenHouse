@@ -231,6 +231,9 @@ export default function App() {
       {/* เนื้อหาทั้งหมด */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
+        {/* ค่าเฉลี่ยรวมโรงเรือน */}
+        <ZoneAverages dataList={dataList} theme={themePeriod} />
+
         {/* เลือกโซน */}
         <ControlPanel selectedZone={selectedZone} onZoneSelect={(z) => setSelectedZone(z)} theme={themePeriod} />
 
@@ -241,9 +244,6 @@ export default function App() {
           diagnosticsData={diagnosticsData}
           theme={themePeriod}
         />
-
-        {/* ค่าเฉลี่ยรวมโรงเรือน */}
-        <ZoneAverages dataList={dataList} theme={themePeriod} />
 
         {/* กราฟเปรียบเทียบ */}
         <ZoneComparison dataList={dataList} selectedZone={selectedZone} theme={themePeriod} />
