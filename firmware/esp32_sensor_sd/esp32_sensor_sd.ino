@@ -312,9 +312,12 @@ float calibrateLux(float rawLux) {
   else if (rawLux < 1964.58) {
     return 1.46155 * (rawLux - 472.95) + 700.4;
   }
-  else {
-    // ปรับสเกลช่วงแดดจ้าจัด (High-Light Sunlight): เครื่องวัดเทียบได้ 25276.6 Lux
+  else if (rawLux < 10570.86) {
     return 2.6023 * (rawLux - 1964.58) + 2880.5;
+  }
+  else {
+    // ปรับสเกลช่วงแดดแรงสูงสุด (Extreme-Light Sunlight): เครื่องวัดเทียบได้ 36983 Lux
+    return 1.1929 * (rawLux - 10570.86) + 25276.6;
   }
 }
 
