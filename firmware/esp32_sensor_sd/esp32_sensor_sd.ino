@@ -31,7 +31,13 @@ const int zoneId = 5;                         // ⚠️ เปลี่ยนเ
 // 4. พินเชื่อมต่อการ์ดรีดเดอร์ SD Card (พิน SPI มาตรฐาน ESP32)
 #define SD_CS_PIN 5   // ขา Chip Select (CS) ต่อเข้า Pin 5 ของ ESP32
 
-// 5. เปิดใช้งานการวัดเซ็นเซอร์จริง (DHT22 / BH1750) 
+// 5. พินควบคุม Solid State Relay (SSR) ทั้ง 3 แชนเนล (Active Low)
+// การต่อขั้ว: ขั้วบวก (+) ของอินพุต SSR ต่อ 5V / ขั้วลบ (-) ของอินพุต SSR ต่อเข้ากับขา ESP32 ด้านล่าง
+#define SSR_PIN_1 12   // ขาสำหรับระบบระบายความร้อน (เช่น พัดลม หรือ ปั๊มพ่นน้ำระบายความร้อน)
+#define SSR_PIN_2 13   // ขาสำหรับระบบพ่นหมอกเพิ่มความชื้น (เมื่อความชื้นต่ำกว่าเกณฑ์)
+#define SSR_PIN_3 14   // ขาสำหรับระบบไฟช่วยปลูก Grow Light (เมื่อแสงสลัวเกินไป)
+
+// 6. เปิดใช้งานการวัดเซ็นเซอร์จริง (DHT22 / BH1750) 
 // หากยังไม่มีอุปกรณ์ต่อจริง ให้คอมเมนต์บรรทัดนี้ออก ระบบจะใช้ข้อมูลจำลอง (Mock Data) อัตโนมัติเพื่อตรวจสอบผลเทส
 #define USE_REAL_SENSORS 
 
@@ -362,6 +368,15 @@ void setup() {
     }
   #endif
 
+  // ตั้งค่าขาควบคุม SSR ทั้ง 3 พินเป็น OUTPUT และสั่งไฟ HIGH เป็นค่าเริ่มต้น (ดับ SSR)
+  pinMode(SSR_PIN_1, OUTPUT);
+  pinMode(SSR_PIN_2, OUTPUT);
+  pinMode(SSR_PIN_3, OUTPUT);
+  digitalWrite(SSR_PIN_1, HIGH);
+  digitalWrite(SSR_PIN_2, HIGH);
+  digitalWrite(SSR_PIN_3, HIGH);
+  Serial.println("🔌 [SSR] ติดตั้งและปิดสถานะรีเลย์เริ่มต้นสำเร็จ (HIGH)");
+
   // เชื่อมต่อ Wi-Fi
   Serial.printf("🌐 กำลังเชื่อมต่อ Wi-Fi: %s ", ssid);
   WiFi.begin(ssid, password);
@@ -415,6 +430,36 @@ void loop() {
     float ppfd = lux * 0.0299; // ใช้ตัวคูณ 0.0299 เพื่อปรับแต่งค่าให้ตรงตามสเปกตรัมแสงมาตรฐาน (เช่น หลอดไฟพืชหรือการกรองแสงในโรงเรือน)
     Serial.printf("\n📊 [วัดค่าได้] Temp: %.2fC | Hum: %.2f%% | Lux: %d | PPFD: %.2f umol/m2/s | Time: %s\n", 
                   temperature, humidity, lux, ppfd, currentTimestamp.c_str());
+                  
+    // --- ควบคุมรีเลย์ Solid State Relay (SSR) ทั้ง 3 แชนเนลตามระดับสภาพแวดล้อม ---
+    // (ใช้ตรรกะ Active Low: สั่งจ่าย LOW เพื่อให้ SSR เปิด (ON) และสั่งจ่าย HIGH เพื่อให้ SSR ปิด (OFF))
+    
+    // 1) ระบบควบคุมอุณหภูมิ (SSR_PIN_1) -> ควบคุมพัดลมระบายอากาศ / ปั๊มพ่นน้ำระบายความร้อน
+    if (temperature > 30.0) {
+      digitalWrite(SSR_PIN_1, LOW);  // เปิดพัดลม / ปั๊มน้ำ
+      Serial.println("🔌 [SSR 1] อากาศร้อนเกินไป (Temp > 30C) -> เปิดระบบระบายความร้อน (ON/LOW)");
+    } else if (temperature <= 28.0) {
+      digitalWrite(SSR_PIN_1, HIGH); // ปิดพัดลม / ปั๊มน้ำ (มี Hysteresis ป้องกันตัดต่อบ่อย)
+      Serial.println("🔌 [SSR 1] อุณหภูมิปกติ (Temp <= 28C) -> ปิดระบบระบายความร้อน (OFF/HIGH)");
+    }
+
+    // 2) ระบบควบคุมความชื้น (SSR_PIN_2) -> ควบคุมระบบพ่นหมอก / เครื่องพ่นความชื้น
+    if (humidity < 60.0) {
+      digitalWrite(SSR_PIN_2, LOW);  // เปิดเครื่องพ่นหมอก
+      Serial.println("🔌 [SSR 2] อากาศแห้งเกินไป (Hum < 60%) -> เปิดเครื่องพ่นหมอกเพิ่มความชื้น (ON/LOW)");
+    } else if (humidity >= 70.0) {
+      digitalWrite(SSR_PIN_2, HIGH); // ปิดเครื่องพ่นหมอก
+      Serial.println("🔌 [SSR 2] ความชื้นเพียงพอแล้ว (Hum >= 70%) -> ปิดเครื่องพ่นหมอก (OFF/HIGH)");
+    }
+
+    // 3) ระบบควบคุมไฟส่องสว่าง (SSR_PIN_3) -> ควบคุมไฟช่วยปลูก (Grow Light)
+    if (lux < 21600) {
+      digitalWrite(SSR_PIN_3, LOW);  // เปิดไฟช่วยปลูก
+      Serial.println("🔌 [SSR 3] ความเข้มแสงต่ำกว่าเกณฑ์มาตรฐาน -> เปิดไฟช่วยปลูก Grow Light (ON/LOW)");
+    } else if (lux >= 30000) {
+      digitalWrite(SSR_PIN_3, HIGH); // ปิดไฟช่วยปลูก
+      Serial.println("🔌 [SSR 3] ความเข้มแสงแดดเพียงพอแล้ว -> ปิดไฟช่วยปลูก (OFF/HIGH)");
+    }
                   
     // ยิงส่งแบบเรียลไทม์ปกติ
     bool sendSuccess = false;
