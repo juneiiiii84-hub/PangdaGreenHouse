@@ -111,9 +111,10 @@ interface ClimateCardsProps {
   history: SensorData[];
   diagnosticsData: DiagnosticsResponse | null;
   theme: ThemePeriod;
+  isInitialLoaded?: boolean;
 }
 
-export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history, diagnosticsData, theme }) => {
+export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history, diagnosticsData, theme, isInitialLoaded = true }) => {
   const [activeDetailMetric, setActiveDetailMetric] = useState<'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux' | null>(null);
   const [viewPpfdFormula, setViewPpfdFormula] = useState(false);
   const multiplier = DEFAULT_MULTIPLIER;
@@ -330,9 +331,14 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
           const styles = getDynamicStyles(card.key, cardDiag?.state);
 
           const badgeStatus = isNight ? 'ไม่มีการประเมิน' : (cardDiag ? cardDiag.status : 'รอข้อมูล...');
+          
+          const isCritical = !isNight && cardDiag?.state === 'critical';
+          const isWarning = !isNight && cardDiag?.state === 'warning';
+          const glowClass = isCritical ? 'glow-critical' : (isWarning ? 'glow-warning' : '');
+
           const badgeColor = isNight 
             ? 'bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-800' 
-            : (cardDiag ? cardDiag.color : 'bg-slate-100 text-slate-400 border-slate-200');
+            : (cardDiag ? `${cardDiag.color} ${glowClass}` : 'bg-slate-100 text-slate-400 border-slate-200');
 
           const cardBorderColor = isNight ? 'border-slate-200 dark:border-slate-800/80 shadow-none' : styles.borderColor;
           const cardBgGlow = isNight ? 'opacity-0' : styles.bgGlow;
@@ -341,7 +347,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
             <div key={idx} className="flex flex-col gap-2">
               {/* การ์ดหลักแสดงค่าตัวเลข */}
               <div
-                className={`border-2 ${cardBorderColor} rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-3 relative overflow-hidden flex-grow theme-transition`}
+                className={`border-2 ${cardBorderColor} rounded-2xl p-4 shadow-sm card-dimensional flex flex-col justify-between space-y-3 relative overflow-hidden flex-grow theme-transition`}
                 style={{ backgroundColor: 'var(--bg-card)' }}
               >
                 {/* แสงหัวการ์ด */}
@@ -380,8 +386,11 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                     </button>
                   </div>
                   <div className={`text-2xl md:text-3xl font-black font-mono tracking-tight leading-none ${styles.valueColor}`}>
-                    {latestData ? card.value : '---'}
-                    <span className="text-sm md:text-base font-bold ml-1" style={{ color: 'var(--text-muted)' }}>{card.unit}</span>
+                    {!isInitialLoaded ? (
+                      <span className="skeleton inline-block w-20 h-8 align-middle" />
+                    ) : (
+                      <>{latestData ? card.value : '---'}<span className="text-sm md:text-base font-bold ml-1" style={{ color: 'var(--text-muted)' }}>{card.unit}</span></>
+                    )}
                   </div>
                   <div className="text-[10px] sm:text-[10.5px] md:text-xs mt-1 font-medium leading-relaxed" style={{ color: 'var(--text-muted)' }}>{card.desc}</div>
                 </div>
@@ -403,7 +412,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
 
               {/* กล่องคำแนะนำ */}
               <div
-                className="rounded-xl p-3 shadow-md text-xs flex flex-col gap-1 min-h-[64px] justify-center transition-all hover:shadow-lg border theme-transition"
+                className="rounded-xl p-3 shadow-md text-xs flex flex-col gap-1 min-h-[64px] justify-center card-dimensional border theme-transition"
                 style={{
                   backgroundColor: 'var(--bg-subtle)',
                   borderColor: 'var(--border-card)',

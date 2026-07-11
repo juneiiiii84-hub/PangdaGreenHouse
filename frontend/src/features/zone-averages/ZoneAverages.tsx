@@ -10,6 +10,7 @@ type AveragePeriod = 'all' | 'day' | 'night';
 interface ZoneAveragesProps {
   dataList: SensorData[];
   theme: ThemePeriod;
+  isInitialLoaded?: boolean;
 }
 
 interface DiagnosticResult {
@@ -318,7 +319,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
 
   return (
     <section
-      className="border rounded-[32px] p-5 shadow-xl space-y-5 theme-transition"
+      className="border rounded-[32px] p-5 shadow-xl space-y-5 card-dimensional theme-transition"
       style={{
         backgroundColor: 'var(--bg-section)',
         borderColor: 'var(--border-card)',
@@ -343,7 +344,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
         >
           <button
             onClick={() => setAveragePeriod('all')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer interaction-bounce ${
               averagePeriod === 'all'
                 ? 'bg-emerald-500 text-white shadow-sm'
                 : ''
@@ -354,7 +355,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
           </button>
           <button
             onClick={() => setAveragePeriod('day')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer interaction-bounce ${
               averagePeriod === 'day'
                 ? 'bg-amber-500 text-white shadow-sm'
                 : ''
@@ -366,7 +367,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
           </button>
           <button
             onClick={() => setAveragePeriod('night')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer interaction-bounce ${
               averagePeriod === 'night'
                 ? 'bg-indigo-500 text-white shadow-sm'
                 : ''
@@ -385,9 +386,14 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
           const isNight = theme === 'night';
           const diag = (isNight || m.rawVal === null) ? null : getAverageDiagnostics(m.key, m.rawVal);
           const badgeStatus = isNight ? 'ไม่มีการประเมิน' : (diag ? diag.status : 'รอข้อมูล...');
+          
+          const isCritical = !isNight && diag?.state === 'critical';
+          const isWarning = !isNight && diag?.state === 'warning';
+          const glowClass = isCritical ? 'glow-critical' : (isWarning ? 'glow-warning' : '');
+
           const badgeColor = isNight 
             ? 'bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-800' 
-            : (diag ? diag.color : 'bg-slate-100 text-slate-400 border-slate-200');
+            : (diag ? `${diag.color} ${glowClass}` : 'bg-slate-100 text-slate-400 border-slate-200');
 
           const cardBorderColor = isNight ? 'border-slate-200 dark:border-slate-800/80 shadow-none' : getDynamicBorderColor(diag?.state, theme);
           const valueColor = getDynamicValueColor(diag?.state);
@@ -396,7 +402,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
           return (
             <div
               key={idx}
-              className={`border-2 ${cardBorderColor} rounded-2xl p-4 flex flex-col justify-between space-y-3 hover:shadow-md transition-all theme-transition relative overflow-hidden`}
+              className={`border-2 ${cardBorderColor} rounded-2xl p-4 flex flex-col justify-between space-y-3 card-dimensional theme-transition relative overflow-hidden`}
               style={{
                 backgroundColor: 'var(--bg-card)',
               }}

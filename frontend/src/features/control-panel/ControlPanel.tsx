@@ -24,7 +24,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
 
   return (
     <div
-      className="rounded-[28px] p-4 md:p-5 shadow-lg space-y-4 border theme-transition"
+      className="rounded-[28px] p-4 md:p-5 shadow-lg space-y-4 border card-dimensional theme-transition"
       style={{
         backgroundColor: 'var(--bg-card)',
         borderColor: 'var(--border-card)',
@@ -165,7 +165,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
 
           {/* ข้อมูลกายภาพของโซนที่เลือก แสดงคู่กับแผนที่ */}
           <div
-            className="w-full p-4 rounded-xl border theme-transition flex flex-col gap-1.5 text-left mt-2"
+            className="w-full p-4 rounded-xl border card-dimensional theme-transition flex flex-col gap-1.5 text-left mt-2"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border-card)',
@@ -188,7 +188,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
             key={zone.id}
             id={`zone-btn-${zone.id}`}
             onClick={() => onZoneSelect(zone.id)}
-            className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl text-center transition-all cursor-pointer border ${
+            className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl text-center transition-all cursor-pointer border interaction-bounce ${
               selectedZone === zone.id
                 ? `${zone.activeClass} font-black shadow-md`
                 : 'border-transparent font-bold hover:opacity-80'

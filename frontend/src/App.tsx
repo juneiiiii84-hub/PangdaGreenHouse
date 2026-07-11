@@ -16,6 +16,8 @@ export default function App() {
   const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(null);
   // เก็บค่าล่าสุดแยกตามโซน — ไม่มีวันกลับเป็น null หลังจากได้รับข้อมูลครั้งแรก (ป้องกัน Flicker)
   const [latestByZone, setLatestByZone] = useState<Record<number, SensorData>>({});
+  // flag ว่าข้อมูลชุดแรกโหลดเสร็จแล้ว — ใช้แสดง skeleton แทน --- ระหว่างรอ
+  const [isInitialLoaded, setIsInitialLoaded] = useState(false);
 
   // สเปกสำหรับช่วงวันดาวน์โหลดข้อมูลดิบ
   const [startDate, setStartDate] = useState<string>('');
@@ -38,7 +40,7 @@ export default function App() {
     // 1. ดึงประวัติข้อมูลเริ่มต้นของทั้ง 5 โซนในเวลาเดียวกันเพื่อแสดงค่าเฉลี่ย
     const loadInitialLogs = async () => {
       try {
-        const promises = Array.from({ length: 5 }, (_, i) => api.getLogs(i + 1, 100));
+        const promises = Array.from({ length: 5 }, (_, i) => api.getLogs(i + 1, 144));
         const results = await Promise.all(promises);
         const allData: SensorData[] = [];
         const latestMap: Record<number, SensorData> = {};
@@ -52,8 +54,10 @@ export default function App() {
         });
         setDataList(allData);
         setLatestByZone((prev) => ({ ...prev, ...latestMap }));
+        setIsInitialLoaded(true); // บอก UI ว่าข้อมูลชุดแรกพร้อมแล้ว หยุดแสดง skeleton
       } catch (err) {
         console.error('ไม่สามารถโหลดข้อมูลประวัติเริ่มต้นได้:', err);
+        setIsInitialLoaded(true); // ถ้า error ก็หยุด skeleton ไม่ให้ค้างตลอดกาล
       }
     };
     loadInitialLogs();
@@ -78,12 +82,14 @@ export default function App() {
         const validTicks = ticksArray.filter((t: any) => t && t.temperature !== undefined && t.humidity !== undefined);
 
         if (validTicks.length > 0) {
+          // SSE stream ส่งมา — ถ้า initial ยังไม่เสร็จให้ mark ว่าเสร็จได้เลย
+          setIsInitialLoaded(true);
           setDataList((prev) => {
             const combined = [...prev, ...validTicks];
-            // กรองขอบเขตประวัติสูงสุด 100 แถวต่อโซนในการเก็บบันทึกบนหน้าจอเพื่อความเบา
+            // กรองขอบเขตประวัติสูงสุด 144 แถว (12 ชั่วโมง) ต่อโซนในการเก็บบันทึกบนหน้าจอเพื่อความเบา
             const trimmed: SensorData[] = [];
             for (let z = 1; z <= 5; z++) {
-              trimmed.push(...combined.filter((d) => d.zone === z).slice(-100));
+              trimmed.push(...combined.filter((d) => d.zone === z).slice(-144));
             }
             return trimmed;
           });
@@ -109,7 +115,7 @@ export default function App() {
     const fetchLatestData = async () => {
       try {
         // 1. ดึงข้อมูลประวัติและค่าเรียลไทม์ล่าสุดของโซนที่เลือก
-        const logsRes = await api.getLogs(selectedZone, 100);
+        const logsRes = await api.getLogs(selectedZone, 144);
         if (logsRes.success && logsRes.data.length > 0) {
           setDataList((prev) => {
             const filteredPrev = prev.filter((d) => d.zone !== selectedZone);
@@ -268,98 +274,109 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
         {/* ค่าเฉลี่ยรวมโรงเรือน */}
-        <ZoneAverages dataList={dataList} theme={themePeriod} />
+        <div className="animate-fade-in-up">
+          <ZoneAverages dataList={dataList} theme={themePeriod} isInitialLoaded={isInitialLoaded} />
+        </div>
 
         {/* เลือกโซน */}
-        <ControlPanel selectedZone={selectedZone} onZoneSelect={(z) => setSelectedZone(z)} theme={themePeriod} />
+        <div className="animate-fade-in-up delay-75">
+          <ControlPanel selectedZone={selectedZone} onZoneSelect={(z) => setSelectedZone(z)} theme={themePeriod} />
+        </div>
 
         {/* การ์ดข้อมูลเซนเซอร์ */}
-        <ClimateCards
-          latestData={currentLatest}
-          history={dataList.filter(d => d.zone === selectedZone)}
-          diagnosticsData={diagnosticsData}
-          theme={themePeriod}
-        />
+        <div className="animate-fade-in-up delay-150">
+          <ClimateCards
+            latestData={currentLatest}
+            history={dataList.filter(d => d.zone === selectedZone)}
+            diagnosticsData={diagnosticsData}
+            theme={themePeriod}
+            isInitialLoaded={isInitialLoaded}
+          />
+        </div>
 
         {/* กราฟเปรียบเทียบ */}
-        <ZoneComparison dataList={dataList} selectedZone={selectedZone} theme={themePeriod} />
+        <div className="animate-fade-in-up delay-225">
+          <ZoneComparison dataList={dataList} selectedZone={selectedZone} theme={themePeriod} />
+        </div>
 
         {/* ดาวน์โหลดข้อมูล */}
-        <section
-          className="border rounded-[32px] p-5 shadow-xl space-y-4 theme-transition"
-          style={{
-            backgroundColor: 'var(--bg-section)',
-            borderColor: 'var(--border-card)',
-            boxShadow: `0 20px 60px ${themePeriod === 'night' ? 'rgba(0,0,0,0.3)' : 'rgba(241,245,249,0.3)'}`,
-          }}
-        >
-          <div>
-            <h3 className="text-base md:text-lg font-black flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-              <Calendar size={18} style={{ color: 'var(--text-muted)' }} />
-              <span>ดาวน์โหลดข้อมูลโรงเรือน</span>
-            </h3>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>เลือกโซนและช่วงวันที่ แล้วกดดาวน์โหลดเป็นไฟล์ Excel</p>
-          </div>
+        <div className="animate-fade-in-up delay-300">
+          <section
+            className="border rounded-[32px] p-5 shadow-xl space-y-4 theme-transition"
+            style={{
+              backgroundColor: 'var(--bg-section)',
+              borderColor: 'var(--border-card)',
+              boxShadow: `0 20px 60px ${themePeriod === 'night' ? 'rgba(0,0,0,0.3)' : 'rgba(241,245,249,0.3)'}`,
+            }}
+          >
+            <div>
+              <h3 className="text-base md:text-lg font-black flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                <Calendar size={18} style={{ color: 'var(--text-muted)' }} />
+                <span>ดาวน์โหลดข้อมูลโรงเรือน</span>
+              </h3>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>เลือกโซนและช่วงวันที่ แล้วกดดาวน์โหลดเป็นไฟล์ Excel</p>
+            </div>
 
-          <div className="flex flex-col gap-3">
-            {/* เลือกโซน */}
-            <div className="space-y-1">
-              <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>เลือกโซน:</label>
-              <div className="relative">
-                <select
-                  value={downloadZone}
-                  onChange={(e) => setDownloadZone(e.target.value)}
-                  className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 appearance-none cursor-pointer theme-transition"
+            <div className="flex flex-col gap-3">
+              {/* เลือกโซน */}
+              <div className="space-y-1">
+                <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>เลือกโซน:</label>
+                <div className="relative">
+                  <select
+                    value={downloadZone}
+                    onChange={(e) => setDownloadZone(e.target.value)}
+                    className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 appearance-none cursor-pointer theme-transition"
+                    style={{
+                      backgroundColor: 'var(--bg-input)',
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--text-primary)',
+                    }}
+                  >
+                    <option value="all">ทุกโซน (A-E)</option>
+                    <option value="5">โซน A</option>
+                    <option value="2">โซน B</option>
+                    <option value="4">โซน C</option>
+                    <option value="1">โซน D</option>
+                    <option value="3">โซน E</option>
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+                </div>
+              </div>
+
+              {/* เลือกวันที่ */}
+              <div className="space-y-1">
+                <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>เลือกช่วงวันที่:</label>
+                <input
+                  ref={datePickerRef}
+                  type="text"
+                  placeholder="คลิกเพื่อเลือก วันเริ่มต้น ➔ วันสิ้นสุด..."
+                  className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 font-mono theme-transition cursor-pointer"
                   style={{
                     backgroundColor: 'var(--bg-input)',
                     borderColor: 'var(--border-subtle)',
                     color: 'var(--text-primary)',
                   }}
-                >
-                  <option value="all">ทุกโซน (A-E)</option>
-                  <option value="5">โซน A</option>
-                  <option value="2">โซน B</option>
-                  <option value="4">โซน C</option>
-                  <option value="1">โซน D</option>
-                  <option value="3">โซน E</option>
-                </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+                />
               </div>
+
+              {/* ข้อความเตือน */}
+              {downloadWarning && (
+                <div className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl">
+                  {downloadWarning}
+                </div>
+              )}
+
+              <button
+                onClick={handleDownloadExcel}
+                disabled={isDownloading}
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm md:text-base font-black flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
+              >
+                {isDownloading ? <RefreshCcw size={16} className="animate-spin" /> : <Download size={16} />}
+                <span>{isDownloading ? 'กำลังดึงข้อมูล...' : `ดาวน์โหลด Excel (${downloadZone === 'all' ? 'ทุกโซน' : `โซน ${downloadZone === '5' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '4' ? 'C' : downloadZone === '1' ? 'D' : 'E'}`})`}</span>
+              </button>
             </div>
-
-            {/* เลือกวันที่ */}
-            <div className="space-y-1">
-              <label className="text-xs font-black tracking-wider block uppercase" style={{ color: 'var(--text-muted)' }}>เลือกช่วงวันที่:</label>
-              <input
-                ref={datePickerRef}
-                type="text"
-                placeholder="คลิกเพื่อเลือก วันเริ่มต้น ➔ วันสิ้นสุด..."
-                className="w-full px-3 py-2.5 border rounded-xl text-xs md:text-sm font-bold focus:outline-none focus:border-emerald-500 font-mono theme-transition cursor-pointer"
-                style={{
-                  backgroundColor: 'var(--bg-input)',
-                  borderColor: 'var(--border-subtle)',
-                  color: 'var(--text-primary)',
-                }}
-              />
-            </div>
-
-            {/* ข้อความเตือน */}
-            {downloadWarning && (
-              <div className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl">
-                {downloadWarning}
-              </div>
-            )}
-
-            <button
-              onClick={handleDownloadExcel}
-              disabled={isDownloading}
-              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm md:text-base font-black flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed"
-            >
-              {isDownloading ? <RefreshCcw size={16} className="animate-spin" /> : <Download size={16} />}
-              <span>{isDownloading ? 'กำลังดึงข้อมูล...' : `ดาวน์โหลด Excel (${downloadZone === 'all' ? 'ทุกโซน' : `โซน ${downloadZone === '5' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '4' ? 'C' : downloadZone === '1' ? 'D' : 'E'}`})`}</span>
-            </button>
-          </div>
-        </section>
+          </section>
+        </div>
 
       </main>
     </div>
