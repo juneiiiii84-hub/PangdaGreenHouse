@@ -12,35 +12,8 @@ import { useTheme } from './shared/utils/useTheme';
 
 export default function App() {
   const [selectedZone, setSelectedZone] = useState<number>(5);
-  const [dataList, setDataList] = useState<SensorData[]>(() => {
-    try {
-      const cached = localStorage.getItem('pangda_greenhouse_data');
-      return cached ? JSON.parse(cached) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(() => {
-    try {
-      const cached = localStorage.getItem('pangda_greenhouse_diagnostics');
-      return cached ? JSON.parse(cached) : null;
-    } catch {
-      return null;
-    }
-  });
-
-  // บันทึกข้อมูลลง Cache เมื่อมีการอัปเดตเพื่อลดการกระพริบหน้าจอตอนโหลดใหม่
-  useEffect(() => {
-    if (dataList.length > 0) {
-      localStorage.setItem('pangda_greenhouse_data', JSON.stringify(dataList));
-    }
-  }, [dataList]);
-
-  useEffect(() => {
-    if (diagnosticsData) {
-      localStorage.setItem('pangda_greenhouse_diagnostics', JSON.stringify(diagnosticsData));
-    }
-  }, [diagnosticsData]);
+  const [dataList, setDataList] = useState<SensorData[]>([]);
+  const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(null);
 
   // สเปกสำหรับช่วงวันดาวน์โหลดข้อมูลดิบ
   const [startDate, setStartDate] = useState<string>('');
@@ -56,6 +29,10 @@ export default function App() {
 
   // 📡 เชื่อมท่อสตรีมมิ่งสด (Server-Sent Events) และดึงประวัติเริ่มต้นสำหรับทุกโซน
   useEffect(() => {
+    // ลบ cache เก่าที่อาจเหลืออยู่จากเวอร์ชันก่อนหน้า
+    localStorage.removeItem('pangda_greenhouse_data');
+    localStorage.removeItem('pangda_greenhouse_diagnostics');
+
     // 1. ดึงประวัติข้อมูลเริ่มต้นของทั้ง 5 โซนในเวลาเดียวกันเพื่อแสดงค่าเฉลี่ย
     const loadInitialLogs = async () => {
       try {
