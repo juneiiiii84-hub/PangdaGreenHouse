@@ -87,15 +87,28 @@ export default function App() {
     };
   }, []);
 
-  // 🔬 โหลดผลวิเคราะห์เกณฑ์พืชแบบสม่ำเสมอ
+  // 🔬 โหลดผลวิเคราะห์เกณฑ์พืชและข้อมูลเรียลไทม์สม่ำเสมอทุกๆ 5 วินาที (Real-time Polling Fallback)
   useEffect(() => {
-    const fetchDiagnostics = async () => {
-      const res = await api.getDiagnostics(selectedZone);
-      setDiagnosticsData(res);
+    const fetchLatestData = async () => {
+      try {
+        // 1. ดึงข้อมูลประวัติและค่าเรียลไทม์ล่าสุดของโซนที่เลือก
+        const logsRes = await api.getLogs(selectedZone, 100);
+        if (logsRes.success) {
+          setDataList((prev) => {
+            const filteredPrev = prev.filter((d) => d.zone !== selectedZone);
+            return [...filteredPrev, ...logsRes.data];
+          });
+        }
+        // 2. ดึงผลวิเคราะห์การประเมิน
+        const diagRes = await api.getDiagnostics(selectedZone);
+        setDiagnosticsData(diagRes);
+      } catch (err) {
+        console.error('Real-time polling error:', err);
+      }
     };
 
-    fetchDiagnostics();
-    const interval = setInterval(fetchDiagnostics, 5000); // อัปเดตผลทุก 5 วินาที
+    fetchLatestData();
+    const interval = setInterval(fetchLatestData, 5000); // อัปเดตข้อมูลทุกๆ 5 วินาที
     return () => clearInterval(interval);
   }, [selectedZone]);
 
