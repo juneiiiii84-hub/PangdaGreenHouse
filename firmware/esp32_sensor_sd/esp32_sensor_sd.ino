@@ -310,7 +310,7 @@ float calibrateLux(float rawLux) {
     return 2.1148 * (rawLux - 432.0) + 613.8;
   } 
   else {
-    return 0.8659 * (rawLux - 472.95) + 700.4;
+    return 1.46155 * (rawLux - 472.95) + 700.4;
   }
 }
 
