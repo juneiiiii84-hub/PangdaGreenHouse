@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { Download, Calendar, RefreshCcw, ChevronDown } from 'lucide-react';
 import flatpickr from 'flatpickr';
 import { api } from './services/api';
-import type { SensorData, DiagnosticsResponse } from './services/api';
+import type { SensorData } from './services/api';
 import { ControlPanel } from './features/control-panel/ControlPanel';
 import { ClimateCards } from './features/climate-cards/ClimateCards';
 import { ZoneComparison } from './features/zone-comparison/ZoneComparison';
@@ -13,7 +13,7 @@ import { useTheme } from './shared/utils/useTheme';
 export default function App() {
   const [selectedZone, setSelectedZone] = useState<number>(5);
   const [dataList, setDataList] = useState<SensorData[]>([]);
-  const [diagnosticsData, setDiagnosticsData] = useState<DiagnosticsResponse | null>(null);
+  const diagnosticsData = null;
   // เก็บค่าล่าสุดแยกตามโซน — ไม่มีวันกลับเป็น null หลังจากได้รับข้อมูลครั้งแรก (ป้องกัน Flicker)
   const [latestByZone, setLatestByZone] = useState<Record<number, SensorData>>({});
   // flag ว่าข้อมูลชุดแรกโหลดเสร็จแล้ว — ใช้แสดง skeleton แทน --- ระหว่างรอ
@@ -31,6 +31,14 @@ export default function App() {
   // ธีมกลางวัน/กลางคืนอัตโนมัติ
   const themePeriod = useTheme();
 
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  // อัปเดตเวลาปัจจุบันเพื่อคำนวณ Offline Timeout แบบ Real-time
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // 📡 เชื่อมท่อสตรีมมิ่งสด (Server-Sent Events) และดึงประวัติเริ่มต้นสำหรับทุกโซน
   useEffect(() => {
     // ลบ cache เก่าที่อาจเหลืออยู่จากเวอร์ชันก่อนหน้า
@@ -43,17 +51,12 @@ export default function App() {
         const promises = Array.from({ length: 5 }, (_, i) => api.getLogs(i + 1, 144));
         const results = await Promise.all(promises);
         const allData: SensorData[] = [];
-        const latestMap: Record<number, SensorData> = {};
         results.forEach((res) => {
           if (res.success && res.data.length > 0) {
             allData.push(...res.data);
-            // เก็บค่าสุดท้ายของแต่ละโซนไว้เลย
-            const last = res.data[res.data.length - 1];
-            if (last) latestMap[last.zone] = last;
           }
         });
         setDataList(allData);
-        setLatestByZone((prev) => ({ ...prev, ...latestMap }));
         setIsInitialLoaded(true); // บอก UI ว่าข้อมูลชุดแรกพร้อมแล้ว หยุดแสดง skeleton
       } catch (err) {
         console.error('ไม่สามารถโหลดข้อมูลประวัติเริ่มต้นได้:', err);
@@ -110,32 +113,23 @@ export default function App() {
     };
   }, []);
 
-  // 🔬 โหลดผลวิเคราะห์เกณฑ์พืชและข้อมูลเรียลไทม์สม่ำเสมอทุกๆ 5 วินาที (Real-time Polling Fallback)
+  // 🔬 โหลดประวัติล่าสุดของโซนที่เลือกแบบครั้งเดียวเมื่อเปลี่ยนโซน (หลีกเลี่ยงการทำ Polling ซ้ำซ้อนกับ SSE Stream)
   useEffect(() => {
-    const fetchLatestData = async () => {
+    const fetchZoneLogs = async () => {
       try {
-        // 1. ดึงข้อมูลประวัติและค่าเรียลไทม์ล่าสุดของโซนที่เลือก
         const logsRes = await api.getLogs(selectedZone, 144);
         if (logsRes.success && logsRes.data.length > 0) {
           setDataList((prev) => {
             const filteredPrev = prev.filter((d) => d.zone !== selectedZone);
             return [...filteredPrev, ...logsRes.data];
           });
-          // อัปเดต latestByZone จาก polling — เลือกเฉพาะค่าล่าสุด
-          const last = logsRes.data[logsRes.data.length - 1];
-          if (last) setLatestByZone((prev) => ({ ...prev, [selectedZone]: last }));
         }
-        // 2. ดึงผลวิเคราะห์การประเมิน
-        const diagRes = await api.getDiagnostics(selectedZone);
-        setDiagnosticsData(diagRes);
       } catch (err) {
-        console.error('Real-time polling error:', err);
+        console.error('Error fetching zone logs:', err);
       }
     };
 
-    fetchLatestData();
-    const interval = setInterval(fetchLatestData, 5000); // อัปเดตข้อมูลทุกๆ 5 วินาที
-    return () => clearInterval(interval);
+    fetchZoneLogs();
   }, [selectedZone]);
 
   // 📅 เริ่มต้นใช้งาน Flatpickr สำหรับเลือกช่วงวันที่ในปฏิทินเดียว
@@ -234,10 +228,18 @@ export default function App() {
     }
   };
 
-  // ใช้ latestByZone แทน currentLatest — ไม่มีวันกลับเป็น null หลังได้ข้อมูลครั้งแรก ทำให้ไม่ flicker
+  // ใช้ latestByZone และประเมินสถานะออนไลน์ของเซ็นเซอร์
   const stableLatest = latestByZone[selectedZone] || null;
-  // ตรวจสอบว่าเซนเซอร์ยังออนไลน์อยู่ไหม (ไม่เกิน 15 นาที) — ถ้าออฟไลน์ยังแสดงค่าเดิมแต่ badge จะเปลี่ยน
-  const currentLatest = stableLatest;
+
+  // ตรวจสอบสถานะออนไลน์ของเซนเซอร์
+  // ข้อมูลจะต้องมาจาก SSE Stream (Real-time) เท่านั้น และต้องส่งมาไม่เกิน 15 วินาที
+  const isSensorOnline = (() => {
+    if (!stableLatest) return false;
+    const timeDiff = currentTime - new Date(stableLatest.created_at).getTime();
+    return timeDiff < 15000; // เก่าเกิน 15 วินาทีถือว่าออฟไลน์
+  })();
+
+  const currentLatest = isSensorOnline ? stableLatest : null;
 
   return (
     <div className={`min-h-screen pb-16 font-sans theme-transition ${themePeriod === 'night' ? 'theme-night' : 'theme-day'}`}
@@ -261,11 +263,11 @@ export default function App() {
           </div>
 
           <div
-            className="text-xs text-white px-3 py-1.5 rounded-xl font-black flex items-center gap-2 border border-white/20"
-            style={{ backgroundColor: 'var(--header-badge-bg)' }}
+            className="text-xs text-white px-3 py-1.5 rounded-xl font-black flex items-center gap-2 border border-white/20 transition-all duration-300"
+            style={{ backgroundColor: isSensorOnline ? 'var(--header-badge-bg)' : 'rgba(239, 68, 68, 0.2)' }}
           >
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping inline-block"></span>
-            <span>🟢 Online</span>
+            <span className={`h-2 w-2 rounded-full inline-block ${isSensorOnline ? 'bg-emerald-400 animate-ping' : 'bg-rose-500'}`}></span>
+            <span>{isSensorOnline ? '🟢 Online' : '🔴 Sensor Offline'}</span>
           </div>
         </div>
       </header>

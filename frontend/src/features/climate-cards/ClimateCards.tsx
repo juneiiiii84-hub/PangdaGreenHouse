@@ -5,47 +5,7 @@ import { DEFAULT_MULTIPLIER } from '../../shared/utils/ppfd';
 import type { SensorData, DiagnosticsResponse } from '../../services/api';
 import type { ThemePeriod } from '../../shared/utils/useTheme';
 
-const getHumanFriendlyRecommendation = (
-  key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux',
-  state?: 'excellent' | 'good' | 'warning' | 'critical'
-): string => {
-  if (!state) return 'กำลังวิเคราะห์...';
 
-  switch (key) {
-    case 'temp':
-      if (state === 'excellent') return 'ดีที่สุดต่อการเติบโตและการคายน้ำของใบพืช';
-      if (state === 'good') return 'พืชสังเคราะห์แสงและทำงานได้ปกติไม่มีปัญหา';
-      if (state === 'warning') return 'อากาศเริ่มเย็นหรือร้อนเกินไป พืชอาจเติบโตช้าลงเล็กน้อย';
-      return 'ร้อนจัดจนเหี่ยวเฉาใบไหม้ หรือเย็นจัดจนต้นพืชหยุดชะงัก';
-
-    case 'hum':
-      if (state === 'excellent') return 'ปากใบเปิดพอดี พืชดูดปุ๋ยและคายน้ำได้ดีที่สุด';
-      if (state === 'good') return 'ความชื้นปานกลาง พืชเจริญเติบโตได้ปกติ';
-      if (state === 'warning') return 'อากาศเริ่มแห้งทำให้คายน้ำเร็วเกินไป หรือชื้นเกินจนจำกัดการคายน้ำ';
-      return 'ชื้นจัดจนเสี่ยงโรคราใบไม้ระบาด หรือแห้งจัดจนต้นพืชขาดน้ำ';
-
-    case 'vpd':
-      if (state === 'excellent') return 'แรงดันไอน้ำดีเยี่ยม พืชลำเลียงน้ำและปุ๋ยขึ้นจากดินได้สูงที่สุด';
-      if (state === 'good') return 'พืชคายน้ำได้ปกติและลำเลียงอาหารไปเลี้ยงยอดได้สม่ำเสมอ';
-      if (state === 'warning') return 'คายน้ำได้ช้าเพราะอากาศชื้นเกิน หรือคายน้ำเร็วเกินเพราะอากาศแห้ง';
-      return 'พืชจะปิดปากใบสนิท ทำให้ไม่สามารถดูดซึมปุ๋ยไปเลี้ยงต้นได้';
-
-    case 'ppfd':
-      if (state === 'excellent') return 'ความเข้มแสงกำลังพอดี พืชสังเคราะห์อาหารและเติบโตได้เร็วที่สุด';
-      if (state === 'good') return 'ความเข้มแสงเพียงพอต่อการเจริญเติบโตได้อย่างแข็งแรงปกติ';
-      if (state === 'warning') return 'แสงน้อยไปจนต้นพืชยืดหาแสง หรือแสงแดดแรงไปจนพืชเครียดสะสมความร้อน';
-      return 'มืดเกินไปจนไม่เติบโต หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย';
-
-    case 'lux':
-      if (state === 'excellent') return 'ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์';
-      if (state === 'good') return 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น';
-      if (state === 'warning') return 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง';
-      return 'มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย';
-
-    default:
-      return 'กำลังวิเคราะห์...';
-  }
-};
 
 // คำอธิบายเกณฑ์ความเหมาะสมอ้างอิงตารางประเมิน แปลเป็นภาษาคนพูดเข้าใจง่าย
 const detailExplanations: Record<string, { title: string; description: string; unit: string; list: { status: string; color: string; range: string; effect: string }[] }> = {
@@ -124,32 +84,125 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
     setActiveDetailMetric(key);
   };
 
-  const getPpfdDiagnostics = (ppfdVal: number) => {
-    if (ppfdVal >= 400 && ppfdVal <= 800) {
-      return {
-        state: 'excellent' as const,
-        status: 'เหมาะสมมาก',
-        color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-      };
-    } else if ((ppfdVal >= 300 && ppfdVal < 400) || (ppfdVal > 800 && ppfdVal <= 950)) {
-      return {
-        state: 'good' as const,
-        status: 'เหมาะสม',
-        color: 'bg-blue-500/10 text-blue-500 border-blue-500/20'
-      };
-    } else if ((ppfdVal >= 200 && ppfdVal < 300) || (ppfdVal > 950 && ppfdVal <= 1100)) {
-      return {
-        state: 'warning' as const,
-        status: 'เฝ้าระวัง',
-        color: 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-      };
-    } else {
-      return {
-        state: 'critical' as const,
-        status: 'ไม่เหมาะสม',
-        color: 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-      };
+  const getMetricDiagnostics = (
+    key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux',
+    value: number
+  ) => {
+    let state: 'excellent' | 'good' | 'warning' | 'critical' = 'good';
+    let recommendation = '';
+
+    if (key === 'temp') {
+      if (value >= 25 && value <= 30) {
+        state = 'excellent';
+        recommendation = 'รักษาเสถียรภาพความร้อนในห้องควบคุมให้อยู่ในช่วงนี้ต่อไป';
+      } else if ((value >= 22 && value <= 24) || (value >= 31 && value <= 32)) {
+        state = 'good';
+        recommendation = 'คอยสังเกตแนวโน้ม ไม่ให้อุณหภูมิผันผวนขึ้นหรือลงเร็วเกินไปในช่วงวัน';
+      } else if ((value >= 20 && value <= 21) || (value >= 33 && value <= 35)) {
+        state = 'warning';
+        recommendation = value >= 33
+          ? 'อุณหภูมิค่อนข้างสูง: แนะนำให้เปิดพัดลมระบายอากาศ (Exhaust Fan) หรือเพิ่มการไหลเวียนของลม'
+          : 'อุณหภูมิค่อนข้างต่ำ: ควรลดระดับพัดลมระบายอากาศเพื่อสะสมความร้อนภายในโรงเรือน';
+      } else {
+        state = 'critical';
+        recommendation = value > 35
+          ? 'อุณหภูมิสูงเกินไป: แนะนำให้เปิดพัดลมระบายอากาศทันที เปิดระบบพ่นละอองหมอกน้ำ และกางสแลนกรองแสง 50%'
+          : 'อุณหภูมิต่ำเกินไป: ควรปิดพัดลมระบายอากาศทั้งหมด หรือเปิดระบบเครื่องทำความร้อน (Heater) เพื่อเพิ่มความอบอุ่น';
+      }
+    } else if (key === 'hum') {
+      if (value >= 60 && value <= 80) {
+        state = 'excellent';
+        recommendation = 'ความชื้นดีเยี่ยม: เหมาะสมกับการเปิดปากใบดูดซึมปุ๋ยและสารอาหารอย่างราบรื่น';
+      } else if ((value >= 50 && value <= 59) || (value >= 81 && value <= 85)) {
+        state = 'good';
+        recommendation = 'ข้อมูลปกติ: คอยดูแนวโน้มความชื้นไม่ให้อิ่มตัวในช่วงกลางคืน';
+      } else if ((value >= 40 && value <= 49) || (value >= 86 && value <= 90)) {
+        state = 'warning';
+        recommendation = value >= 86
+          ? 'ความชื้นสูงเกินเกณฑ์: แนะนำให้เปิดพัดลมหมุนเวียนอากาศภายในเพื่อช่วยลดความแฉะสะสม'
+          : 'ความชื้นต่ำเกินเกณฑ์: แนะนำให้สเปรย์น้ำหรือเปิดระบบพ่นหมอกเป็นรอบสั้นๆ เพิ่มความชื้นในอากาศ';
+      } else {
+        state = 'critical';
+        recommendation = value > 90
+          ? 'ความชื้นสูงวิกฤต: เสี่ยงโรคราใบไม้และเน่าคอดิน แนะนำเปิดพัดลมระบายอากาศ 100% และหยุดให้น้ำชั่วคราว'
+          : 'ความชื้นต่ำวิกฤต: พืชคายน้ำเร็วจนเฉา แนะนำให้เปิดระบบเครื่องพ่นหมอกเต็มกำลังเพื่อดึงระดับความชื้นสัมพัทธ์ขึ้นด่วน';
+      }
+    } else if (key === 'vpd') {
+      if (value >= 0.4 && value <= 0.8) {
+        state = 'excellent';
+        recommendation = 'ระดับแรงดันไอดีเลิศ: ช่วยรักษาอัตราการไหลเวียนของน้ำและธาตุอาหารภายในต้นพืชอย่างมีประสิทธิภาพ';
+      } else if ((value >= 0.3 && value < 0.4) || (value > 0.8 && value <= 1.2)) {
+        state = 'good';
+        recommendation = 'ตรวจสอบความชื้นและอุณหภูมิสม่ำเสมอเพื่อประคองระดับค่าแรงดันไอ';
+      } else if ((value >= 0.2 && value < 0.3) || (value > 1.2 && value <= 1.6)) {
+        state = 'warning';
+        recommendation = value > 1.2
+          ? 'VPD ค่อนข้างสูง (อากาศแห้ง): แนะนำสเปรย์ละอองน้ำฝอยเพื่อลดค่า VPD ลงมาให้อยู่ในเกณฑ์เหมาะสม'
+          : 'VPD ค่อนข้างต่ำ (อากาศชื้น): แนะนำเปิดระบบระบายลมไหลผ่านใบพืชเพื่อขับไล่ไอน้ำสะสมรอบๆ ใบ';
+      } else {
+        state = 'critical';
+        recommendation = value > 1.6
+          ? 'VPD สูงวิกฤต: พืชปิดปากใบเสี่ยงเกิดภาวะขาดสารอาหารฉับพลัน แนะนำให้กางสแลนกรองแสงลงและพ่นหมอกลดความแห้งแล้งทันที'
+          : 'VPD ต่ำวิกฤต: ความชื้นอิ่มตัวจนพืชไม่คายน้ำ แนะนำให้หยุดให้น้ำทางดิน เปิดพัดลมเป่าระบายหมุนเวียนลมรอบต้นพืชด่วน';
+      }
+    } else if (key === 'ppfd') {
+      if (value >= 400 && value <= 800) {
+        state = 'excellent';
+        recommendation = 'แสงเหมาะสมมาก: ให้พลังงานแสงที่เพียงพอ พืชเติบโตได้อย่างรวดเร็วและแข็งแรง';
+      } else if ((value >= 300 && value < 400) || (value > 800 && value <= 950)) {
+        state = 'good';
+        recommendation = 'แสงข้อมูลปกติ: คอยดูค่าความเข้มแสงในช่วงบ่ายเพื่อหลีกเลี่ยงภาวะแสงจ้าเกินจำเป็น';
+      } else if ((value >= 200 && value < 300) || (value > 950 && value <= 1100)) {
+        state = 'warning';
+        recommendation = value > 950
+          ? 'แสงจ้าเกินไป: แนะนำให้เปิดใช้งานระบบตาข่ายแรเงา (Shading Net) เพื่อป้องกันความเครียดสะสมบนใบ'
+          : 'แสงค่อนข้างสลัว: แนะนำเปิดไฟส่องสว่างช่วยปลูก (Grow Lights) เสริมความเข้มแสงให้เพียงพอ';
+      } else {
+        state = 'critical';
+        recommendation = value > 1100
+          ? 'แสงแดดจัดแผดเผาเกรียม: แนะนำกางสแลนกรองแสงอย่างน้อย 50% หรือสเปรย์หมอกน้ำกำบังความร้อนเฉียบพลันด่วน'
+          : 'แสงมืดสลัวรุนแรง: อัตราแลกธาตุพืชหยุดชะงัก แนะนำเปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมประสิทธิภาพแสงสูงสุดทันที';
+      }
+    } else if (key === 'lux') {
+      if (value >= 21600 && value <= 43200) {
+        state = 'excellent';
+        recommendation = 'ระดับแสงเหมาะสมมากสำหรับการเจริญเติบโตของพืช';
+      } else if ((value >= 16200 && value < 21600) || (value > 43200 && value <= 51350)) {
+        state = 'good';
+        recommendation = 'ระดับแสงปกติ สังเกตแนวโน้มของแสงแดดในช่วงกลางวัน';
+      } else if ((value >= 10800 && value < 16200) || (value > 51350 && value <= 59450)) {
+        state = 'warning';
+        recommendation = value > 51350
+          ? 'แสงเริ่มแรงเกินไป: แนะนำให้เตรียมกางสแลนกรองแสงเพื่อชะลอความร้อนสะสม'
+          : 'แสงค่อนข้างสลัว: พืชสังเคราะห์แสงได้ช้าลงเล็กน้อย';
+      } else {
+        state = 'critical';
+        recommendation = value > 59450
+          ? 'แสงแดดจัดแผดเผา: แนะนำให้กางสแลนกรองแสงอย่างน้อย 50% หรือเปิดพัดลมสเปรย์หมอกน้ำเพื่อกำบังความร้อนเฉียบพลันด่วน'
+          : 'แสงมืดสลัวรุนแรง: อัตราแลกธาตุพืชหยุดชะงัก แนะนำเปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมประสิทธิภาพแสงสังเคราะห์';
+      }
     }
+
+    const statusMap = {
+      excellent: 'เหมาะสมมาก',
+      good: 'เหมาะสม',
+      warning: 'เฝ้าระวัง',
+      critical: 'ไม่เหมาะสม'
+    };
+
+    const colorMap = {
+      excellent: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+      good: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+      warning: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+      critical: 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+    };
+
+    return {
+      state,
+      status: statusMap[state],
+      color: colorMap[state],
+      recommendation
+    };
   };
 
   const temp = latestData ? latestData.temperature : 0;
@@ -327,10 +380,11 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         {cards.map((card, idx) => {
           const isNight = theme === 'night';
-          const cardDiag = (isNight || !latestData) ? null : (card.key === 'ppfd' ? getPpfdDiagnostics(ppfd) : (diagnostics?.[card.key] || null));
+          const valueMap = { temp, hum, vpd, ppfd, lux };
+          const cardDiag = (isNight || !latestData) ? null : getMetricDiagnostics(card.key, valueMap[card.key]);
           const styles = getDynamicStyles(card.key, cardDiag?.state);
 
-          const badgeStatus = isNight ? 'ไม่มีการประเมิน' : (cardDiag ? cardDiag.status : 'รอข้อมูล...');
+          const badgeStatus = isNight ? 'ไม่มีการประเมิน' : (cardDiag ? cardDiag.status : 'ออฟไลน์');
           
           const isCritical = !isNight && cardDiag?.state === 'critical';
           const isWarning = !isNight && cardDiag?.state === 'warning';
@@ -424,7 +478,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                 <p className="font-semibold leading-relaxed text-[10px] sm:text-[11px] md:text-xs" style={{ color: 'var(--text-secondary)' }}>
                   {isNight 
                     ? 'ระบบงดการประเมินในช่วงเวลากลางคืน' 
-                    : (diagnostics?.[card.key]?.recommendation || (cardDiag ? getHumanFriendlyRecommendation(card.key, cardDiag.state) : 'กำลังวิเคราะห์...'))}
+                    : (cardDiag ? cardDiag.recommendation : 'ไม่สามารถประเมินได้เนื่องจากเซนเซอร์ออฟไลน์')}
                 </p>
               </div>
             </div>
