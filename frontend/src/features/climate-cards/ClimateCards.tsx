@@ -15,7 +15,7 @@ const detailExplanations: Record<string, { title: string; description: string; u
     unit: '°C',
     list: [
       { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '25 — 30 °C', effect: 'ดีที่สุดต่อการเติบโตและการคายน้ำของใบพืช' },
-      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '22—24 °C หรือ 31—32 °C', effect: 'พืชสังเคราะห์แสงและทำงานได้ปกติไม่มีปัญหา' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '22—24 °C หรือ 30.1—32 °C', effect: 'พืชสังเคราะห์แสงและทำงานได้ปกติไม่มีปัญหา' },
       { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '20—21 °C หรือ 33—35 °C', effect: 'อากาศเริ่มเย็นหรือร้อนเกินไป พืชอาจเติบโตช้าลงเล็กน้อย' },
       { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 20 °C หรือสูงกว่า 35 °C', effect: 'ร้อนจัดจนเหี่ยวเฉาใบไหม้ หรือเย็นจัดจนต้นพืชหยุดชะงัก' },
     ]
@@ -95,12 +95,12 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
       if (value >= 25 && value <= 30) {
         state = 'excellent';
         recommendation = 'รักษาเสถียรภาพความร้อนในห้องควบคุมให้อยู่ในช่วงนี้ต่อไป';
-      } else if ((value >= 22 && value <= 24) || (value >= 31 && value <= 32)) {
+      } else if ((value >= 22 && value < 25) || (value > 30 && value <= 32)) {
         state = 'good';
         recommendation = 'คอยสังเกตแนวโน้ม ไม่ให้อุณหภูมิผันผวนขึ้นหรือลงเร็วเกินไปในช่วงวัน';
-      } else if ((value >= 20 && value <= 21) || (value >= 33 && value <= 35)) {
+      } else if ((value >= 20 && value < 22) || (value > 32 && value <= 35)) {
         state = 'warning';
-        recommendation = value >= 33
+        recommendation = value > 32
           ? 'อุณหภูมิค่อนข้างสูง: แนะนำให้เปิดพัดลมระบายอากาศ (Exhaust Fan) หรือเพิ่มการไหลเวียนของลม'
           : 'อุณหภูมิค่อนข้างต่ำ: ควรลดระดับพัดลมระบายอากาศเพื่อสะสมความร้อนภายในโรงเรือน';
       } else {

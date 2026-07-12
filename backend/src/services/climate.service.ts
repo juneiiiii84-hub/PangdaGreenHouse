@@ -35,7 +35,7 @@ export class ClimateService {
           recommendation: '✅ รักษาเสถียรภาพความร้อนในห้องควบคุมให้อยู่ในช่วงนี้ต่อไป'
         };
       }
-      if ((value >= 22 && value <= 24) || (value >= 31 && value <= 32)) {
+      if ((value >= 22 && value < 25) || (value > 30 && value <= 32)) {
         return {
           state: 'good',
           status: 'เหมาะสม',
@@ -44,13 +44,13 @@ export class ClimateService {
           recommendation: '👍 คอยสังเกตแนวโน้ม ไม่ให้อุณหภูมิผันผวนขึ้นหรือลงเร็วเกินไปในช่วงวัน'
         };
       }
-      if ((value >= 20 && value <= 21) || (value >= 33 && value <= 35)) {
+      if ((value >= 20 && value < 22) || (value > 32 && value <= 35)) {
         return {
           state: 'warning',
           status: 'เฝ้าระวัง',
           color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
           desc: `อุณหภูมิ ${value.toFixed(1)}°C อยู่ในเกณฑ์เฝ้าระวัง อุณหภูมิเบี่ยงเบนเล็กน้อย พืชอาจมีอัตราการเติบโตช้าลง`,
-          recommendation: value >= 33
+          recommendation: value > 32
             ? '⚠️ อุณหภูมิค่อนข้างสูง: แนะนำให้เปิดพัดลมระบายอากาศ (Exhaust Fan) หรือเพิ่มการไหลเวียนของลม'
             : '⚠️ อุณหภูมิค่อนข้างต่ำ: ควรลดระดับพัดลมระบายอากาศเพื่อสะสมความร้อนภายในโรงเรือน'
         };
