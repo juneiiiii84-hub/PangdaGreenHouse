@@ -256,6 +256,9 @@ export default function App() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
           <div className="flex items-center gap-3">
+            <div className="bg-white/95 p-1.5 rounded-2xl shadow-sm border border-emerald-100/30 flex items-center justify-center animate-bounce hover:scale-105 transition-transform shrink-0" style={{ animationDuration: '3s' }}>
+              <img src="/favicon.svg" alt="Greenhouse Logo" className="h-9 w-9" />
+            </div>
             <div>
               <h1 className="text-sm sm:text-base md:text-lg font-black text-white tracking-tight leading-none">ระบบตรวจวัดสภาวะอากาศในโรงเรือนเพาะพันธุ์ไม้ผล</h1>
               <p className="text-xs text-emerald-50 mt-1.5 font-bold">(สถานีเกษตรหลวงปางดะ)</p>
