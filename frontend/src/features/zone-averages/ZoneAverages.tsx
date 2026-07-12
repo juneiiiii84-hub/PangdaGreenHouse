@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Thermometer, Droplets, Wind, Sun, SunMedium, Moon, Info, X } from 'lucide-react';
 import type { SensorData } from '../../services/api';
 import type { ThemePeriod } from '../../shared/utils/useTheme';
@@ -264,58 +264,52 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
 
   const avg = getGreenhouseAverage();
 
-  // ใช้ useRef เพื่อจำค่า avg ล่าสุดที่ไม่เป็น null — ทำให้การ์ดไม่กระพริบเป็น '---' ระหว่าง fetch
-  const stableAvgRef = useRef<typeof avg>(null);
-  if (avg !== null) stableAvgRef.current = avg;
-  const stableAvg = stableAvgRef.current;
-
   const periodLabel = averagePeriod === 'day' ? ' (กลางวัน 06:30-18:30)' : averagePeriod === 'night' ? ' (กลางคืน 18:30-06:30)' : '';
 
   const metricCards = [
     { 
       key: 'temp' as const,
       label: 'อุณหภูมิอากาศ', 
-      value: stableAvg ? `${stableAvg.temp.toFixed(1)}` : '---', 
-      rawVal: stableAvg ? stableAvg.temp : null,
+      value: avg ? `${avg.temp.toFixed(1)}` : '---', 
+      rawVal: avg ? avg.temp : null,
       unit: '°C', 
       icon: <Thermometer size={18} />, 
     },
     { 
       key: 'hum' as const,
       label: 'ความชื้นสัมพัทธ์ (%RH)', 
-      value: stableAvg ? `${stableAvg.humidity.toFixed(1)}` : '---', 
-      rawVal: stableAvg ? stableAvg.humidity : null,
+      value: avg ? `${avg.humidity.toFixed(1)}` : '---', 
+      rawVal: avg ? avg.humidity : null,
       unit: '%RH', 
       icon: <Droplets size={18} />, 
     },
     { 
       key: 'vpd' as const,
       label: 'ความต่างของความดันไอน้ำ (VPD)', 
-      value: stableAvg ? `${stableAvg.vpd.toFixed(2)}` : '---', 
-      rawVal: stableAvg ? stableAvg.vpd : null,
+      value: avg ? `${avg.vpd.toFixed(2)}` : '---', 
+      rawVal: avg ? avg.vpd : null,
       unit: 'kPa', 
       icon: <Wind size={18} />, 
     },
     { 
       key: 'ppfd' as const,
       label: 'ค่าแสงที่พืชได้รับ (PPFD)', 
-      value: stableAvg ? `${stableAvg.ppfd.toFixed(1)}` : '---', 
-      rawVal: stableAvg ? stableAvg.ppfd : null,
+      value: avg ? `${avg.ppfd.toFixed(1)}` : '---', 
+      rawVal: avg ? avg.ppfd : null,
       unit: 'μmol/m²/s', 
       icon: <Sun size={18} />, 
     },
     { 
       key: 'lux' as const,
       label: 'ความส่องสว่าง (LUX)', 
-      value: stableAvg ? `${Math.round(stableAvg.lux).toLocaleString()}` : '---', 
-      rawVal: stableAvg ? stableAvg.lux : null,
+      value: avg ? `${Math.round(avg.lux).toLocaleString()}` : '---', 
+      rawVal: avg ? avg.lux : null,
       unit: 'Lux', 
       icon: <Sun size={18} />, 
     },
   ];
 
-  // ใช้ stableAvg เพื่อแสดงผลประเมินภาพรวม — ไม่ flicker เป็นค่าว่างระหว่าง fetch
-  const displayAvg = stableAvg;
+  const displayAvg = avg;
 
   return (
     <section
@@ -442,7 +436,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
       </div>
 
       {/* คำอธิบายภาพรวมสภาพแวดล้อม */}
-      {displayAvg && (
+      {displayAvg ? (
         <div 
           className="border p-4.5 rounded-2xl space-y-2.5 theme-transition"
           style={{
@@ -455,6 +449,18 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
           </h4>
           <div className="text-xs md:text-sm font-semibold leading-relaxed space-y-1.5 whitespace-pre-line" style={{ color: 'var(--text-secondary)' }}>
             {getGreenhouseSummary(displayAvg)}
+          </div>
+        </div>
+      ) : (
+        <div 
+          className="border p-4.5 rounded-2xl space-y-2.5 theme-transition text-center"
+          style={{
+            backgroundColor: 'var(--bg-subtle)',
+            borderColor: 'var(--border-subtle)',
+          }}
+        >
+          <div className="text-xs md:text-sm font-bold text-slate-400 dark:text-slate-500 py-2">
+            📭 ยังไม่มีข้อมูลบันทึกสำหรับช่วงเวลานี้ (เริ่มบันทึกข้อมูลเวลา 16:30 น. เป็นต้นไป)
           </div>
         </div>
       )}
