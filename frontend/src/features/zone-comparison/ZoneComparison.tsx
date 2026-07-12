@@ -109,18 +109,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
     }
   };
 
-  // สร้าง labels ย้อนหลัง 12 ชั่วโมงจากเวลาปัจจุบัน (ทุก 30 นาที = 25 จุด)
-  const generate12HourLabels = (): string[] => {
-    const now = new Date();
-    const labels: string[] = [];
-    for (let i = 24; i >= 0; i--) {
-      const time = new Date(now.getTime() - i * 30 * 60 * 1000);
-      const h = time.getHours().toString().padStart(2, '0');
-      const m = time.getMinutes() < 30 ? '00' : '30';
-      labels.push(`${h}:${m}`);
-    }
-    return labels;
-  };
+
 
   // กรองข้อมูล 12 ชม.ย้อนหลัง
   const get12HourData = () => {
@@ -132,22 +121,50 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
   };
 
   const getChartDataAndOptions = () => {
-    const sortedData = get12HourData();
-    const labels = generate12HourLabels();
+    const now = new Date();
+    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+    const sortedData = [...dataList]
+      .filter(d => new Date(d.created_at) >= twelveHoursAgo)
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+    const labels: string[] = [];
+    for (let i = 24; i >= 0; i--) {
+      const time = new Date(now.getTime() - i * 30 * 60 * 1000);
+      const h = time.getHours().toString().padStart(2, '0');
+      const m = time.getMinutes() < 30 ? '00' : '30';
+      labels.push(`${h}:${m}`);
+    }
+
+    const nowMs = now.getTime();
 
     if (comparisonMode === 'zones') {
       const datasets = compareZones.map(zone => {
         const zc = zoneConfig.find(z => z.id === zone)!;
         const zoneData = sortedData.filter(d => d.zone === zone);
 
-        // แมปข้อมูลเข้า 25 จุดเวลา
+        // แมปข้อมูลเข้า 25 จุดเวลา โดยเฉลี่ยข้อมูลที่ตกอยู่ในช่วง 30 นาทีของแต่ละช่องเวลา
         const dataPoints = labels.map((_, i) => {
           if (zoneData.length === 0) return null;
-          const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
-          const point = zoneData[dataIndex];
-          if (!point) return null;
-          if (selectedMetric === 'ppfd') return point.lux * DEFAULT_MULTIPLIER;
-          return point[selectedMetric];
+          
+          const slotTimeMs = nowMs - (24 - i) * 30 * 60 * 1000;
+          const rangeStart = slotTimeMs - 15 * 60 * 1000;
+          const rangeEnd = slotTimeMs + 15 * 60 * 1000;
+          
+          const matchingPoints = zoneData.filter(d => {
+            const time = new Date(d.created_at).getTime();
+            return time >= rangeStart && time < rangeEnd;
+          });
+          
+          if (matchingPoints.length === 0) return null;
+          
+          const sum = matchingPoints.reduce((acc, point) => {
+            let val = 0;
+            if (selectedMetric === 'ppfd') val = point.lux * DEFAULT_MULTIPLIER;
+            else val = point[selectedMetric];
+            return acc + val;
+          }, 0);
+          
+          return sum / matchingPoints.length;
         });
 
         return {
@@ -209,20 +226,46 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
 
       const dataA = labels.map((_, i) => {
         if (zoneData.length === 0) return null;
-        const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
-        const point = zoneData[dataIndex];
-        if (!point) return null;
-        if (compareMetricA === 'ppfd') return point.lux * DEFAULT_MULTIPLIER;
-        return point[compareMetricA];
+        const slotTimeMs = nowMs - (24 - i) * 30 * 60 * 1000;
+        const rangeStart = slotTimeMs - 15 * 60 * 1000;
+        const rangeEnd = slotTimeMs + 15 * 60 * 1000;
+        
+        const matchingPoints = zoneData.filter(d => {
+          const time = new Date(d.created_at).getTime();
+          return time >= rangeStart && time < rangeEnd;
+        });
+        
+        if (matchingPoints.length === 0) return null;
+        
+        const sum = matchingPoints.reduce((acc, point) => {
+          let val = 0;
+          if (compareMetricA === 'ppfd') val = point.lux * DEFAULT_MULTIPLIER;
+          else val = point[compareMetricA];
+          return acc + val;
+        }, 0);
+        return sum / matchingPoints.length;
       });
 
       const dataB = labels.map((_, i) => {
         if (zoneData.length === 0) return null;
-        const dataIndex = Math.floor((i / (labels.length - 1)) * (zoneData.length - 1));
-        const point = zoneData[dataIndex];
-        if (!point) return null;
-        if (compareMetricB === 'ppfd') return point.lux * DEFAULT_MULTIPLIER;
-        return point[compareMetricB];
+        const slotTimeMs = nowMs - (24 - i) * 30 * 60 * 1000;
+        const rangeStart = slotTimeMs - 15 * 60 * 1000;
+        const rangeEnd = slotTimeMs + 15 * 60 * 1000;
+        
+        const matchingPoints = zoneData.filter(d => {
+          const time = new Date(d.created_at).getTime();
+          return time >= rangeStart && time < rangeEnd;
+        });
+        
+        if (matchingPoints.length === 0) return null;
+        
+        const sum = matchingPoints.reduce((acc, point) => {
+          let val = 0;
+          if (compareMetricB === 'ppfd') val = point.lux * DEFAULT_MULTIPLIER;
+          else val = point[compareMetricB];
+          return acc + val;
+        }, 0);
+        return sum / matchingPoints.length;
       });
 
       const tabA = metricTabs.find(t => t.id === compareMetricA)!;
