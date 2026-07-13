@@ -102,11 +102,11 @@ async function sendDiscordNotify(payload: any) {
 }
 
 const zoneNames: Record<number, string> = {
-  1: 'Zone A (โรงเรือนหลัก)',
-  2: 'Zone B (โรงเรือนชำฝั่งพัดลม)',
-  3: 'Zone C (ห้องเพาะชำเนื้อเยื่อ)',
-  4: 'Zone D (ทางเข้าโรงเรือนหลัก)',
-  5: 'Zone E (พื้นที่กรองแสงพิเศษ)'
+  1: 'Zone A',
+  2: 'Zone B',
+  3: 'Zone C',
+  4: 'Zone D',
+  5: 'Zone E'
 };
 
 // ฟังก์ชันประเมินความเหมาะสมของสภาพอากาศและยิงแจ้งเตือนเชิงรุก
