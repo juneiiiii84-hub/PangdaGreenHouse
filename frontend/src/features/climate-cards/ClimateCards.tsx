@@ -613,11 +613,11 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                           {item.status}
                         </span>
                         <span className="text-xs font-black font-mono flex flex-wrap items-center gap-1" style={{ color: 'var(--text-value)' }}>
-                          {item.range.includes(' หรือ ') ? (
+                          {item.range.includes('หรือ') ? (
                             <>
-                              {item.range.split(' หรือ ').map((part, pIdx, arr) => (
+                              {item.range.split('หรือ').map((part, pIdx, arr) => (
                                 <React.Fragment key={pIdx}>
-                                  <span className="whitespace-nowrap">{part}</span>
+                                  <span className="whitespace-nowrap">{part.trim()}</span>
                                   {pIdx < arr.length - 1 && <span className="text-[10px] text-slate-500 font-medium px-0.5">หรือ</span>}
                                 </React.Fragment>
                               ))}
