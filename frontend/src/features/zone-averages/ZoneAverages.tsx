@@ -527,7 +527,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
                       borderColor: 'var(--border-subtle)',
                     }}
                   >
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-col items-start gap-1.5">
                       <span className={`w-[82px] text-center py-1 rounded-full text-[10px] font-black border uppercase whitespace-nowrap flex-shrink-0 ${item.color}`}>
                         {item.status}
                       </span>
