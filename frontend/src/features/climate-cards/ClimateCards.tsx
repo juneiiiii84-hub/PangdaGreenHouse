@@ -448,13 +448,13 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                       <Info size={12} style={{ color: 'var(--text-muted)' }} />
                     </button>
                   </div>
-                  <div className={`flex flex-wrap items-baseline gap-0.5 font-mono tracking-tight leading-none ${styles.valueColor}`}>
+                  <div className={`flex items-baseline gap-0.5 font-mono tracking-tight leading-none whitespace-nowrap ${styles.valueColor}`}>
                     {!isInitialLoaded ? (
                       <span className="skeleton inline-block w-20 h-8 align-middle" />
                     ) : (
                       <>
-                        <span className="text-2xl md:text-3xl font-black">{latestData ? card.value : '---'}</span>
-                        <span className="text-[10px] md:text-xs font-bold whitespace-nowrap ml-0.5" style={{ color: 'var(--text-muted)' }}>{card.unit}</span>
+                        <span className={`font-black ${card.key === 'ppfd' ? 'text-[21px] sm:text-2xl md:text-[25px]' : 'text-2xl md:text-3xl'}`}>{latestData ? card.value : '---'}</span>
+                        <span className={`font-bold ml-0.5 ${card.key === 'ppfd' ? 'text-[10px] sm:text-[11px] md:text-xs' : 'text-sm md:text-base'}`} style={{ color: 'var(--text-muted)' }}>{card.unit}</span>
                       </>
                     )}
                   </div>
