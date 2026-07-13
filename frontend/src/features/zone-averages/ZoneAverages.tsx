@@ -434,9 +434,9 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
                     <Info size={12} style={{ color: 'var(--text-muted)' }} />
                   </button>
                 </div>
-                <div className="flex flex-col items-start gap-1 font-mono tracking-tight leading-none">
-                  <span className={`text-2xl md:text-3xl font-black ${valueColor}`}>{m.value}</span>
-                  <span className="text-[10px] md:text-xs font-bold whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{m.unit}</span>
+                <div className={`flex flex-wrap items-baseline gap-0.5 font-mono tracking-tight leading-none ${valueColor}`}>
+                  <span className="text-2xl md:text-3xl font-black">{m.value}</span>
+                  <span className="text-[10px] md:text-xs font-bold whitespace-nowrap ml-0.5" style={{ color: 'var(--text-muted)' }}>{m.unit}</span>
                 </div>
               </div>
             </div>
