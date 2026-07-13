@@ -1,0 +1,1002 @@
+[
+  {
+    "temperature": 25.73,
+    "humidity": 73.54,
+    "lux": 22427,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:29:38.194Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.01,
+    "humidity": 52.2,
+    "lux": 37633,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:29:38.194Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.18,
+    "humidity": 86.2,
+    "lux": 11541,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:29:38.194Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.17,
+    "humidity": 67.48,
+    "lux": 24110,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:29:38.194Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.76,
+    "humidity": 59.45,
+    "lux": 48322,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:29:38.194Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 25.74,
+    "humidity": 73.76,
+    "lux": 21670,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:29:43.140Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.96,
+    "humidity": 50.78,
+    "lux": 38495,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:29:43.140Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.8,
+    "humidity": 84.1,
+    "lux": 11774,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:29:43.140Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.98,
+    "humidity": 67.43,
+    "lux": 23552,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:29:43.140Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 30.08,
+    "humidity": 59.6,
+    "lux": 48218,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:29:43.140Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.09,
+    "humidity": 75.69,
+    "lux": 21679,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:29:48.139Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.16,
+    "humidity": 52.97,
+    "lux": 38052,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:29:48.139Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.78,
+    "humidity": 85.04,
+    "lux": 11745,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:29:48.139Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.77,
+    "humidity": 66.69,
+    "lux": 23572,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:29:48.139Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 30.12,
+    "humidity": 59.08,
+    "lux": 48092,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:29:48.139Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.11,
+    "humidity": 76.26,
+    "lux": 22464,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:29:53.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.07,
+    "humidity": 52.99,
+    "lux": 38375,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:29:53.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.06,
+    "humidity": 84.77,
+    "lux": 11652,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:29:53.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.18,
+    "humidity": 66.84,
+    "lux": 24169,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:29:53.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.9,
+    "humidity": 60.07,
+    "lux": 47513,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:29:53.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 25.73,
+    "humidity": 74.44,
+    "lux": 21509,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:29:58.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.98,
+    "humidity": 50.64,
+    "lux": 38283,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:29:58.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.13,
+    "humidity": 84.22,
+    "lux": 12183,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:29:58.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.01,
+    "humidity": 67.71,
+    "lux": 24073,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:29:58.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.81,
+    "humidity": 59.75,
+    "lux": 48155,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:29:58.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.15,
+    "humidity": 76.38,
+    "lux": 21902,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:03.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.81,
+    "humidity": 53.18,
+    "lux": 37880,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:03.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.71,
+    "humidity": 85.81,
+    "lux": 12313,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:03.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.86,
+    "humidity": 67.84,
+    "lux": 24286,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:03.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.8,
+    "humidity": 59.42,
+    "lux": 48268,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:03.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.16,
+    "humidity": 74.92,
+    "lux": 21745,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:08.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.96,
+    "humidity": 52.3,
+    "lux": 37794,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:08.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.06,
+    "humidity": 83.52,
+    "lux": 11553,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:08.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.12,
+    "humidity": 69.01,
+    "lux": 24373,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:08.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 30.19,
+    "humidity": 59.31,
+    "lux": 47987,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:08.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 25.95,
+    "humidity": 76.12,
+    "lux": 21988,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:13.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.93,
+    "humidity": 51.83,
+    "lux": 37611,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:13.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.12,
+    "humidity": 84.84,
+    "lux": 11630,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:13.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.05,
+    "humidity": 67.58,
+    "lux": 23518,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:13.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.87,
+    "humidity": 59.85,
+    "lux": 47529,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:13.141Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.18,
+    "humidity": 76.17,
+    "lux": 22190,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:18.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.12,
+    "humidity": 52.4,
+    "lux": 37871,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:18.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.16,
+    "humidity": 86.03,
+    "lux": 12276,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:18.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.92,
+    "humidity": 67.22,
+    "lux": 24013,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:18.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.86,
+    "humidity": 60.53,
+    "lux": 47506,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:18.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.02,
+    "humidity": 73.78,
+    "lux": 22261,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:23.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.85,
+    "humidity": 53.05,
+    "lux": 37588,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:23.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.01,
+    "humidity": 84.61,
+    "lux": 12126,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:23.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.17,
+    "humidity": 69.05,
+    "lux": 23539,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:23.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 30.2,
+    "humidity": 61.37,
+    "lux": 48062,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:23.142Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 25.87,
+    "humidity": 75.01,
+    "lux": 22045,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:28.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.25,
+    "humidity": 52.24,
+    "lux": 37715,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:28.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.73,
+    "humidity": 83.58,
+    "lux": 11798,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:28.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.04,
+    "humidity": 69.47,
+    "lux": 24066,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:28.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 30.17,
+    "humidity": 60.28,
+    "lux": 48306,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:28.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.03,
+    "humidity": 75.37,
+    "lux": 21911,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:33.146Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.97,
+    "humidity": 51.19,
+    "lux": 37908,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:33.146Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.06,
+    "humidity": 83.83,
+    "lux": 11556,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:33.146Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.72,
+    "humidity": 68.37,
+    "lux": 23746,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:33.146Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.78,
+    "humidity": 60.01,
+    "lux": 47778,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:33.146Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.09,
+    "humidity": 73.66,
+    "lux": 21655,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:38.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.74,
+    "humidity": 51.83,
+    "lux": 38432,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:38.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.07,
+    "humidity": 83.72,
+    "lux": 11515,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:38.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.07,
+    "humidity": 66.68,
+    "lux": 24495,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:38.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.71,
+    "humidity": 59.26,
+    "lux": 47634,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:38.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.2,
+    "humidity": 73.96,
+    "lux": 21581,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:43.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.23,
+    "humidity": 52.99,
+    "lux": 37738,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:43.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.78,
+    "humidity": 86.18,
+    "lux": 11830,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:43.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.96,
+    "humidity": 67.2,
+    "lux": 23512,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:43.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.92,
+    "humidity": 59.84,
+    "lux": 48485,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:43.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.2,
+    "humidity": 74.09,
+    "lux": 22328,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:48.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.02,
+    "humidity": 51.11,
+    "lux": 37930,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:48.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.13,
+    "humidity": 85.7,
+    "lux": 12153,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:48.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.25,
+    "humidity": 68.28,
+    "lux": 23652,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:48.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 30.18,
+    "humidity": 58.58,
+    "lux": 47624,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:48.143Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.09,
+    "humidity": 73.75,
+    "lux": 22158,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:30:53.144Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.94,
+    "humidity": 53.34,
+    "lux": 38015,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:30:53.144Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.7,
+    "humidity": 83.88,
+    "lux": 11888,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:30:53.144Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.94,
+    "humidity": 67.34,
+    "lux": 24480,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:30:53.144Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.98,
+    "humidity": 59.78,
+    "lux": 47974,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:30:53.144Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 25.89,
+    "humidity": 75.19,
+    "lux": 22229,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:51:28.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.78,
+    "humidity": 52.67,
+    "lux": 37635,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:51:28.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.77,
+    "humidity": 85.75,
+    "lux": 12090,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:51:28.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.91,
+    "humidity": 66.52,
+    "lux": 24065,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:51:28.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.74,
+    "humidity": 61.25,
+    "lux": 47892,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:51:28.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.04,
+    "humidity": 75.82,
+    "lux": 22475,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:51:33.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.83,
+    "humidity": 51,
+    "lux": 38225,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:51:33.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.87,
+    "humidity": 85.78,
+    "lux": 12435,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:51:33.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.84,
+    "humidity": 67.79,
+    "lux": 24266,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:51:33.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.95,
+    "humidity": 59.08,
+    "lux": 47856,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:51:33.425Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.23,
+    "humidity": 74.13,
+    "lux": 21520,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:51:38.426Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.01,
+    "humidity": 52.75,
+    "lux": 37741,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:51:38.426Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.87,
+    "humidity": 84.62,
+    "lux": 11533,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:51:38.426Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.82,
+    "humidity": 67.49,
+    "lux": 24078,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:51:38.426Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.92,
+    "humidity": 59.21,
+    "lux": 48461,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:51:38.426Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.21,
+    "humidity": 75.64,
+    "lux": 21987,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:51:43.427Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.14,
+    "humidity": 51.96,
+    "lux": 38435,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:51:43.427Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 21.12,
+    "humidity": 85.81,
+    "lux": 12191,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:51:43.427Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.17,
+    "humidity": 67.81,
+    "lux": 24364,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:51:43.427Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.94,
+    "humidity": 58.83,
+    "lux": 47984,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:51:43.427Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 25.71,
+    "humidity": 74.48,
+    "lux": 21895,
+    "zone": 1,
+    "timestamp": "2026-07-08T09:51:48.428Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.97,
+    "humidity": 52.47,
+    "lux": 37761,
+    "zone": 2,
+    "timestamp": "2026-07-08T09:51:48.428Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.74,
+    "humidity": 85.33,
+    "lux": 11652,
+    "zone": 3,
+    "timestamp": "2026-07-08T09:51:48.428Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.9,
+    "humidity": 67.37,
+    "lux": 24010,
+    "zone": 4,
+    "timestamp": "2026-07-08T09:51:48.428Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.77,
+    "humidity": 60.44,
+    "lux": 48462,
+    "zone": 5,
+    "timestamp": "2026-07-08T09:51:48.428Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 25.9,
+    "humidity": 75.27,
+    "lux": 22082,
+    "zone": 1,
+    "timestamp": "2026-07-08T10:19:54.600Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.93,
+    "humidity": 51.19,
+    "lux": 38241,
+    "zone": 2,
+    "timestamp": "2026-07-08T10:19:54.600Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 20.75,
+    "humidity": 84.35,
+    "lux": 12094,
+    "zone": 3,
+    "timestamp": "2026-07-08T10:19:54.600Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.72,
+    "humidity": 67.5,
+    "lux": 23559,
+    "zone": 4,
+    "timestamp": "2026-07-08T10:19:54.600Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 30.28,
+    "humidity": 58.62,
+    "lux": 47875,
+    "zone": 5,
+    "timestamp": "2026-07-08T10:19:54.600Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.29,
+    "humidity": 63.34,
+    "lux": 7709,
+    "zone": 1,
+    "timestamp": "2026-07-08T10:20:39.961Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.78,
+    "humidity": 54.98,
+    "lux": 9330,
+    "zone": 2,
+    "timestamp": "2026-07-08T10:20:39.961Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 26.94,
+    "humidity": 77.56,
+    "lux": 2386,
+    "zone": 3,
+    "timestamp": "2026-07-08T10:20:39.962Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 30.36,
+    "humidity": 59.73,
+    "lux": 7713,
+    "zone": 4,
+    "timestamp": "2026-07-08T10:20:39.962Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.41,
+    "humidity": 68.1,
+    "lux": 3133,
+    "zone": 5,
+    "timestamp": "2026-07-08T10:20:39.962Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 29.19,
+    "humidity": 64.56,
+    "lux": 7855,
+    "zone": 1,
+    "timestamp": "2026-07-08T10:29:54.975Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 31.8,
+    "humidity": 53.55,
+    "lux": 9392,
+    "zone": 2,
+    "timestamp": "2026-07-08T10:29:54.975Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27,
+    "humidity": 76.97,
+    "lux": 1857,
+    "zone": 3,
+    "timestamp": "2026-07-08T10:29:54.975Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 36.39,
+    "humidity": 45.1,
+    "lux": 7548,
+    "zone": 4,
+    "timestamp": "2026-07-08T10:29:54.975Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 27.53,
+    "humidity": 67.71,
+    "lux": 3339,
+    "zone": 5,
+    "timestamp": "2026-07-08T10:29:54.975Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 33.58,
+    "humidity": 49.56,
+    "lux": 7319,
+    "zone": 1,
+    "timestamp": "2026-07-08T10:35:21.620Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 32.83,
+    "humidity": 26.87,
+    "lux": 8671,
+    "zone": 2,
+    "timestamp": "2026-07-08T10:35:21.620Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 28.15,
+    "humidity": 50.8,
+    "lux": 1630,
+    "zone": 3,
+    "timestamp": "2026-07-08T10:35:21.620Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 35.36,
+    "humidity": 44.64,
+    "lux": 7673,
+    "zone": 4,
+    "timestamp": "2026-07-08T10:35:21.620Z",
+    "status": "sent"
+  },
+  {
+    "temperature": 28.57,
+    "humidity": 40.5,
+    "lux": 2671,
+    "zone": 5,
+    "timestamp": "2026-07-08T10:35:21.620Z",
+    "status": "sent"
+  }
+]

@@ -23,34 +23,43 @@ const getAverageDiagnostics = (
   key: 'temp' | 'hum' | 'vpd' | 'ppfd' | 'lux',
   value: number
 ): DiagnosticResult => {
+  let roundedValue = value;
+  if (key === 'temp' || key === 'hum' || key === 'ppfd') {
+    roundedValue = Math.round(value * 10) / 10;
+  } else if (key === 'vpd') {
+    roundedValue = Math.round(value * 100) / 100;
+  } else if (key === 'lux') {
+    roundedValue = Math.round(value);
+  }
+
   if (key === 'temp') {
-    if (value >= 25 && value <= 30) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
-    if ((value >= 22 && value <= 24) || (value >= 31 && value <= 32)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
-    if ((value >= 20 && value <= 21) || (value >= 33 && value <= 35)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+    if (roundedValue >= 25 && roundedValue <= 30) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+    if ((roundedValue >= 22 && roundedValue <= 24.9) || (roundedValue >= 30.1 && roundedValue <= 32)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
+    if ((roundedValue >= 20 && roundedValue <= 21.9) || (roundedValue >= 32.1 && roundedValue <= 35)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
     return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
   }
   if (key === 'hum') {
-    if (value >= 60 && value <= 80) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
-    if ((value >= 50 && value <= 59) || (value >= 81 && value <= 85)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
-    if ((value >= 40 && value <= 49) || (value >= 86 && value <= 90)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+    if (roundedValue >= 60 && roundedValue <= 80) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+    if ((roundedValue >= 50 && roundedValue <= 59.9) || (roundedValue >= 80.1 && roundedValue <= 85)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
+    if ((roundedValue >= 40 && roundedValue <= 49.9) || (roundedValue >= 85.1 && roundedValue <= 90)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
     return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
   }
   if (key === 'vpd') {
-    if (value >= 0.4 && value <= 0.8) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
-    if ((value >= 0.3 && value < 0.4) || (value > 0.8 && value <= 1.2)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
-    if ((value >= 0.2 && value < 0.3) || (value > 1.2 && value <= 1.6)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+    if (roundedValue >= 0.4 && roundedValue <= 0.8) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+    if ((roundedValue >= 0.3 && roundedValue <= 0.39) || (roundedValue >= 0.81 && roundedValue <= 1.2)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
+    if ((roundedValue >= 0.2 && roundedValue <= 0.29) || (roundedValue >= 1.21 && roundedValue <= 1.6)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
     return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
   }
   if (key === 'ppfd') {
-    if (value >= 400 && value <= 800) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
-    if ((value >= 300 && value < 400) || (value > 800 && value <= 950)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
-    if ((value >= 200 && value < 300) || (value > 950 && value <= 1100)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+    if (roundedValue >= 400 && roundedValue <= 800) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+    if ((roundedValue >= 300 && roundedValue <= 399.9) || (roundedValue >= 800.1 && roundedValue <= 950)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
+    if ((roundedValue >= 200 && roundedValue <= 299.9) || (roundedValue >= 950.1 && roundedValue <= 1100)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
     return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
   }
   // LUX
-  if (value >= 21600 && value <= 43200) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
-  if ((value >= 16200 && value < 21600) || (value > 43200 && value <= 51350)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
-  if ((value >= 10800 && value < 16200) || (value > 51350 && value <= 59450)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+  if (roundedValue >= 21600 && roundedValue <= 43200) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+  if ((roundedValue >= 16200 && roundedValue <= 21599) || (roundedValue >= 43201 && roundedValue <= 51350)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
+  if ((roundedValue >= 10800 && roundedValue <= 16199) || (roundedValue >= 51351 && roundedValue <= 59450)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
   return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
 };
 
@@ -139,10 +148,10 @@ const detailExplanations: Record<string, { title: string; description: string; u
     description: 'ระดับความร้อนเย็นในโรงเรือน ส่งผลโดยตรงต่อการระเหยน้ำและการเติบโตของยอดพืช',
     unit: '°C',
     list: [
-      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '25 — 30 °C', effect: 'ดีที่สุดต่อการเติบโตและการคายน้ำของใบพืช' },
-      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '22—24 °C หรือ 30.1—32 °C', effect: 'พืชสังเคราะห์แสงและทำงานได้ปกติไม่มีปัญหา' },
-      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '20—21 °C หรือ 33—35 °C', effect: 'อากาศเริ่มเย็นหรือร้อนเกินไป พืชอาจเติบโตช้าลงเล็กน้อย' },
-      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 20 °C หรือสูงกว่า 35 °C', effect: 'ร้อนจัดจนเหี่ยวเฉาใบไหม้ หรือเย็นจัดจนต้นพืชหยุดชะงัก' },
+      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '25.0 — 30.0 °C', effect: 'ดีที่สุดต่อการเติบโตและการคายน้ำของใบพืช' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '22.0 — 24.9 °C หรือ 30.1 — 32.0 °C', effect: 'พืชสังเคราะห์แสงและทำงานได้ปกติไม่มีปัญหา' },
+      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '20.0 — 21.9 °C หรือ 32.1 — 35.0 °C', effect: 'อากาศเริ่มเย็นหรือร้อนเกินไป พืชอาจเติบโตช้าลงเล็กน้อย' },
+      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 20.0 °C หรือสูงกว่า 35.0 °C', effect: 'ร้อนจัดจนเหี่ยวเฉาใบไหม้ หรือเย็นจัดจนต้นพืชหยุดชะงัก' },
     ]
   },
   hum: {
@@ -150,10 +159,10 @@ const detailExplanations: Record<string, { title: string; description: string; u
     description: 'ปริมาณไอน้ำในอากาศ ช่วยควบคุมการเปิดปากใบพืชเพื่อให้ดูดซึมปุ๋ยและสารอาหารได้อย่างราบรื่น',
     unit: '%RH',
     list: [
-      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '60 — 80 %RH', effect: 'ปากใบเปิดพอดี พืชดูดปุ๋ยและคายน้ำได้ดีที่สุด' },
-      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '50—59 %RH หรือ 81—85 %RH', effect: 'ความชื้นปานกลาง พืชเจริญเติบโตได้ปกติ' },
-      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '40—49 %RH หรือ 86—90 %RH', effect: 'อากาศเริ่มแห้งทำให้คายน้ำเร็วเกินไป หรือชื้นเกินจนจำกัดการคายน้ำ' },
-      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 40 %RH หรือสูงกว่า 90 %RH', effect: 'ชื้นจัดจนเสี่ยงโรคราใบไม้ระบาด หรือแห้งจัดจนต้นพืชขาดน้ำ' },
+      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '60.0 — 80.0 %RH', effect: 'ปากใบเปิดพอดี พืชดูดปุ๋ยและคายน้ำได้ดีที่สุด' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '50.0 — 59.9 %RH หรือ 80.1 — 85.0 %RH', effect: 'ความชื้นปานกลาง พืชเจริญเติบโตได้ปกติ' },
+      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '40.0 — 49.9 %RH หรือ 85.1 — 90.0 %RH', effect: 'อากาศเริ่มแห้งทำให้คายน้ำเร็วเกินไป หรือชื้นเกินจนจำกัดการคายน้ำ' },
+      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 40.0 %RH หรือสูงกว่า 90.0 %RH', effect: 'ชื้นจัดจนเสี่ยงโรคราใบไม้ระบาด หรือแห้งจัดจนต้นพืชขาดน้ำ' },
     ]
   },
   vpd: {
@@ -161,10 +170,10 @@ const detailExplanations: Record<string, { title: string; description: string; u
     description: 'ดัชนีวัดระดับความแห้งแล้งรอบใบพืช ช่วยระบุประสิทธิภาพการคายน้ำและการลำเลียงปุ๋ยขึ้นจากดิน',
     unit: 'kPa',
     list: [
-      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '0.4 — 0.8 kPa', effect: 'แรงดันไอน้ำดีเยี่ยม พืชลำเลียงน้ำและปุ๋ยขึ้นจากดินได้สูงที่สุด' },
-      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '0.3 kPa หรือ 0.9 — 1.2 kPa', effect: 'พืชคายน้ำได้ปกติและลำเลียงอาหารไปเลี้ยงยอดได้สม่ำเสมอ' },
-      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '0.2 kPa หรือ 1.3 — 1.6 kPa', effect: 'คายน้ำได้ช้าเพราะอากาศชื้นเกิน หรือคายน้ำเร็วเกินเพราะอากาศแห้ง' },
-      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 0.2 kPa หรือสูงกว่า 1.6 kPa', effect: 'พืชจะปิดปากใบสนิท ทำให้ไม่สามารถดูดซึมปุ๋ยไปเลี้ยงต้นได้' },
+      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '0.40 — 0.80 kPa', effect: 'แรงดันไอน้ำดีเยี่ยม พืชลำเลียงน้ำและปุ๋ยขึ้นจากดินได้สูงที่สุด' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '0.30 — 0.39 kPa หรือ 0.81 — 1.20 kPa', effect: 'พืชคายน้ำได้ปกติและลำเลียงอาหารไปเลี้ยงยอดได้สม่ำเสมอ' },
+      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '0.20 — 0.29 kPa หรือ 1.21 — 1.60 kPa', effect: 'คายน้ำได้ช้าเพราะอากาศชื้นเกิน หรือคายน้ำเร็วเกินเพราะอากาศแห้ง' },
+      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 0.20 kPa หรือสูงกว่า 1.60 kPa', effect: 'พืชจะปิดปากใบสนิท ทำให้ไม่สามารถดูดซึมปุ๋ยไปเลี้ยงต้นได้' },
     ]
   },
   ppfd: {
@@ -172,10 +181,10 @@ const detailExplanations: Record<string, { title: string; description: string; u
     description: 'ความเข้มแสงแดดหรือไฟช่วยปลูกเฉพาะช่วงคลื่นแสงที่พืชสามารถนำไปใช้สังเคราะห์แสงเจริญเติบโตได้โดยตรง',
     unit: 'μmol/m²/s',
     list: [
-      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '400 — 800 μmol', effect: 'ความเข้มแสงกำลังพอดี พืชสังเคราะห์อาหารและเติบโตได้เร็วที่สุด' },
-      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '300 — 399 μmol หรือ 801 — 950 μmol', effect: 'ความเข้มแสงเพียงพอต่อการเจริญเติบโตได้อย่างแข็งแรงปกติ' },
-      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '200 — 299 μmol หรือ 951 — 1100 μmol', effect: 'แสงน้อยไปจนต้นพืชยืดหาแสง หรือแสงแดดแรงไปจนพืชเครียดสะสมความร้อน' },
-      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 200 μmol หรือสูงกว่า 1100 μmol', effect: 'มืดเกินไปจนไม่เติบโต หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย' },
+      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '400.0 — 800.0 μmol/m²/s', effect: 'ความเข้มแสงกำลังพอดี พืชสังเคราะห์อาหารและเติบโตได้เร็วที่สุด' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '300.0 — 399.9 μmol/m²/s หรือ 800.1 — 950.0 μmol/m²/s', effect: 'ความเข้มแสงเพียงพอต่อการเจริญเติบโตได้อย่างแข็งแรงปกติ' },
+      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '200.0 — 299.9 μmol/m²/s หรือ 950.1 — 1100.0 μmol/m²/s', effect: 'แสงน้อยไปจนต้นพืชยืดหาแสง หรือแสงแดดแรงไปจนพืชเครียดสะสมความร้อน' },
+      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 200.0 μmol/m²/s หรือสูงกว่า 1100.0 μmol/m²/s', effect: 'มืดเกินไปจนไม่เติบโต หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย' },
     ]
   },
   lux: {
@@ -184,8 +193,8 @@ const detailExplanations: Record<string, { title: string; description: string; u
     unit: 'Lux',
     list: [
       { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '21,600 — 43,200 Lux', effect: 'ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์' },
-      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '16,200—21,599 Lux หรือ 43,201—51,350 Lux', effect: 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น' },
-      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '10,800—16,199 Lux หรือ 51,351—59,450 Lux', effect: 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '16,200 — 21,599 Lux หรือ 43,201 — 51,350 Lux', effect: 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น' },
+      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '10,800 — 16,199 Lux หรือ 51,351 — 59,450 Lux', effect: 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง' },
       { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 10,800 Lux หรือสูงกว่า 59,450 Lux', effect: 'มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย' },
     ]
   }
@@ -518,11 +527,11 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
                       borderColor: 'var(--border-subtle)',
                     }}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className={`w-[82px] text-center py-1 rounded-full text-[10px] font-black border uppercase whitespace-nowrap flex-shrink-0 ${item.color}`}>
                         {item.status}
                       </span>
-                      <span className="text-xs font-black font-mono" style={{ color: 'var(--text-value)' }}>
+                      <span className="text-xs font-black font-mono whitespace-nowrap" style={{ color: 'var(--text-value)' }}>
                         {item.range}
                       </span>
                     </div>
