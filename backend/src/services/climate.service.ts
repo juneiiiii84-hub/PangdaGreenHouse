@@ -35,84 +35,84 @@ export class ClimateService {
     }
 
     if (type === 'temp') {
-      if (roundedValue >= 25 && roundedValue <= 30) {
+      if (roundedValue >= 25 && roundedValue <= 28) {
         return {
           state: 'excellent',
           status: 'เหมาะสมมาก',
           color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-          desc: `อุณหภูมิ ${roundedValue.toFixed(1)}°C อยู่ในเกณฑ์เหมาะสมมาก ซึ่งเป็นเกณฑ์ดีที่สุดต่อการเติบโตของใบไม้และการคายน้ำ`,
-          recommendation: '✅ รักษาเสถียรภาพความร้อนในห้องควบคุมให้อยู่ในช่วงนี้ต่อไป'
+          desc: `อุณหภูมิ ${roundedValue.toFixed(1)}°C อยู่ในเกณฑ์ดีมากต่อการเจริญเติบโตของพืช`,
+          recommendation: '✅ อุณหภูมิคงที่ดีแล้ว รักษาให้อยู่ในช่วงนี้ต่อไป'
         };
       }
-      if ((roundedValue >= 22 && roundedValue <= 24.9) || (roundedValue >= 30.1 && roundedValue <= 32)) {
+      if ((roundedValue >= 22 && roundedValue <= 24.9) || (roundedValue >= 28.1 && roundedValue <= 31)) {
         return {
           state: 'good',
           status: 'เหมาะสม',
           color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-          desc: `อุณหภูมิ ${roundedValue.toFixed(1)}°C อยู่ในเกณฑ์เหมาะสม พืชเจริญเติบโตสังเคราะห์แสงได้ปกติ`,
-          recommendation: '👍 คอยสังเกตแนวโน้ม ไม่ให้อุณหภูมิผันผวนขึ้นหรือลงเร็วเกินไปในช่วงวัน'
+          desc: `อุณหภูมิ ${roundedValue.toFixed(1)}°C อยู่ในเกณฑ์ดี พืชโตได้ปกติ`,
+          recommendation: '👍 คอยดูแลไม่ให้อุณหภูมิขึ้นลงเร็วเกินไปในช่วงวัน'
         };
       }
-      if ((roundedValue >= 20 && roundedValue <= 21.9) || (roundedValue >= 32.1 && roundedValue <= 35)) {
+      if ((roundedValue >= 20 && roundedValue <= 21.9) || (roundedValue >= 31.1 && roundedValue <= 34)) {
         return {
           state: 'warning',
           status: 'เฝ้าระวัง',
           color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-          desc: `อุณหภูมิ ${roundedValue.toFixed(1)}°C อยู่ในเกณฑ์เฝ้าระวัง อุณหภูมิเบี่ยงเบนเล็กน้อย พืชอาจมีอัตราการเติบโตช้าลง`,
-          recommendation: roundedValue > 32
-            ? '⚠️ อุณหภูมิค่อนข้างสูง: แนะนำให้เปิดพัดลมระบายอากาศ (Exhaust Fan) หรือเพิ่มการไหลเวียนของลม'
-            : '⚠️ อุณหภูมิค่อนข้างต่ำ: ควรลดระดับพัดลมระบายอากาศเพื่อสะสมความร้อนภายในโรงเรือน'
+          desc: `อุณหภูมิ ${roundedValue.toFixed(1)}°C อยู่ในเกณฑ์เฝ้าระวัง พืชอาจโตช้าลง`,
+          recommendation: roundedValue > 31
+            ? '⚠️ อุณหภูมิเริ่มสูง: แนะนำเปิดพัดลมระบายอากาศเพื่อระบายความร้อน'
+            : '⚠️ อุณหภูมิเริ่มต่ำ: แนะนำลดระดับพัดลมระบายอากาศลง'
         };
       }
       return {
         state: 'critical',
         status: 'ไม่เหมาะสม',
         color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-        desc: `อุณหภูมิ ${roundedValue.toFixed(1)}°C อยู่ในเกณฑ์ไม่เหมาะสม ส่งผลเสียต่อสรีรวิทยาของพืชอย่างรุนแรง`,
-        recommendation: roundedValue > 35
-          ? '🚨 อุณหภูมิสูงเกินไป: แนะนำให้เปิดพัดลมระบายอากาศทันที เปิดระบบพ่นละอองหมอกน้ำ และกางสแลนกรองแสง 50%'
-          : '🚨 อุณหภูมิต่ำเกินไป: ควรปิดพัดลมระบายอากาศทั้งหมด หรือเปิดระบบเครื่องทำความร้อน (Heater) เพื่อเพิ่มความอบอุ่น'
+        desc: `อุณหภูมิ ${roundedValue.toFixed(1)}°C ไม่เหมาะสม อาจทำให้พืชเหี่ยวเฉาหรือหยุดโตได้`,
+        recommendation: roundedValue > 34
+          ? '🚨 อุณหภูมิสูงเกินไป: แนะนำให้เปิดพัดลมระบายอากาศทันที เปิดระบบพ่นละอองหมอก และกางสแลนกรองแสง 50%'
+          : '🚨 อุณหภูมิต่ำเกินไป: ควรปิดพัดลมระบายอากาศทั้งหมด หรือเปิดระบบทำความร้อนเพื่อเพิ่มความอบอุ่น'
       };
     }
 
     if (type === 'hum') {
-      if (roundedValue >= 60 && roundedValue <= 80) {
+      if (roundedValue >= 65 && roundedValue <= 75) {
         return {
           state: 'excellent',
           status: 'เหมาะสมมาก',
           color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-          desc: `ความชื้นสัมพัทธ์ ${roundedValue.toFixed(1)}%RH อยู่ในเกณฑ์เหมาะสมมาก ป้องกันอาการใบไหม้และยับยั้งสปอร์เชื้อรา`,
-          recommendation: '✅ ความชื้นดีเยี่ยม: เหมาะสมกับการเปิดปากใบดูดซึมปุ๋ยและสารอาหารอย่างราบรื่น'
+          desc: `ความชื้น ${roundedValue.toFixed(1)}%RH เหมาะสมมาก ช่วยป้องกันโรคพืชและเชื้อรา`,
+          recommendation: '✅ ความชื้นดีเยี่ยม ช่วยให้พืชดูดซึมปุ๋ยและน้ำได้ดีที่สุด'
         };
       }
-      if ((roundedValue >= 50 && roundedValue <= 59.9) || (roundedValue >= 80.1 && roundedValue <= 85)) {
+      if ((roundedValue >= 55 && roundedValue <= 64.9) || (roundedValue >= 75.1 && roundedValue <= 85)) {
         return {
           state: 'good',
           status: 'เหมาะสม',
           color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-          desc: `ความชื้นสัมพัทธ์ ${roundedValue.toFixed(1)}%RH อยู่ในเกณฑ์เหมาะสม พืชแลกเปลี่ยนก๊าซได้ปกติ`,
-          recommendation: '👍 ข้อมูลปกติ: คอยดูแนวโน้มความชื้นไม่ให้อิ่มตัวในช่วงกลางคืน'
+          desc: `ความชื้น ${roundedValue.toFixed(1)}%RH เหมาะสมดี พืชเติบโตได้ปกติ`,
+          recommendation: '👍 ดูแลไม่ให้ชื้นเกินไปในช่วงเวลากลางคืน'
         };
       }
-      if ((roundedValue >= 40 && roundedValue <= 49.9) || (roundedValue >= 85.1 && roundedValue <= 90)) {
+      if ((roundedValue >= 40 && roundedValue <= 54.9) || (roundedValue >= 85.1 && roundedValue <= 90)) {
         return {
           state: 'warning',
           status: 'เฝ้าระวัง',
           color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-          desc: `ความชื้นสัมพัทธ์ ${roundedValue.toFixed(1)}%RH อยู่ในเกณฑ์เฝ้าระวัง อาจเริ่มส่งผลกระทบต่ออัตราคายน้ำพืช`,
+          desc: `ความชื้น ${roundedValue.toFixed(1)}%RH อยู่ในเกณฑ์เฝ้าระวัง พืชอาจจะเฉาหรือแฉะเกินไป`,
           recommendation: roundedValue > 85
-            ? '⚠️ ความชื้นสูงเกินเกณฑ์: แนะนำให้เปิดพัดลมหมุนเวียนอากาศภายในเพื่อช่วยลดความแฉะสะสม'
-            : '⚠️ ความชื้นต่ำเกินเกณฑ์: แนะนำให้สเปรย์น้ำหรือเปิดระบบพ่นหมอกเป็นรอบสั้นๆ เพิ่มความชื้นในอากาศ'
+            ? '⚠️ ความชื้นเริ่มสูง: แนะนำให้เปิดพัดลมหมุนเวียนอากาศเพื่อช่วยระบายความชื้นสะสม'
+            : '⚠️ ความชื้นเริ่มต่ำ: แนะนำให้พ่นน้ำหรือเปิดระบบพ่นหมอกสั้นๆ เพื่อเพิ่มความชื้น'
         };
       }
       return {
         state: 'critical',
         status: 'ไม่เหมาะสม',
         color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-        desc: `ความชื้นสัมพัทธ์ ${roundedValue.toFixed(1)}%RH อยู่ในเกณฑ์ไม่เหมาะสม แฉะหรือแห้งแล้งผิดปกติ`,
+        desc: `ความชื้น ${roundedValue.toFixed(1)}%RH ไม่เหมาะสม แห้งแล้งหรือแฉะเกินไปอย่างรุนแรง`,
         recommendation: roundedValue > 90
-          ? '🚨 ความชื้นสูงวิกฤต: เสี่ยงโรคราใบไม้และเน่าคอดิน แนะนำเปิดพัดลมระบายอากาศ 100% และหยุดให้น้ำชั่วคราว'
-          : '🚨 ความชื้นต่ำวิกฤต: พืชคายน้ำเร็วจนเฉา แนะนำให้เปิดระบบเครื่องพ่นหมอกเต็มกำลังเพื่อดึงระดับความชื้นสัมพัทธ์ขึ้นด่วน'
+          ? '🚨 ชื้นเกินเกณฑ์วิกฤต: แนะนำเปิดพัดลมระบายอากาศ 100% และหยุดรดน้ำชั่วคราวเพื่อป้องกันโรครา'
+          : '🚨 แห้งเกินเกณฑ์วิกฤต: พืชอาจเฉาแห้ง แนะนำให้เปิดเครื่องพ่นหมอกเต็มกำลังเพื่อดึงระดับความชื้นขึ้นด่วน'
       };
     }
 
@@ -122,8 +122,8 @@ export class ClimateService {
           state: 'excellent',
           status: 'เหมาะสมมาก',
           color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-          desc: `แรงดันไอ VPD ${roundedValue.toFixed(2)} kPa อยู่ในเกณฑ์เหมาะสมมาก พืชคายน้ำดีที่สุด ดูดปุ๋ยแร่ธาตุได้เต็มกำลัง`,
-          recommendation: '✅ ระดับแรงดันไอดีเลิศ: ช่วยรักษาอัตราการไหลเวียนของน้ำและธาตุอาหารภายในต้นพืชอย่างมีประสิทธิภาพ'
+          desc: `ค่า VPD ${roundedValue.toFixed(2)} kPa เหมาะสมมาก พืชดูดปุ๋ยและโตได้ดีที่สุด`,
+          recommendation: '✅ ค่า VPD ดีมาก ช่วยให้ระบบรากและใบทำงานได้อย่างมีประสิทธิภาพ'
         };
       }
       if ((roundedValue >= 0.3 && roundedValue <= 0.39) || (roundedValue >= 0.81 && roundedValue <= 1.2)) {
@@ -131,8 +131,8 @@ export class ClimateService {
           state: 'good',
           status: 'เหมาะสม',
           color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-          desc: `แรงดันไอ VPD ${roundedValue.toFixed(2)} kPa อยู่ในเกณฑ์เหมาะสม พืชคายน้ำได้ในระดับปกติ`,
-          recommendation: '👍 ตรวจสอบความชื้นและอุณหภูมิสม่ำเสมอเพื่อประคองระดับค่าแรงดันไอ'
+          desc: `ค่า VPD ${roundedValue.toFixed(2)} kPa เหมาะสมดี พืชทำงานได้ตามปกติ`,
+          recommendation: '👍 คอยตรวจเช็คอุณหภูมิและความชื้นให้อยู่ในเกณฑ์เหมาะสมต่อเนื่อง'
         };
       }
       if ((roundedValue >= 0.2 && roundedValue <= 0.29) || (roundedValue >= 1.21 && roundedValue <= 1.6)) {
@@ -140,20 +140,20 @@ export class ClimateService {
           state: 'warning',
           status: 'เฝ้าระวัง',
           color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-          desc: `แรงดันไอ VPD ${roundedValue.toFixed(2)} kPa อยู่ในเกณฑ์เฝ้าระวัง อัตราคายน้ำเริ่มชะงัก (VPD ต่ำ) หรือคายน้ำไวเกินเฉา (VPD สูง)`,
+          desc: `ค่า VPD ${roundedValue.toFixed(2)} kPa อยู่ในเกณฑ์เฝ้าระวัง พืชอาจจะโตช้าหรือเหี่ยวเฉาได้`,
           recommendation: roundedValue > 1.2
-            ? '⚠️ VPD ค่อนข้างสูง (อากาศแห้ง): แนะนำสเปรย์ละอองน้ำฝอยเพื่อลดค่า VPD ลงมาให้อยู่ในเกณฑ์เหมาะสม'
-            : '⚠️ VPD ค่อนข้างต่ำ (อากาศชื้น): แนะนำเปิดระบบระบายลมไหลผ่านใบพืชเพื่อขับไล่ไอน้ำสะสมรอบๆ ใบ'
+            ? '⚠️ อากาศแห้งเกินไป (VPD สูง): แนะนำพ่นละอองหมอกเพื่อเพิ่มความชื้นในอากาศ'
+            : '⚠️ อากาศชื้นเกินไป (VPD ต่ำ): แนะนำเปิดพัดลมระบายอากาศช่วยให้อากาศหมุนเวียน'
         };
       }
       return {
         state: 'critical',
         status: 'ไม่เหมาะสม',
         color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-        desc: `แรงดันไอ VPD ${roundedValue.toFixed(2)} kPa อยู่ในเกณฑ์ไม่เหมาะสม ส่งผลกระทบอย่างรุนแรงต่อการสังเคราะห์แสงและขนส่งธาตุอาหาร`,
+        desc: `ค่า VPD ${roundedValue.toFixed(2)} kPa ไม่เหมาะสม อาจทำให้พืชหยุดโตหรือขาดน้ำรุนแรง`,
         recommendation: roundedValue > 1.6
-          ? '🚨 VPD สูงวิกฤต: พืชปิดปากใบเสี่ยงเกิดภาวะขาดสารอาหารฉับพลัน แนะนำให้กางสแลนกรองแสงลงและพ่นหมอกลดความแห้งแล้งทันที'
-          : '🚨 VPD ต่ำวิกฤต: ความชื้นอิ่มตัวจนพืชไม่คายน้ำ แนะนำให้หยุดให้น้ำทางดิน เปิดพัดลมเป่าระบายหมุนเวียนลมรอบต้นพืชด่วน'
+          ? '🚨 อากาศแห้งจัดจนต้นพืชขาดสารอาหาร: แนะนำให้กางสแลนกรองแสงลงและเปิดพ่นหมอกช่วยด่วน'
+          : '🚨 อากาศชื้นจัดจนพืชหยุดคายน้ำ: แนะนำหยุดรดน้ำและเปิดพัดลมระบายอากาศด่วน'
       };
     }
 
@@ -164,8 +164,8 @@ export class ClimateService {
           state: 'excellent',
           status: 'เหมาะสมมาก',
           color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-          desc: `ความเข้มแสง PPFD ${roundedValue.toFixed(1)} μmol/m²/s อยู่ในเกณฑ์เหมาะสมมาก เหมาะสมสำหรับการสังเคราะห์แสงและแลกเปลี่ยนคาร์บอนสูงสุด`,
-          recommendation: '✅ แสงเหมาะสมมาก: ให้พลังงานแสงที่เพียงพอ พืชเติบโตได้อย่างรวดเร็วและแข็งแรง'
+          desc: `ความเข้มแสง PPFD ${roundedValue.toFixed(1)} μmol/m²/s เหมาะสมมาก พืชสังเคราะห์แสงได้ดีที่สุด`,
+          recommendation: '✅ แสงดีมาก ช่วยให้พืชเจริญเติบโตได้อย่างรวดเร็วและแข็งแรง'
         };
       }
       if ((roundedValue >= 300 && roundedValue <= 399.9) || (roundedValue >= 800.1 && roundedValue <= 950)) {
@@ -173,8 +173,8 @@ export class ClimateService {
           state: 'good',
           status: 'เหมาะสม',
           color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-          desc: `ความเข้มแสง PPFD ${roundedValue.toFixed(1)} μmol/m²/s อยู่ในเกณฑ์เหมาะสม พืชเจริญเติบโตได้ตามเป้าหมายดี`,
-          recommendation: '👍 แสงข้อมูลปกติ: คอยดูค่าความเข้มแสงในช่วงบ่ายเพื่อหลีกเลี่ยงภาวะแสงจ้าเกินจำเป็น'
+          desc: `ความเข้มแสง PPFD ${roundedValue.toFixed(1)} μmol/m²/s เหมาะสมดี พืชเติบโตได้ตามปกติ`,
+          recommendation: '👍 คอยดูระดับแสงในช่วงบ่ายไม่ให้จ้าเกินไป'
         };
       }
       if ((roundedValue >= 200 && roundedValue <= 299.9) || (roundedValue >= 950.1 && roundedValue <= 1100)) {
@@ -182,50 +182,50 @@ export class ClimateService {
           state: 'warning',
           status: 'เฝ้าระวัง',
           color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-          desc: `ความเข้มแสง PPFD ${roundedValue.toFixed(1)} μmol/m²/s อยู่ในเกณฑ์เฝ้าระวัง แสงอาจน้อยเกินพืชยืดต้น หรือมากเกินพืชเครียดสะสมความร้อน`,
+          desc: `ความเข้มแสง PPFD ${roundedValue.toFixed(1)} μmol/m²/s อยู่ในเกณฑ์เฝ้าระวัง แสงอาจน้อยหรือมากเกินไป`,
           recommendation: roundedValue > 950
-            ? '⚠️ แสงจ้าเกินไป: แนะนำให้เปิดใช้งานระบบตาข่ายแรเงา (Shading Net) เพื่อป้องกันความเครียดสะสมบนใบ'
-            : '⚠️ แสงค่อนข้างสลัว: แนะนำเปิดไฟส่องสว่างช่วยปลูก (Grow Lights) เสริมความเข้มแสงให้เพียงพอ'
+            ? '⚠️ แสงเริ่มแรงเกินไป: แนะนำให้เปิดใช้งานระบบตาข่ายแรเงา (Shading Net) เพื่อลดความร้อน'
+            : '⚠️ แสงค่อนข้างสลัว: แนะนำเปิดไฟช่วยปลูก (Grow Lights) เพื่อเพิ่มแสง'
         };
       }
       return {
         state: 'critical',
         status: 'ไม่เหมาะสม',
         color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-        desc: `ความเข้มแสง PPFD ${roundedValue.toFixed(1)} μmol/m²/s อยู่ในเกณฑ์ไม่เหมาะสม มืดเกินไปหรือร้อนแผดเผาจนใบพืชถูกทำลาย`,
+        desc: `ความเข้มแสง PPFD ${roundedValue.toFixed(1)} μmol/m²/s ไม่เหมาะสม แสงมืดเกินไปหรือแรงจนใบอาจไหม้`,
         recommendation: roundedValue > 1100
-          ? '🚨 แสงแดดจัดแผดเผาเกรียม: แนะนำกางสแลนกรองแสงอย่างน้อย 50% หรือสเปรย์หมอกน้ำกำบังความร้อนเฉียบพลันด่วน'
-          : '🚨 แสงมืดสลัวรุนแรง: อัตราแลกธาตุพืชหยุดชะงัก แนะนำเปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมประสิทธิภาพแสงสูงสุดทันที'
+          ? '🚨 แดดแรงจัดจนเสี่ยงใบไหม้: แนะนำให้กางสแลนกรองแสง 50% และพ่นหมอกช่วยลดความร้อนด่วน'
+          : '🚨 แสงมืดเกินไปจนพืชหยุดโต: แนะนำเปิดไฟช่วยปลูก (Grow Lights) เสริมแสงให้พืชด่วน'
       };
     }
 
     // LUX
     if (type === 'lux') {
-      if (roundedValue >= 21600 && roundedValue <= 43200) {
+      if (roundedValue >= 13377 && roundedValue <= 26757) {
         return {
           state: 'excellent',
           status: 'เหมาะสมมาก',
           color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-          desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux อยู่ในเกณฑ์เหมาะสมมาก ซึ่งเป็นเกณฑ์ดีที่สุดต่อการเติบโตและการสังเคราะห์แสงของพืช`,
-          recommendation: '✅ ระดับแสงเหมาะสมมากสำหรับการเจริญเติบโตของพืช'
+          desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux เหมาะสมมากสำหรับพืช`,
+          recommendation: '✅ แสงแดดอยู่ในช่วงที่ดีที่สุดต่อการเติบโตของพืช'
         };
       }
-      if ((roundedValue >= 16200 && roundedValue <= 21599) || (roundedValue >= 43201 && roundedValue <= 51350)) {
+      if ((roundedValue >= 10032 && roundedValue <= 13376) || (roundedValue >= 26758 && roundedValue <= 31774)) {
         return {
           state: 'good',
           status: 'เหมาะสม',
           color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-          desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux อยู่ในเกณฑ์เหมาะสม พืชสังเคราะห์แสงได้ปกติ`,
-          recommendation: '👍 ระดับแสงปกติ สังเกตแนวโน้มของแสงแดดในช่วงกลางวัน'
+          desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux เหมาะสม พืชสังเคราะห์แสงได้ปกติ`,
+          recommendation: '👍 แสงแดดปกติ คอยสังเกตแนวโน้มความสว่างในช่วงวัน'
         };
       }
-      if ((roundedValue >= 10800 && roundedValue <= 16199) || (roundedValue >= 51351 && roundedValue <= 59450)) {
+      if ((roundedValue >= 6688 && roundedValue <= 10031) || (roundedValue >= 31775 && roundedValue <= 36790)) {
         return {
           state: 'warning',
           status: 'เฝ้าระวัง',
           color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-          desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux อยู่ในเกณฑ์เฝ้าระวัง แสงแดดอาจน้อยเกินไปหรือร้อนแรงเกินไป`,
-          recommendation: roundedValue > 51351
+          desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux อยู่ในเกณฑ์เฝ้าระวัง แสงแดดอาจน้อยไปหรือแรงไป`,
+          recommendation: roundedValue > 31774
             ? '⚠️ แสงเริ่มแรงเกินไป: แนะนำให้เตรียมกางสแลนกรองแสงเพื่อชะลอความร้อนสะสม'
             : '⚠️ แสงค่อนข้างสลัว: พืชสังเคราะห์แสงได้ช้าลงเล็กน้อย'
         };
@@ -234,10 +234,10 @@ export class ClimateService {
         state: 'critical',
         status: 'ไม่เหมาะสม',
         color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-        desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux อยู่ในเกณฑ์ไม่เหมาะสม มืดเกินไปหรือสว่างจ้าเกินไป`,
-        recommendation: roundedValue > 59450
-          ? '🚨 แสงแดดจัดแผดเผา: แนะนำให้กางสแลนกรองแสงอย่างน้อย 50% หรือเปิดพัดลมสเปรย์หมอกน้ำเพื่อกำบังความร้อนเฉียบพลันด่วน'
-          : '🚨 แสงมืดสลัวรุนแรง: อัตราแลกธาตุพืชหยุดชะงัก แนะนำเปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมประสิทธิภาพแสงสังเคราะห์'
+        desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux ไม่เหมาะสม มืดเกินไปหรือสว่างจ้าเกินไป`,
+        recommendation: roundedValue > 36790
+          ? '🚨 แดดจัดเกินไปจนเสี่ยงใบไหม้: แนะนำกางสแลนกรองแสงและพ่นหมอกระบายความร้อนด่วน'
+          : '🚨 แสงสลัวเกินไปจนพืชไม่เติบโต: แนะนำเปิดไฟช่วยปลูก (Grow Lights) เสริมแสงด่วน'
       };
     }
 
