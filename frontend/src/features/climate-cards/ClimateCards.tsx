@@ -448,11 +448,14 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                       <Info size={12} style={{ color: 'var(--text-muted)' }} />
                     </button>
                   </div>
-                  <div className={`text-2xl md:text-3xl font-black font-mono tracking-tight leading-none ${styles.valueColor}`}>
+                  <div className={`flex flex-wrap items-baseline gap-1 font-mono tracking-tight leading-none ${styles.valueColor}`}>
                     {!isInitialLoaded ? (
                       <span className="skeleton inline-block w-20 h-8 align-middle" />
                     ) : (
-                      <>{latestData ? card.value : '---'}<span className="text-sm md:text-base font-bold ml-1" style={{ color: 'var(--text-muted)' }}>{card.unit}</span></>
+                      <>
+                        <span className="text-2xl md:text-3xl font-black">{latestData ? card.value : '---'}</span>
+                        <span className="text-[10px] md:text-xs font-bold whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>{card.unit}</span>
+                      </>
                     )}
                   </div>
                   <div className="text-[10px] sm:text-[10.5px] md:text-xs mt-1 font-medium leading-relaxed" style={{ color: 'var(--text-muted)' }}>{card.desc}</div>
@@ -609,8 +612,19 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                         <span className={`w-[82px] text-center py-1 rounded-full text-[10px] font-black border uppercase whitespace-nowrap flex-shrink-0 ${item.color}`}>
                           {item.status}
                         </span>
-                        <span className="text-xs font-black font-mono whitespace-nowrap" style={{ color: 'var(--text-value)' }}>
-                          {item.range}
+                        <span className="text-xs font-black font-mono flex flex-wrap items-center gap-1" style={{ color: 'var(--text-value)' }}>
+                          {item.range.includes(' หรือ ') ? (
+                            <>
+                              {item.range.split(' หรือ ').map((part, pIdx, arr) => (
+                                <React.Fragment key={pIdx}>
+                                  <span className="whitespace-nowrap">{part}</span>
+                                  {pIdx < arr.length - 1 && <span className="text-[10px] text-slate-500 font-medium px-0.5">หรือ</span>}
+                                </React.Fragment>
+                              ))}
+                            </>
+                          ) : (
+                            <span className="whitespace-nowrap">{item.range}</span>
+                          )}
                         </span>
                       </div>
                       <span className="text-[11px] font-medium mt-1 sm:mt-0" style={{ color: 'var(--text-secondary)' }}>

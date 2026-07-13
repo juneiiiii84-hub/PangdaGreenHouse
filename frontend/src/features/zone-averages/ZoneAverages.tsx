@@ -531,8 +531,19 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
                       <span className={`w-[82px] text-center py-1 rounded-full text-[10px] font-black border uppercase whitespace-nowrap flex-shrink-0 ${item.color}`}>
                         {item.status}
                       </span>
-                      <span className="text-xs font-black font-mono whitespace-nowrap" style={{ color: 'var(--text-value)' }}>
-                        {item.range}
+                      <span className="text-xs font-black font-mono flex flex-wrap items-center gap-1" style={{ color: 'var(--text-value)' }}>
+                        {item.range.includes(' หรือ ') ? (
+                          <>
+                            {item.range.split(' หรือ ').map((part, pIdx, arr) => (
+                              <React.Fragment key={pIdx}>
+                                <span className="whitespace-nowrap">{part}</span>
+                                {pIdx < arr.length - 1 && <span className="text-[10px] text-slate-500 font-medium px-0.5">หรือ</span>}
+                              </React.Fragment>
+                            ))}
+                          </>
+                        ) : (
+                          <span className="whitespace-nowrap">{item.range}</span>
+                        )}
                       </span>
                     </div>
                     <span className="text-[11px] font-medium mt-1 sm:mt-0" style={{ color: 'var(--text-secondary)' }}>
