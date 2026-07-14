@@ -214,7 +214,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
               font: { size: 10, weight: 'bold' as const },
               maxRotation: 0,
               autoSkip: false,
-              callback: function(val: any, index: number) {
+              callback: function(_val: any, index: number) {
                 // แสดงผลทุกๆ 4 ชั่วโมง (ทุกๆ 8 ช่องเวลา ช่องละ 30 นาที) เพื่อให้สเกลเริ่มต้นและสิ้นสุดตรงกับจุดข้อมูลจริงเสมอ
                 if (index % 8 === 0) {
                   return labels[index];
@@ -337,7 +337,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
               font: { size: 10, weight: 'bold' as const },
               maxRotation: 0,
               autoSkip: false,
-              callback: function(val: any, index: number) {
+              callback: function(_val: any, index: number) {
                 // แสดงผลทุกๆ 4 ชั่วโมง (ทุกๆ 8 ช่องเวลา ช่องละ 30 นาที) เพื่อให้สเกลเริ่มต้นและสิ้นสุดตรงกับจุดข้อมูลจริงเสมอ
                 if (index % 8 === 0) {
                   return labels[index];
