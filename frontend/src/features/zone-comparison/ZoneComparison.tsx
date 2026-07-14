@@ -210,7 +210,19 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         scales: {
           x: {
             grid: { display: false },
-            ticks: { font: { size: 10, weight: 'bold' as const }, maxRotation: 0, autoSkip: true, autoSkipPadding: 15, color: textColor }
+            ticks: {
+              font: { size: 10, weight: 'bold' as const },
+              maxRotation: 0,
+              autoSkip: false,
+              callback: function(val: any, index: number) {
+                // แสดงผลทุกๆ 4 ชั่วโมง (ทุกๆ 8 ช่องเวลา ช่องละ 30 นาที) เพื่อให้สเกลเริ่มต้นและสิ้นสุดตรงกับจุดข้อมูลจริงเสมอ
+                if (index % 8 === 0) {
+                  return labels[index];
+                }
+                return '';
+              },
+              color: textColor
+            }
           },
           y: {
             border: { dash: [4, 4] },
@@ -321,7 +333,19 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         scales: {
           x: {
             grid: { display: false },
-            ticks: { font: { size: 10, weight: 'bold' as const }, maxRotation: 0, autoSkip: true, autoSkipPadding: 15, color: textColor }
+            ticks: {
+              font: { size: 10, weight: 'bold' as const },
+              maxRotation: 0,
+              autoSkip: false,
+              callback: function(val: any, index: number) {
+                // แสดงผลทุกๆ 4 ชั่วโมง (ทุกๆ 8 ช่องเวลา ช่องละ 30 นาที) เพื่อให้สเกลเริ่มต้นและสิ้นสุดตรงกับจุดข้อมูลจริงเสมอ
+                if (index % 8 === 0) {
+                  return labels[index];
+                }
+                return '';
+              },
+              color: textColor
+            }
           },
           yA: {
             type: 'linear' as const,
