@@ -456,8 +456,10 @@ void loop() {
   
   // สลับการต่อเน็ตและกู้คืนข้อมูลออฟไลน์แบบอัตโนมัติเมื่อตรวจพบการต่อ Wi-Fi สำเร็จ
   static bool wasOffline = true;
+  static unsigned long offlineStartTime = 0;
   
   if (WiFi.status() == WL_CONNECTED) {
+    offlineStartTime = 0; // รีเซ็ตเวลานับถอยหลังออฟไลน์สะสมเมื่อออนไลน์ปกติ
     if (wasOffline) {
       Serial.println("\n🟢 ระบบตรวจพบ Wi-Fi กลับมาต่อได้แล้ว!");
       syncTimeNTP(); // ซิงค์เวลารอบใหม่เพื่อป้องกันเวลาเพี้ยน
@@ -476,6 +478,23 @@ void loop() {
     if (!wasOffline) {
       Serial.println("\n🔴 [คำเตือน] ตรวจพบสายเน็ต / Wi-Fi หลุดการเชื่อมต่อ!");
       wasOffline = true;
+    }
+    
+    // ระบบกู้คืนสัญญาณเครือข่ายอัตโนมัติ (Self-Healing)
+    // เริ่มนับระยะเวลาขาดการติดต่อ หากติดต่อไม่ได้ต่อเนื่องเกิน 15 นาที ให้รีสตาร์ทบอร์ดควบคุมใหม่
+    if (offlineStartTime == 0) {
+      offlineStartTime = millis();
+      Serial.println("⏱️ [Self-Healing] เริ่มต้นนับเวลาขาดการเชื่อมต่อ (หากครบ 15 นาที บอร์ดจะรีสตาร์ทตัวเองเพื่อต่อสัญญาณใหม่)");
+    } else {
+      unsigned long elapsedOffline = millis() - offlineStartTime;
+      const unsigned long OFFLINE_REBOOT_THRESHOLD = 900000; // 15 นาที (900,000 มิลลิวินาที)
+      
+      if (elapsedOffline >= OFFLINE_REBOOT_THRESHOLD) {
+        Serial.printf("\n🚨 [วิกฤต] ขาดการเชื่อมต่อเครือข่ายสะสมเป็นเวลานานกว่า %d นาทีแล้ว!\n", OFFLINE_REBOOT_THRESHOLD / 60000);
+        Serial.println("🔄 กำลังรีสตาร์ทบอร์ด ESP32 อัตโนมัติ เพื่อล้างการค้างของระบบสัญญาณและเชื่อมต่อใหม่...");
+        delay(3000);
+        ESP.restart(); // สั่งรีสตาร์ทบอร์ด
+      }
     }
   }
   
