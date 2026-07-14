@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, RefreshCw } from 'lucide-react';
+import { Home } from 'lucide-react';
 import type { ThemePeriod } from '../../shared/utils/useTheme';
 
 interface ControlPanelProps {
@@ -10,29 +10,6 @@ interface ControlPanelProps {
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZoneSelect, theme }) => {
   const [showMap, setShowMap] = useState(false);
-  const [rebooting, setRebooting] = useState(false);
-  const [rebootSuccess, setRebootSuccess] = useState(false);
-
-  const handleRebootESP = async () => {
-    setRebooting(true);
-    setRebootSuccess(false);
-    try {
-      const response = await fetch('/api/sensors/reboot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ zone: selectedZone })
-      });
-      const result = await response.json();
-      if (result.success) {
-        setRebootSuccess(true);
-        setTimeout(() => setRebootSuccess(false), 5000);
-      }
-    } catch (err) {
-      console.error('Error requesting reboot:', err);
-    } finally {
-      setRebooting(false);
-    }
-  };
 
   // แผนที่จับคู่รหัสโซน (หลังบ้าน) กับตัวอักษรและตำแหน่งจริงตามภาพร่าง พร้อมข้อมูลกายภาพ
   const zones = [
@@ -227,44 +204,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({ selectedZone, onZone
             <span className="text-xs md:text-sm leading-none">{zone.name}</span>
           </button>
         ))}
-      </div>
-
-      {/* ส่วนจัดการอุปกรณ์ฮาร์ดแวร์ ESP32 สำหรับโซนที่เลือก */}
-      <div
-        className="mt-4 p-4 rounded-2xl border theme-transition flex flex-col sm:flex-row items-center justify-between gap-3"
-        style={{
-          backgroundColor: 'var(--bg-subtle)',
-          borderColor: 'var(--border-subtle)',
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-rose-500/10 text-rose-500 rounded-xl">
-            <RefreshCw size={18} className={rebooting ? 'animate-spin' : ''} />
-          </div>
-          <div className="text-left">
-            <h4 className="text-xs font-black" style={{ color: 'var(--text-primary)' }}>
-              จัดการอุปกรณ์บอร์ด ESP32 ({currentZone?.name})
-            </h4>
-            <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-              {rebootSuccess 
-                ? '✅ ส่งสัญญาณรีบูทสำเร็จ บอร์ดจะเริ่มใหม่เมื่อรายงานผลครั้งต่อไป' 
-                : 'ส่งคำสั่งรีสตาร์ทบอร์ดควบคุมเมื่อค่าข้อมูลหยุดนิ่งหรือไม่เป็นปัจจุบัน'}
-            </p>
-          </div>
-        </div>
-        
-        <button
-          onClick={handleRebootESP}
-          disabled={rebooting || rebootSuccess}
-          className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer border hover:opacity-90 active:scale-95 shrink-0 ${
-            rebootSuccess
-              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500'
-              : 'bg-rose-500/15 border-rose-500/30 text-rose-500'
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
-        >
-          <RefreshCw size={13} className={rebooting ? 'animate-spin' : ''} />
-          <span>{rebootSuccess ? 'ส่งคำสั่งแล้ว' : (rebooting ? 'กำลังส่งคำสั่ง...' : 'รีสตาร์ทบอร์ด (Restart ESP32)')}</span>
-        </button>
       </div>
     </div>
   );

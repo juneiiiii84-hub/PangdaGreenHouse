@@ -26,6 +26,30 @@ export default function App() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadWarning, setDownloadWarning] = useState<string>('');
 
+  const [rebooting, setRebooting] = useState(false);
+  const [rebootSuccess, setRebootSuccess] = useState(false);
+
+  const handleRebootESP = async () => {
+    setRebooting(true);
+    setRebootSuccess(false);
+    try {
+      const response = await fetch('/api/sensors/reboot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ zone: selectedZone })
+      });
+      const result = await response.json();
+      if (result.success) {
+        setRebootSuccess(true);
+        setTimeout(() => setRebootSuccess(false), 5000);
+      }
+    } catch (err) {
+      console.error('Error requesting reboot:', err);
+    } finally {
+      setRebooting(false);
+    }
+  };
+
   const datePickerRef = useRef<HTMLInputElement>(null);
 
   // ธีมกลางวัน/กลางคืนอัตโนมัติ
@@ -380,6 +404,47 @@ export default function App() {
                 <span>{isDownloading ? 'กำลังดึงข้อมูล...' : `ดาวน์โหลด Excel (${downloadZone === 'all' ? 'ทุกโซน' : `โซน ${downloadZone === '5' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '4' ? 'C' : downloadZone === '1' ? 'D' : 'E'}`})`}</span>
               </button>
             </div>
+          </section>
+        </div>
+
+        {/* ส่วนจัดการอุปกรณ์ฮาร์ดแวร์ ESP32 สำหรับโซนที่เลือก */}
+        <div className="animate-fade-in-up delay-300 mt-6">
+          <section
+            className="border rounded-[32px] p-5 shadow-xl theme-transition flex flex-col sm:flex-row items-center justify-between gap-4"
+            style={{
+              backgroundColor: 'var(--bg-section)',
+              borderColor: 'var(--border-card)',
+              boxShadow: `0 20px 60px ${themePeriod === 'night' ? 'rgba(0,0,0,0.3)' : 'rgba(241,245,249,0.3)'}`,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-3.5 bg-rose-500/10 text-rose-500 rounded-2xl">
+                <RefreshCcw size={22} className={rebooting ? 'animate-spin' : ''} />
+              </div>
+              <div className="text-left">
+                <h3 className="text-base md:text-lg font-black flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                  <span>จัดการอุปกรณ์บอร์ด ESP32 (โซน {selectedZone === 5 ? 'A' : selectedZone === 2 ? 'B' : selectedZone === 4 ? 'C' : selectedZone === 1 ? 'D' : 'E'})</span>
+                </h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  {rebootSuccess 
+                    ? '✅ ส่งสัญญาณรีบูทสำเร็จ บอร์ดจะเริ่มใหม่เมื่อรายงานผลครั้งต่อไป' 
+                    : 'ส่งคำสั่งรีสตาร์ทบอร์ดควบคุมระยะไกลเมื่อค่าข้อมูลหยุดนิ่งหรือไม่เป็นปัจจุบัน'}
+                </p>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleRebootESP}
+              disabled={rebooting || rebootSuccess}
+              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-black transition-all cursor-pointer border hover:opacity-90 active:scale-95 shrink-0 ${
+                rebootSuccess
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500'
+                  : 'bg-rose-500/15 border-rose-500/30 text-rose-500'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              <RefreshCcw size={15} className={rebooting ? 'animate-spin' : ''} />
+              <span>{rebootSuccess ? 'ส่งคำสั่งรีบูทแล้ว' : (rebooting ? 'กำลังส่งคำสั่ง...' : 'รีสตาร์ทบอร์ด (Restart ESP32)')}</span>
+            </button>
           </section>
         </div>
 
