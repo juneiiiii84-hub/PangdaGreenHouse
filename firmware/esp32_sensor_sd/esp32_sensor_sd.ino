@@ -186,6 +186,12 @@ bool sendReport(String timestamp, float temp, float hum, int lux, int zone) {
     // ค้นหาข้อความ "success":true ในผลตอบกลับ
     if (response.indexOf("\"success\":true") != -1) {
       success = true;
+      // ตรวจหาคำสั่งรีบูทบอร์ดจากเซิร์ฟเวอร์
+      if (response.indexOf("\"reboot\":true") != -1) {
+        Serial.println("\n🚨 [COMMAND] ได้รับคำสั่งรีบูทบอร์ดจากเซิร์ฟเวอร์! กำลังรีสตาร์ทใน 3 วินาที...");
+        delay(3000);
+        ESP.restart();
+      }
     } else {
       Serial.printf("⚠️ เซิร์ฟเวอร์ส่งข้อความปฏิเสธ: %s\n", response.c_str());
     }

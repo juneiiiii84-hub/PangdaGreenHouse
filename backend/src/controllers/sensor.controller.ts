@@ -75,6 +75,30 @@ const zoneParameterStates: Record<number, ZoneState> = {
   }
 };
 
+// ติดตามข้อมูลการแจ้งเตือนสภาวะออฟไลน์ของเซ็นเซอร์แต่ละโซน
+interface OfflineState {
+  lastSeenTime: number;
+  isOffline: boolean;
+  offlineAlertSent: boolean;
+}
+
+const zoneOfflineStates: Record<number, OfflineState> = {
+  1: { lastSeenTime: Date.now(), isOffline: false, offlineAlertSent: false },
+  2: { lastSeenTime: Date.now(), isOffline: false, offlineAlertSent: false },
+  3: { lastSeenTime: Date.now(), isOffline: false, offlineAlertSent: false },
+  4: { lastSeenTime: Date.now(), isOffline: false, offlineAlertSent: false },
+  5: { lastSeenTime: Date.now(), isOffline: false, offlineAlertSent: false }
+};
+
+// คิวรับส่งคำสั่งรีบูทอุปกรณ์ ESP32 สำหรับแต่ละโซน
+const pendingReboots: Record<number, boolean> = {
+  1: false,
+  2: false,
+  3: false,
+  4: false,
+  5: false
+};
+
 // ฟังก์ชันสำหรับส่งการแจ้งเตือนเข้า Discord Webhook
 async function sendDiscordNotify(payload: any) {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
@@ -165,12 +189,12 @@ export function evaluateAndTriggerAlert(zone: number, temp: number, hum: number,
             pState.alreadyAlerted = true;
             const durationText = limit === 30000 ? '30 วินาที' : (limit === 1800000 ? '30 นาที' : `${Math.round(limit / 60000)} นาที`);
             const mention = process.env.DISCORD_MENTION ? `${process.env.DISCORD_MENTION}\n` : '';
-            const alertMsg = `${mention}⚠️ **[แจ้งเตือนสภาวะผิดปกติสะสมเกิน ${durationText}]**\n` +
-                             `📌 **ตำแหน่ง:** ${zoneNames[zone] || `โซน ${zone}`}\n` +
-                             `▪️ **พารามิเตอร์:** ${label}\n` +
-                             `▪️ **ค่าที่วัดได้:** ${valueStr} (${diag.status})\n` +
-                             `▪️ **รายละเอียด:** ${diag.desc}\n` +
-                             `👉 **คำแนะนำ:** ${diag.recommendation.replace('✅ ', '').replace('👍 ', '').replace('⚠️ ', '').replace('🚨 ', '')}`;
+            const alertMsg = `${mention}⚠️ **[รายงานแจ้งเตือนสภาวะแวดล้อมคลาดเคลื่อนสะสมเกิน ${durationText}]**\n` +
+                             `📌 **พื้นที่:** ${zoneNames[zone] || `โซน ${zone}`}\n` +
+                             `▪️ **ตัวแปรตรวจวัด:** ${label}\n` +
+                             `▪️ **ค่าที่ตรวจวัดได้:** ${valueStr} (${diag.status})\n` +
+                             `▪️ **คำอธิบายสภาวะ:** ${diag.desc}\n` +
+                             `👉 **แนวทางจัดการ:** ${diag.recommendation.replace('✅ ', '').replace('👍 ', '').replace('⚠️ ', '').replace('🚨 ', '')}`;
             return alertMsg;
           }
         }
@@ -260,6 +284,34 @@ setInterval(async () => {
     }
   }
 }, FIVE_MINUTES);
+
+// ⏱️ ตัวตรวจเช็คสถานะออฟไลน์ของเซ็นเซอร์แต่ละโซน
+const OFFLINE_CHECK_INTERVAL = useMock ? 10000 : 60000; // 10 วินาทีในโหมดจำลอง, 1 นาทีในโหมดจริง
+setInterval(() => {
+  const envLimit = process.env.SENSOR_OFFLINE_THRESHOLD_MS ? parseInt(process.env.SENSOR_OFFLINE_THRESHOLD_MS) : null;
+  const threshold = envLimit !== null && !isNaN(envLimit) ? envLimit : (useMock ? 30000 : 600000); // 30 วินาทีในโหมดจำลอง, 10 นาทีในโหมดจริง
+  
+  for (let zone = 1; zone <= 5; zone++) {
+    const state = zoneOfflineStates[zone];
+    if (state) {
+      const elapsed = Date.now() - state.lastSeenTime;
+      if (elapsed > threshold && !state.isOffline) {
+        state.isOffline = true;
+        if (!state.offlineAlertSent) {
+          state.offlineAlertSent = true;
+          
+          const mention = process.env.DISCORD_MENTION ? `${process.env.DISCORD_MENTION}\n` : '';
+          const offlineMsg = `${mention}🚨 **[แจ้งเตือนสัญญาณเซ็นเซอร์ขาดการเชื่อมต่อ (Offline)]**\n` +
+                             `📌 **พื้นที่:** ${zoneNames[zone] || `โซน ${zone}`}\n` +
+                             `▪️ **สถานะ:** ขาดการเชื่อมต่อ (Offline) สะสมนานเกิน ${Math.round(threshold / 60000) || `${threshold / 1000} วินาที`}\n` +
+                             `⏰ **เวลาที่ขาดการติดต่อล่าสุด:** ${new Date(state.lastSeenTime).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} น.\n` +
+                             `🔧 **ข้อเสนอแนะ:** โปรดตรวจสอบแหล่งจ่ายไฟของบอร์ด ESP32 หรือจุดกระจายสัญญาณ Wi-Fi ในพื้นที่`;
+          sendDiscordNotify(offlineMsg);
+        }
+      }
+    }
+  }
+}, OFFLINE_CHECK_INTERVAL);
 
 // สคริปต์จำลองการทำงาน ESP32 ส่งค่าสดทุกๆ 5 วินาที
 if (useMock) {
@@ -407,6 +459,43 @@ export class SensorController {
       const tempNum = parseFloat(temperature);
       const humNum = parseFloat(humidity);
       const luxNum = parseFloat(lux);
+
+      // อัปเดตเวลาล่าสุดที่ได้รับข้อมูลและตรวจสอบการฟื้นตัวจากการออฟไลน์
+      const offlineState = zoneOfflineStates[zoneNum];
+      if (offlineState) {
+        offlineState.lastSeenTime = Date.now();
+        if (offlineState.isOffline) {
+          offlineState.isOffline = false;
+          offlineState.offlineAlertSent = false;
+          
+          // แจ้งเตือนเมื่อเซ็นเซอร์กลับมาออนไลน์ (Recovery)
+          const mention = process.env.DISCORD_MENTION ? `${process.env.DISCORD_MENTION}\n` : '';
+          const recoveryMsg = `${mention}📡 **[รายงานระบบเชื่อมต่อเซ็นเซอร์ทำงานปกติ]**\n` +
+                               `📌 **พื้นที่:** ${zoneNames[zoneNum] || `โซน ${zoneNum}`}\n` +
+                               `▪️ **สถานะ:** กลับมาเชื่อมต่อและรายงานข้อมูลได้ตามปกติแล้ว\n` +
+                               `⏰ **เวลาที่กลับมาออนไลน์:** ${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} น.`;
+          sendDiscordNotify(recoveryMsg);
+        }
+      }
+
+      // ตรวจสอบความผิดปกติทางกายภาพของเซ็นเซอร์ (Sensor Hardware Anomaly)
+      const isTempAnomaly = isNaN(tempNum) || tempNum === -99 || tempNum < -40 || tempNum > 80;
+      const isHumAnomaly = isNaN(humNum) || humNum === -99 || humNum < 0 || humNum > 100;
+      const isLuxAnomaly = isNaN(luxNum) || luxNum === -99 || luxNum < 0;
+
+      if (isTempAnomaly || isHumAnomaly || isLuxAnomaly) {
+        const anomalyDetails: string[] = [];
+        if (isTempAnomaly) anomalyDetails.push(`อุณหภูมิผิดปกติ (ค่าที่ตรวจวัดได้: ${temperature})`);
+        if (isHumAnomaly) anomalyDetails.push(`ความชื้นสัมพัทธ์ผิดปกติ (ค่าที่ตรวจวัดได้: ${humidity})`);
+        if (isLuxAnomaly) anomalyDetails.push(`ความส่องสว่างผิดปกติ (ค่าที่ตรวจวัดได้: ${lux})`);
+        
+        const mention = process.env.DISCORD_MENTION ? `${process.env.DISCORD_MENTION}\n` : '';
+        const anomalyMsg = `${mention}🚨 **[แจ้งเตือนเซ็นเซอร์ตรวจวัดทำงานผิดปกติ (Hardware Error)]**\n` +
+                           `📌 **พื้นที่:** ${zoneNames[zoneNum] || `โซน ${zoneNum}`}\n` +
+                           `▪️ **ปัญหาที่พบ:** ${anomalyDetails.join(', ')}\n` +
+                           `🔧 **ข้อเสนอแนะ:** โปรดตรวจสอบความเชื่อมต่อของอุปกรณ์เซ็นเซอร์ สายสัญญาณ หรือแหล่งจ่ายไฟในพื้นที่ทันที`;
+        sendDiscordNotify(anomalyMsg);
+      }
       
       const vpd = climateService.calculateVPD(tempNum, humNum);
       const ppfd = parseFloat((luxNum * 0.0299).toFixed(2));
@@ -446,18 +535,27 @@ export class SensorController {
       // 1. ยิงขึ้นหน้าเว็บสด
       dispatchSSETicks([tick]);
 
-      // 2. พักในบัฟเฟอร์เตรียมเฉลี่ย 5 นาที
-      const buf = zoneBuffers[zoneNum];
-      if (buf) {
-        buf.temperature.push(tempNum);
-        buf.humidity.push(humNum);
-        buf.lux.push(luxNum);
+      // หากเซ็นเซอร์ทำงานผิดปกติ จะไม่นำค่าไปคำนวณเฉลี่ยหรือแจ้งเตือนเกณฑ์สภาพอากาศเพื่อป้องกันข้อมูลผิดเพี้ยน
+      if (!isTempAnomaly && !isHumAnomaly && !isLuxAnomaly) {
+        // 2. พักในบัฟเฟอร์เตรียมเฉลี่ย 5 นาที
+        const buf = zoneBuffers[zoneNum];
+        if (buf) {
+          buf.temperature.push(tempNum);
+          buf.humidity.push(humNum);
+          buf.lux.push(luxNum);
+        }
+
+        // 3. ประเมินความเหมาะสมสภาพอากาศเพื่อแจ้งเตือนทาง Discord (เฉพาะการรายงานสดปกติเท่านั้น)
+        evaluateAndTriggerAlert(zoneNum, tempNum, humNum, luxNum);
       }
 
-      // 3. ประเมินความเหมาะสมสภาพอากาศเพื่อแจ้งเตือนทาง Discord (เฉพาะการรายงานสดปกติเท่านั้น)
-      evaluateAndTriggerAlert(zoneNum, tempNum, humNum, luxNum);
+      // ตรวจสอบและส่งมอบคำสั่งรีบูทกลับไปยังบอร์ด ESP32
+      const rebootNeeded = pendingReboots[zoneNum] === true;
+      if (rebootNeeded) {
+        pendingReboots[zoneNum] = false; // เคลียร์สถานะหลังจากส่งคำสั่งแล้ว
+      }
 
-      res.json({ success: true, message: 'บันทึกเรียบร้อย' });
+      res.json({ success: true, message: 'บันทึกเรียบร้อย', reboot: rebootNeeded });
     } catch (e: any) {
       res.status(500).json({ success: false, error: e.message });
     }
@@ -542,6 +640,21 @@ export class SensorController {
         },
         overall
       });
+    } catch (e: any) {
+      res.status(500).json({ success: false, error: e.message });
+    }
+  }
+
+  async requestReboot(req: Request, res: Response) {
+    try {
+      const { zone } = req.body;
+      if (zone === undefined) {
+        return res.status(400).json({ success: false, error: 'กรุณาระบุโซนที่ต้องการส่งสัญญาณรีบูท' });
+      }
+      const zoneNum = parseInt(zone);
+      pendingReboots[zoneNum] = true;
+      console.log(`🔌 [คำสั่งรีบูท] ผู้ใช้ตั้งคำสั่งรีบูทล่วงหน้าสำหรับโซน ${zoneNum} เรียบร้อยแล้ว`);
+      res.json({ success: true, message: `ส่งคำสั่งรีบูทสำเร็จ บอร์ดโซน ${zoneNum} จะรีสตาร์ทตัวเมื่อเชื่อมต่อรายงานข้อมูลเข้ามาในรอบถัดไป` });
     } catch (e: any) {
       res.status(500).json({ success: false, error: e.message });
     }

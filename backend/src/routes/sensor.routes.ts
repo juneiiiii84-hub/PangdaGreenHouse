@@ -9,3 +9,4 @@ sensorRoutes.get('/latest', (req, res) => sensorController.getLatest(req, res));
 sensorRoutes.get('/logs', (req, res) => sensorController.getLogs(req, res));
 sensorRoutes.get('/history', (req, res) => sensorController.getHistory(req, res));
 sensorRoutes.get('/diagnostics', (req, res) => sensorController.getDiagnostics(req, res));
+sensorRoutes.post('/reboot', (req, res) => sensorController.requestReboot(req, res));
