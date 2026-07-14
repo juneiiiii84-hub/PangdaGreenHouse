@@ -30,6 +30,10 @@ export default function App() {
   const [rebootSuccess, setRebootSuccess] = useState(false);
 
   const handleRebootESP = async () => {
+    const zoneName = selectedZone === 5 ? 'A' : selectedZone === 2 ? 'B' : selectedZone === 4 ? 'C' : selectedZone === 1 ? 'D' : 'E';
+    const isConfirmed = window.confirm(`คุณต้องการส่งสัญญาณรีสตาร์ทอุปกรณ์บอร์ด ESP32 สำหรับโซน ${zoneName} หรือไม่?`);
+    if (!isConfirmed) return;
+
     setRebooting(true);
     setRebootSuccess(false);
     try {
@@ -410,22 +414,21 @@ export default function App() {
         {/* ส่วนจัดการอุปกรณ์ฮาร์ดแวร์ ESP32 สำหรับโซนที่เลือก */}
         <div className="animate-fade-in-up delay-300 mt-6">
           <section
-            className="border rounded-[32px] p-5 shadow-xl theme-transition flex flex-col sm:flex-row items-center justify-between gap-4"
+            className="border rounded-2xl p-4 shadow-md theme-transition flex flex-col sm:flex-row items-center justify-between gap-4"
             style={{
               backgroundColor: 'var(--bg-section)',
               borderColor: 'var(--border-card)',
-              boxShadow: `0 20px 60px ${themePeriod === 'night' ? 'rgba(0,0,0,0.3)' : 'rgba(241,245,249,0.3)'}`,
             }}
           >
             <div className="flex items-center gap-3">
-              <div className="p-3.5 bg-rose-500/10 text-rose-500 rounded-2xl">
-                <RefreshCcw size={22} className={rebooting ? 'animate-spin' : ''} />
+              <div className="p-2.5 bg-rose-500/10 text-rose-500 rounded-xl">
+                <RefreshCcw size={18} className={rebooting ? 'animate-spin' : ''} />
               </div>
               <div className="text-left">
-                <h3 className="text-base md:text-lg font-black flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                <h3 className="text-sm font-black flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                   <span>จัดการอุปกรณ์บอร์ด ESP32 (โซน {selectedZone === 5 ? 'A' : selectedZone === 2 ? 'B' : selectedZone === 4 ? 'C' : selectedZone === 1 ? 'D' : 'E'})</span>
                 </h3>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
                   {rebootSuccess 
                     ? '✅ ส่งสัญญาณรีบูทสำเร็จ บอร์ดจะเริ่มใหม่เมื่อรายงานผลครั้งต่อไป' 
                     : 'ส่งคำสั่งรีสตาร์ทบอร์ดควบคุมระยะไกลเมื่อค่าข้อมูลหยุดนิ่งหรือไม่เป็นปัจจุบัน'}
@@ -436,14 +439,14 @@ export default function App() {
             <button
               onClick={handleRebootESP}
               disabled={rebooting || rebootSuccess}
-              className={`w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-black transition-all cursor-pointer border hover:opacity-90 active:scale-95 shrink-0 ${
+              className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer border hover:opacity-90 active:scale-95 shrink-0 ${
                 rebootSuccess
                   ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500'
                   : 'bg-rose-500/15 border-rose-500/30 text-rose-500'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              <RefreshCcw size={15} className={rebooting ? 'animate-spin' : ''} />
-              <span>{rebootSuccess ? 'ส่งคำสั่งรีบูทแล้ว' : (rebooting ? 'กำลังส่งคำสั่ง...' : 'รีสตาร์ทบอร์ด (Restart ESP32)')}</span>
+              <RefreshCcw size={13} className={rebooting ? 'animate-spin' : ''} />
+              <span>{rebootSuccess ? 'ส่งคำสั่งแล้ว' : (rebooting ? 'กำลังส่งคำสั่ง...' : 'รีสตาร์ทบอร์ด (Restart ESP32)')}</span>
             </button>
           </section>
         </div>
