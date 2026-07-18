@@ -101,17 +101,20 @@ async function sendDiscordNotify(payload: any) {
   }
 }
 
-// รายชื่อโซนและรายละเอียดตำแหน่งเพื่อความสมจริง
+// รายชื่อโซนที่แสดงในการแจ้งเตือน (โซน A - E)
 const zoneNames: Record<number, string> = {
-  1: 'โซน 1: โรงเรือนหลัก (กล้วยไม้/ไม้ดอก)',
-  2: 'โซน 2: โรงเรือนชำ (ฝั่งพัดลม Exhaust)',
-  3: 'โซน 3: ห้องเพาะชำเนื้อเยื่อ (Propagation)',
-  4: 'โซน 4: ฝั่งทางเข้าโรงเรือนหลัก (Entrance)',
-  5: 'โซน 5: พื้นที่กรองแสงพิเศษ (Shaded Area)'
+  5: 'โซน A',
+  2: 'โซน B',
+  4: 'โซน C',
+  1: 'โซน D',
+  3: 'โซน E'
 };
 
 // ฟังก์ชันประเมินความเหมาะสมของสภาพอากาศและยิงแจ้งเตือนเชิงรุก
 export function evaluateAndTriggerAlert(zone: number, temp: number, hum: number, lux: number) {
+  // ไม่ส่งการแจ้งเตือนสภาพอากาศของ Zone E (โซน 3 - นอกโรงเรือน)
+  if (zone === 3) return;
+
   // 1. ตรวจสอบเงื่อนไขเวลา: 06:30 - 18:30 (เวลาประเทศไทย GMT+7)
   const now = new Date();
   const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
