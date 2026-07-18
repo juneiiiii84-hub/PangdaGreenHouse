@@ -32,16 +32,9 @@ const int zoneId = 5;                         // ⚠️ เปลี่ยนเ
 // 4. พินเชื่อมต่อการ์ดรีดเดอร์ SD Card (พิน SPI มาตรฐาน ESP32)
 #define SD_CS_PIN 5   // ขา Chip Select (CS) ต่อเข้า Pin 5 ของ ESP32
 
-// 5. พินควบคุม Solid State Relay (SSR) ทั้ง 3 แชนเนล (Active Low)
-// การต่อขั้ว: ขั้วบวก (+) ของอินพุต SSR ต่อ 5V / ขั้วลบ (-) ของอินพุต SSR ต่อเข้ากับขา ESP32 ด้านล่าง
-#define SSR_PIN_1 12   // ขาสำหรับระบบระบายความร้อน (เช่น พัดลม หรือ ปั๊มพ่นน้ำระบายความร้อน)
-#define SSR_PIN_2 13   // ขาสำหรับระบบพ่นหมอกเพิ่มความชื้น (เมื่อความชื้นต่ำกว่าเกณฑ์)
-#define SSR_PIN_3 14   // ขาสำหรับระบบไฟช่วยปลูก Grow Light (เมื่อแสงสลัวเกินไป)
-
 // 6. เปิดใช้งานการวัดเซ็นเซอร์จริง (DHT22 / BH1750) 
 // หากยังไม่มีอุปกรณ์ต่อจริง ให้คอมเมนต์บรรทัดนี้ออก ระบบจะใช้ข้อมูลจำลอง (Mock Data) อัตโนมัติเพื่อตรวจสอบผลเทส
 #define USE_REAL_SENSORS 
-
 #ifdef USE_REAL_SENSORS
   #include <DHT.h>
   #include <Wire.h>
@@ -63,6 +56,7 @@ const int   daylightOffset_sec = 0;   // ประเทศไทยไม่ม
 // ตั้งค่า Watchdog Timer
 #define WDT_TIMEOUT_MS 15000 // 15 วินาที
 
+bool sdCardReady = false; // ตัวแปรสถานะของ SD Card
 unsigned long lastReadTime = 0;
 const unsigned long readInterval = 5000; // รอบการอ่านค่าส่งทุกๆ 5 วินาที
 
@@ -119,19 +113,29 @@ bool initSDCard() {
   Serial.print("💾 กำลังติดตั้ง SD Card...");
   if(!SD.begin(SD_CS_PIN)){
     Serial.println("ล้มเหลว!");
+    sdCardReady = false;
     return false;
   }
   uint8_t cardType = SD.cardType();
   if(cardType == CARD_NONE){
     Serial.println("ตรวจพบการ์ดหลวม หรือไม่มีการเชื่อมต่อ SD card");
+    sdCardReady = false;
     return false;
   }
   Serial.println("สำเร็จ!");
+  sdCardReady = true;
   return true;
 }
 
 // บันทึกข้อมูลค้างลงในไฟล์ SD card เมื่อออฟไลน์
 void logDataToSD(String timestamp, float temp, float hum, int lux, int zone) {
+  if (!sdCardReady) {
+    Serial.println("⚠️ [SD Card] ตรวจพบสถานะไม่พร้อมใช้งาน กำลังลองติดตั้งใหม่อีกครั้ง...");
+    if (!initSDCard()) {
+      Serial.println("❌ [SD Card] ติดตั้งใหม่ล้มเหลว ข้ามการบันทึก");
+      return;
+    }
+  }
   // เปิดไฟล์แบบเขียนต่อท้าย (APPEND)
   File file = SD.open("/offline_logs.csv", FILE_APPEND);
   if(!file){
@@ -205,6 +209,13 @@ bool sendReport(String timestamp, float temp, float hum, int lux, int zone) {
 
 // ฟังก์ชันกู้คืนข้อมูลและอัปโหลดประวัติจาก SD card ย้อนหลังเมื่อออนไลน์
 void recoverOfflineData() {
+  if (!sdCardReady) {
+    Serial.println("⚠️ [SD Card] ตรวจพบสถานะไม่พร้อมใช้งาน กำลังลองติดตั้งใหม่เพื่อกู้คืนข้อมูล...");
+    if (!initSDCard()) {
+      return;
+    }
+  }
+  
   if (!SD.exists("/offline_logs.csv")) {
     return; // ไม่มีไฟล์ข้อมูลค้าง
   }
@@ -415,14 +426,7 @@ void setup() {
     }
   #endif
 
-  // ตั้งค่าขาควบคุม SSR ทั้ง 3 พินเป็น OUTPUT และสั่งไฟ HIGH เป็นค่าเริ่มต้น (ดับ SSR)
-  pinMode(SSR_PIN_1, OUTPUT);
-  pinMode(SSR_PIN_2, OUTPUT);
-  pinMode(SSR_PIN_3, OUTPUT);
-  digitalWrite(SSR_PIN_1, HIGH);
-  digitalWrite(SSR_PIN_2, HIGH);
-  digitalWrite(SSR_PIN_3, HIGH);
-  Serial.println("🔌 [SSR] ติดตั้งและปิดสถานะรีเลย์เริ่มต้นสำเร็จ (HIGH)");
+  Serial.println("🔌 [System] บอร์ดทำงานเฉพาะตรวจวัดเซ็นเซอร์และ SD Card เท่านั้น (ไม่มีการควบคุมรีเลย์ SSR)");
 
   // เชื่อมต่อ Wi-Fi
   Serial.printf("🌐 กำลังเชื่อมต่อ Wi-Fi: %s ", ssid);
@@ -481,19 +485,20 @@ void loop() {
     }
     
     // ระบบกู้คืนสัญญาณเครือข่ายอัตโนมัติ (Self-Healing)
-    // เริ่มนับระยะเวลาขาดการติดต่อ หากติดต่อไม่ได้ต่อเนื่องเกิน 15 นาที ให้รีสตาร์ทบอร์ดควบคุมใหม่
+    // เริ่มนับระยะเวลาขาดการติดต่อ หากติดต่อไม่ได้ต่อเนื่องเกิน 15 นาที ให้เคลียร์และเชื่อมต่อ Wi-Fi ใหม่
     if (offlineStartTime == 0) {
       offlineStartTime = millis();
-      Serial.println("⏱️ [Self-Healing] เริ่มต้นนับเวลาขาดการเชื่อมต่อ (หากครบ 15 นาที บอร์ดจะรีสตาร์ทตัวเองเพื่อต่อสัญญาณใหม่)");
+      Serial.println("⏱️ [Self-Healing] เริ่มต้นนับเวลาขาดการเชื่อมต่อ (หากครบ 15 นาที บอร์ดจะทำการล้างการเชื่อมต่อและพยายามต่อใหม่)");
     } else {
       unsigned long elapsedOffline = millis() - offlineStartTime;
       const unsigned long OFFLINE_REBOOT_THRESHOLD = 900000; // 15 นาที (900,000 มิลลิวินาที)
       
       if (elapsedOffline >= OFFLINE_REBOOT_THRESHOLD) {
-        Serial.printf("\n🚨 [วิกฤต] ขาดการเชื่อมต่อเครือข่ายสะสมเป็นเวลานานกว่า %d นาทีแล้ว!\n", OFFLINE_REBOOT_THRESHOLD / 60000);
-        Serial.println("🔄 กำลังรีสตาร์ทบอร์ด ESP32 อัตโนมัติ เพื่อล้างการค้างของระบบสัญญาณและเชื่อมต่อใหม่...");
-        delay(3000);
-        ESP.restart(); // สั่งรีสตาร์ทบอร์ด
+        Serial.printf("\n🚨 [Self-Healing] ขาดการเชื่อมต่อเครือข่ายสะสมเป็นเวลานานกว่า %d นาที! กำลังล้างบัสและเชื่อมต่อใหม่...\n", OFFLINE_REBOOT_THRESHOLD / 60000);
+        WiFi.disconnect();
+        delay(500);
+        WiFi.begin(ssid, password);
+        offlineStartTime = millis(); // รีเซ็ตตัวจับเวลาเพื่อทดลองเชื่อมต่อใหม่ในรอบถัดไป
       }
     }
   }
@@ -511,35 +516,7 @@ void loop() {
     Serial.printf("\n📊 [วัดค่าได้] Temp: %.2fC | Hum: %.2f%% | Lux: %d | PPFD: %.2f umol/m2/s | Time: %s\n", 
                   temperature, humidity, lux, ppfd, currentTimestamp.c_str());
                   
-    // --- ควบคุมรีเลย์ Solid State Relay (SSR) ทั้ง 3 แชนเนลตามระดับสภาพแวดล้อม ---
-    // (ใช้ตรรกะ Active Low: สั่งจ่าย LOW เพื่อให้ SSR เปิด (ON) และสั่งจ่าย HIGH เพื่อให้ SSR ปิด (OFF))
-    
-    // 1) ระบบควบคุมอุณหภูมิ (SSR_PIN_1) -> ควบคุมพัดลมระบายอากาศ / ปั๊มพ่นน้ำระบายความร้อน
-    if (temperature > 30.0) {
-      digitalWrite(SSR_PIN_1, LOW);  // เปิดพัดลม / ปั๊มน้ำ
-      Serial.println("🔌 [SSR 1] อากาศร้อนเกินไป (Temp > 30C) -> เปิดระบบระบายความร้อน (ON/LOW)");
-    } else if (temperature <= 28.0) {
-      digitalWrite(SSR_PIN_1, HIGH); // ปิดพัดลม / ปั๊มน้ำ (มี Hysteresis ป้องกันตัดต่อบ่อย)
-      Serial.println("🔌 [SSR 1] อุณหภูมิปกติ (Temp <= 28C) -> ปิดระบบระบายความร้อน (OFF/HIGH)");
-    }
 
-    // 2) ระบบควบคุมความชื้น (SSR_PIN_2) -> ควบคุมระบบพ่นหมอก / เครื่องพ่นความชื้น
-    if (humidity < 60.0) {
-      digitalWrite(SSR_PIN_2, LOW);  // เปิดเครื่องพ่นหมอก
-      Serial.println("🔌 [SSR 2] อากาศแห้งเกินไป (Hum < 60%) -> เปิดเครื่องพ่นหมอกเพิ่มความชื้น (ON/LOW)");
-    } else if (humidity >= 70.0) {
-      digitalWrite(SSR_PIN_2, HIGH); // ปิดเครื่องพ่นหมอก
-      Serial.println("🔌 [SSR 2] ความชื้นเพียงพอแล้ว (Hum >= 70%) -> ปิดเครื่องพ่นหมอก (OFF/HIGH)");
-    }
-
-    // 3) ระบบควบคุมไฟส่องสว่าง (SSR_PIN_3) -> ควบคุมไฟช่วยปลูก (Grow Light)
-    if (lux < 21600) {
-      digitalWrite(SSR_PIN_3, LOW);  // เปิดไฟช่วยปลูก
-      Serial.println("🔌 [SSR 3] ความเข้มแสงต่ำกว่าเกณฑ์มาตรฐาน -> เปิดไฟช่วยปลูก Grow Light (ON/LOW)");
-    } else if (lux >= 30000) {
-      digitalWrite(SSR_PIN_3, HIGH); // ปิดไฟช่วยปลูก
-      Serial.println("🔌 [SSR 3] ความเข้มแสงแดดเพียงพอแล้ว -> ปิดไฟช่วยปลูก (OFF/HIGH)");
-    }
                   
     // ยิงส่งแบบเรียลไทม์ปกติ
     bool sendSuccess = false;

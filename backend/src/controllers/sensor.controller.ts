@@ -1,14 +1,31 @@
 import type { Request, Response } from 'express';
 import { SupabaseRepository } from '../repositories/supabase.repository.js';
 import { MockRepository } from '../repositories/mock.repository.js';
+import { SQLiteRepository } from '../repositories/sqlite.repository.js';
 import { ClimateService } from '../services/climate.service.js';
 import type { DiagnosticResult, OverallEvaluation } from '../services/climate.service.js';
 import type { SensorData } from '../repositories/sensor.repository.interface.js';
 
-// ตรวจหาค่าความต้องการโหมดจำลองพารามิเตอร์
-const useMock = process.env.USE_MOCK === 'true';
+// สลับการใช้งานฐานข้อมูล: 'sqlite' | 'supabase' | 'mock'
+const dbType = process.env.DATABASE_TYPE || (process.env.USE_MOCK === 'true' ? 'mock' : 'supabase');
+const useMock = dbType === 'mock';
 
-export const sensorRepo = useMock ? new MockRepository() : new SupabaseRepository();
+const getRepository = () => {
+  switch (dbType) {
+    case 'sqlite':
+      console.log('💾 [Database] ใช้ SQLite Local Database (เก็บข้อมูลในคอมพิวเตอร์นี้)');
+      return new SQLiteRepository();
+    case 'mock':
+      console.log('⚡ [Database] ใช้ Mock Database (ข้อมูลจำลองในหน่วยความจำ)');
+      return new MockRepository();
+    case 'supabase':
+    default:
+      console.log('☁️ [Database] ใช้ Supabase Cloud Database (เก็บข้อมูลบนคลาวด์)');
+      return new SupabaseRepository();
+  }
+};
+
+export const sensorRepo = getRepository();
 export const climateService = new ClimateService(sensorRepo);
 
 // จัดเก็บรายชื่อเบราว์เซอร์ที่เปิดเกาะท่อสตรีมมิ่งสด
@@ -135,6 +152,9 @@ const zoneNames: Record<number, string> = {
 
 // ฟังก์ชันประเมินความเหมาะสมของสภาพอากาศและยิงแจ้งเตือนเชิงรุก
 export function evaluateAndTriggerAlert(zone: number, temp: number, hum: number, lux: number) {
+  // ไม่ส่งแจ้งเตือนการวัดค่าของ Zone E (โซน 5)
+  if (zone === 5) return;
+
   // 1. ตรวจสอบเงื่อนไขเวลา: 06:30 - 18:30 (เวลาประเทศไทย GMT+7)
   const now = new Date();
   const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -292,6 +312,7 @@ setInterval(() => {
   const threshold = envLimit !== null && !isNaN(envLimit) ? envLimit : (useMock ? 30000 : 600000); // 30 วินาทีในโหมดจำลอง, 10 นาทีในโหมดจริง
   
   for (let zone = 1; zone <= 5; zone++) {
+    if (zone === 5) continue; // เว้นการตรวจวัดและการแจ้งเตือนออฟไลน์ของ Zone E
     const state = zoneOfflineStates[zone];
     if (state) {
       const elapsed = Date.now() - state.lastSeenTime;
@@ -468,13 +489,15 @@ export class SensorController {
           offlineState.isOffline = false;
           offlineState.offlineAlertSent = false;
           
-          // แจ้งเตือนเมื่อเซ็นเซอร์กลับมาออนไลน์ (Recovery)
-          const mention = process.env.DISCORD_MENTION ? `${process.env.DISCORD_MENTION}\n` : '';
-          const recoveryMsg = `${mention}📡 **[รายงานระบบเชื่อมต่อเซ็นเซอร์ทำงานปกติ]**\n` +
-                               `📌 **พื้นที่:** ${zoneNames[zoneNum] || `โซน ${zoneNum}`}\n` +
-                               `▪️ **สถานะ:** กลับมาเชื่อมต่อและรายงานข้อมูลได้ตามปกติแล้ว\n` +
-                               `⏰ **เวลาที่กลับมาออนไลน์:** ${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} น.`;
-          sendDiscordNotify(recoveryMsg);
+          // แจ้งเตือนเมื่อเซ็นเซอร์กลับมาออนไลน์ (Recovery) - ยกเว้น Zone E
+          if (zoneNum !== 5) {
+            const mention = process.env.DISCORD_MENTION ? `${process.env.DISCORD_MENTION}\n` : '';
+            const recoveryMsg = `${mention}📡 **[รายงานระบบเชื่อมต่อเซ็นเซอร์ทำงานปกติ]**\n` +
+                                 `📌 **พื้นที่:** ${zoneNames[zoneNum] || `โซน ${zoneNum}`}\n` +
+                                 `▪️ **สถานะ:** กลับมาเชื่อมต่อและรายงานข้อมูลได้ตามปกติแล้ว\n` +
+                                 `⏰ **เวลาที่กลับมาออนไลน์:** ${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} น.`;
+            sendDiscordNotify(recoveryMsg);
+          }
         }
       }
 
@@ -483,7 +506,7 @@ export class SensorController {
       const isHumAnomaly = isNaN(humNum) || humNum === -99 || humNum < 0 || humNum > 100;
       const isLuxAnomaly = isNaN(luxNum) || luxNum === -99 || luxNum < 0;
 
-      if (isTempAnomaly || isHumAnomaly || isLuxAnomaly) {
+      if ((isTempAnomaly || isHumAnomaly || isLuxAnomaly) && zoneNum !== 5) {
         const anomalyDetails: string[] = [];
         if (isTempAnomaly) anomalyDetails.push(`อุณหภูมิผิดปกติ (ค่าที่ตรวจวัดได้: ${temperature})`);
         if (isHumAnomaly) anomalyDetails.push(`ความชื้นสัมพัทธ์ผิดปกติ (ค่าที่ตรวจวัดได้: ${humidity})`);

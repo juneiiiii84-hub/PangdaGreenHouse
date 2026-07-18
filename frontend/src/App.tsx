@@ -31,18 +31,13 @@ export default function App() {
 
   const handleRebootESP = async () => {
     const zoneName = selectedZone === 5 ? 'A' : selectedZone === 2 ? 'B' : selectedZone === 4 ? 'C' : selectedZone === 1 ? 'D' : 'E';
-    const isConfirmed = window.confirm(`คุณต้องการส่งสัญญาณรีสตาร์ทอุปกรณ์บอร์ด ESP32 สำหรับโซน ${zoneName} หรือไม่?`);
+    const isConfirmed = window.confirm(`คุณต้องการส่งคำสั่งรีเฟรชการเชื่อมต่อบอร์ด ESP32 สำหรับโซน ${zoneName} หรือไม่?`);
     if (!isConfirmed) return;
 
     setRebooting(true);
     setRebootSuccess(false);
     try {
-      const response = await fetch('/api/sensors/reboot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ zone: selectedZone })
-      });
-      const result = await response.json();
+      const result = await api.requestReboot(selectedZone);
       if (result.success) {
         setRebootSuccess(true);
         setTimeout(() => setRebootSuccess(false), 5000);
@@ -430,8 +425,8 @@ export default function App() {
                 </h3>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
                   {rebootSuccess 
-                    ? '✅ ส่งสัญญาณรีบูทสำเร็จ บอร์ดจะเริ่มใหม่เมื่อรายงานผลครั้งต่อไป' 
-                    : 'ส่งคำสั่งรีสตาร์ทบอร์ดควบคุมระยะไกลเมื่อค่าข้อมูลหยุดนิ่งหรือไม่เป็นปัจจุบัน'}
+                    ? '✅ ส่งคำสั่งรีเฟรชบอร์ดสำเร็จ บอร์ดจะทำการเริ่มการเชื่อมต่อใหม่และดึงข้อมูลอัปเดต' 
+                    : 'ส่งคำสั่งรีเฟรชบอร์ดควบคุมระยะไกลเพื่อดึงค่าข้อมูลล่าสุดเมื่อข้อมูลหยุดนิ่ง'}
                 </p>
               </div>
             </div>
@@ -446,7 +441,7 @@ export default function App() {
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               <RefreshCcw size={13} className={rebooting ? 'animate-spin' : ''} />
-              <span>{rebootSuccess ? 'ส่งคำสั่งแล้ว' : (rebooting ? 'กำลังส่งคำสั่ง...' : 'รีสตาร์ทบอร์ด (Restart ESP32)')}</span>
+              <span>{rebootSuccess ? 'ส่งคำสั่งแล้ว' : (rebooting ? 'กำลังส่งคำสั่ง...' : 'รีเฟรชบอร์ด (Refresh ESP32)')}</span>
             </button>
           </section>
         </div>
