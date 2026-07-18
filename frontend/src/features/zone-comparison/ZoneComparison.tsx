@@ -57,9 +57,9 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
   const [compareMetricB, setCompareMetricB] = useState<MetricType>('humidity');
   const [metricsZone, setMetricsZone] = useState<number>(1);
 
-  // คำนวณสถิติย้อนหลัง 24 ชั่วโมง (Min, Max, Avg)
+  // คำนวณสถิติย้อนหลัง 12 ชั่วโมง (Min, Max, Avg)
   const getZoneStats = (zoneId: number, metric: MetricType) => {
-    const sortedData = get24HourData();
+    const sortedData = get12HourData();
     const zoneRecords = sortedData.filter(d => d.zone === zoneId);
     if (zoneRecords.length === 0) return { min: 0, max: 0, avg: 0, count: 0 };
 
@@ -111,24 +111,24 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
 
 
 
-  // กรองข้อมูล 24 ชม.ย้อนหลัง
-  const get24HourData = () => {
+  // กรองข้อมูล 12 ชม.ย้อนหลัง
+  const get12HourData = () => {
     const now = new Date();
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
     return [...dataList]
-      .filter(d => new Date(d.created_at) >= twentyFourHoursAgo)
+      .filter(d => new Date(d.created_at) >= twelveHoursAgo)
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   };
 
   const getChartDataAndOptions = () => {
     const now = new Date();
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
     const sortedData = [...dataList]
-      .filter(d => new Date(d.created_at) >= twentyFourHoursAgo)
+      .filter(d => new Date(d.created_at) >= twelveHoursAgo)
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
     const labels: string[] = [];
-    for (let i = 48; i >= 0; i--) {
+    for (let i = 24; i >= 0; i--) {
       const time = new Date(now.getTime() - i * 30 * 60 * 1000);
       const h = time.getHours().toString().padStart(2, '0');
       const m = time.getMinutes() < 30 ? '00' : '30';
@@ -142,11 +142,11 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         const zc = zoneConfig.find(z => z.id === zone)!;
         const zoneData = sortedData.filter(d => d.zone === zone);
 
-        // แมปข้อมูลเข้า 49 จุดเวลา โดยเฉลี่ยข้อมูลที่ตกอยู่ในช่วง 30 นาทีของแต่ละช่องเวลา
+        // แมปข้อมูลเข้า 25 จุดเวลา โดยเฉลี่ยข้อมูลที่ตกอยู่ในช่วง 30 นาทีของแต่ละช่องเวลา
         const dataPoints = labels.map((_, i) => {
           if (zoneData.length === 0) return null;
           
-          const slotTimeMs = nowMs - (48 - i) * 30 * 60 * 1000;
+          const slotTimeMs = nowMs - (24 - i) * 30 * 60 * 1000;
           const rangeStart = slotTimeMs - 15 * 60 * 1000;
           const rangeEnd = slotTimeMs + 15 * 60 * 1000;
           
@@ -210,19 +210,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         scales: {
           x: {
             grid: { display: false },
-            ticks: {
-              font: { size: 10, weight: 'bold' as const },
-              maxRotation: 0,
-              autoSkip: false,
-              callback: function(_val: any, index: number) {
-                // แสดงผลทุกๆ 4 ชั่วโมง (ทุกๆ 8 ช่องเวลา ช่องละ 30 นาที) เพื่อให้สเกลเริ่มต้นและสิ้นสุดตรงกับจุดข้อมูลจริงเสมอ
-                if (index % 8 === 0) {
-                  return labels[index];
-                }
-                return '';
-              },
-              color: textColor
-            }
+            ticks: { font: { size: 10, weight: 'bold' as const }, maxRotation: 0, autoSkip: true, autoSkipPadding: 15, color: textColor }
           },
           y: {
             border: { dash: [4, 4] },
@@ -238,7 +226,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
 
       const dataA = labels.map((_, i) => {
         if (zoneData.length === 0) return null;
-        const slotTimeMs = nowMs - (48 - i) * 30 * 60 * 1000;
+        const slotTimeMs = nowMs - (24 - i) * 30 * 60 * 1000;
         const rangeStart = slotTimeMs - 15 * 60 * 1000;
         const rangeEnd = slotTimeMs + 15 * 60 * 1000;
         
@@ -260,7 +248,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
 
       const dataB = labels.map((_, i) => {
         if (zoneData.length === 0) return null;
-        const slotTimeMs = nowMs - (48 - i) * 30 * 60 * 1000;
+        const slotTimeMs = nowMs - (24 - i) * 30 * 60 * 1000;
         const rangeStart = slotTimeMs - 15 * 60 * 1000;
         const rangeEnd = slotTimeMs + 15 * 60 * 1000;
         
@@ -333,19 +321,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         scales: {
           x: {
             grid: { display: false },
-            ticks: {
-              font: { size: 10, weight: 'bold' as const },
-              maxRotation: 0,
-              autoSkip: false,
-              callback: function(_val: any, index: number) {
-                // แสดงผลทุกๆ 4 ชั่วโมง (ทุกๆ 8 ช่องเวลา ช่องละ 30 นาที) เพื่อให้สเกลเริ่มต้นและสิ้นสุดตรงกับจุดข้อมูลจริงเสมอ
-                if (index % 8 === 0) {
-                  return labels[index];
-                }
-                return '';
-              },
-              color: textColor
-            }
+            ticks: { font: { size: 10, weight: 'bold' as const }, maxRotation: 0, autoSkip: true, autoSkipPadding: 15, color: textColor }
           },
           yA: {
             type: 'linear' as const,
@@ -386,7 +362,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
           <h3 className="text-base md:text-lg font-black flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             📊 เปรียบเทียบข้อมูลโรงเรือน
           </h3>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>ย้อนหลัง 24 ชั่วโมง พร้อมเส้นค่าเหมาะสม</p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>ย้อนหลัง 12 ชั่วโมง พร้อมเส้นค่าเหมาะสม</p>
         </div>
 
         <div className="flex p-1.5 rounded-2xl gap-1 w-full sm:w-auto" style={{ backgroundColor: 'var(--bg-control)' }}>
@@ -567,7 +543,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
 
         {/* คอนเทนเนอร์แสดงผลกราฟและสถิติ */}
         <div className="flex-1 flex flex-col gap-3">
-          {/* แผงแสดงสถิติย้อนหลัง 24 ชั่วโมง (Min / Max / Avg) แทนเส้นประบนกราฟ */}
+          {/* แผงแสดงสถิติย้อนหลัง 12 ชั่วโมง (Min / Max / Avg) แทนเส้นประบนกราฟ */}
           <div 
             className="p-3.5 rounded-2xl border theme-transition flex flex-wrap gap-2 items-center"
             style={{
@@ -576,7 +552,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
             }}
           >
             <div className="text-[10px] font-black uppercase tracking-wider w-full mb-1 flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
-              <span>📊 สถิติย้อนหลัง 24 ชั่วโมง (Min / Max / Avg):</span>
+              <span>📊 สถิติย้อนหลัง 12 ชั่วโมง (Min / Max / Avg):</span>
             </div>
 
             {comparisonMode === 'zones' ? (

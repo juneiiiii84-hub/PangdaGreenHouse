@@ -26,29 +26,6 @@ export default function App() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadWarning, setDownloadWarning] = useState<string>('');
 
-  const [rebooting, setRebooting] = useState(false);
-  const [rebootSuccess, setRebootSuccess] = useState(false);
-
-  const handleRebootESP = async () => {
-    const zoneName = selectedZone === 5 ? 'A' : selectedZone === 2 ? 'B' : selectedZone === 4 ? 'C' : selectedZone === 1 ? 'D' : 'E';
-    const isConfirmed = window.confirm(`คุณต้องการส่งคำสั่งรีเฟรชการเชื่อมต่อบอร์ด ESP32 สำหรับโซน ${zoneName} หรือไม่?`);
-    if (!isConfirmed) return;
-
-    setRebooting(true);
-    setRebootSuccess(false);
-    try {
-      const result = await api.requestReboot(selectedZone);
-      if (result.success) {
-        setRebootSuccess(true);
-        setTimeout(() => setRebootSuccess(false), 5000);
-      }
-    } catch (err) {
-      console.error('Error requesting reboot:', err);
-    } finally {
-      setRebooting(false);
-    }
-  };
-
   const datePickerRef = useRef<HTMLInputElement>(null);
 
   // ธีมกลางวัน/กลางคืนอัตโนมัติ
@@ -71,7 +48,7 @@ export default function App() {
     // 1. ดึงประวัติข้อมูลเริ่มต้นของทั้ง 5 โซนในเวลาเดียวกันเพื่อแสดงค่าเฉลี่ย
     const loadInitialLogs = async () => {
       try {
-        const promises = Array.from({ length: 5 }, (_, i) => api.getLogs(i + 1, 288));
+        const promises = Array.from({ length: 5 }, (_, i) => api.getLogs(i + 1, 144));
         const results = await Promise.all(promises);
         const allData: SensorData[] = [];
         results.forEach((res) => {
@@ -112,10 +89,10 @@ export default function App() {
           setIsInitialLoaded(true);
           setDataList((prev) => {
             const combined = [...prev, ...validTicks];
-            // กรองขอบเขตประวัติสูงสุด 288 แถว (24 ชั่วโมง) ต่อโซนในการเก็บบันทึกบนหน้าจอเพื่อความเบา
+            // กรองขอบเขตประวัติสูงสุด 144 แถว (12 ชั่วโมง) ต่อโซนในการเก็บบันทึกบนหน้าจอเพื่อความเบา
             const trimmed: SensorData[] = [];
             for (let z = 1; z <= 5; z++) {
-              trimmed.push(...combined.filter((d) => d.zone === z).slice(-288));
+              trimmed.push(...combined.filter((d) => d.zone === z).slice(-144));
             }
             return trimmed;
           });
@@ -140,7 +117,7 @@ export default function App() {
   useEffect(() => {
     const fetchZoneLogs = async () => {
       try {
-        const logsRes = await api.getLogs(selectedZone, 288);
+        const logsRes = await api.getLogs(selectedZone, 144);
         if (logsRes.success && logsRes.data.length > 0) {
           setDataList((prev) => {
             const filteredPrev = prev.filter((d) => d.zone !== selectedZone);
@@ -403,46 +380,6 @@ export default function App() {
                 <span>{isDownloading ? 'กำลังดึงข้อมูล...' : `ดาวน์โหลด Excel (${downloadZone === 'all' ? 'ทุกโซน' : `โซน ${downloadZone === '5' ? 'A' : downloadZone === '2' ? 'B' : downloadZone === '4' ? 'C' : downloadZone === '1' ? 'D' : 'E'}`})`}</span>
               </button>
             </div>
-          </section>
-        </div>
-
-        {/* ส่วนจัดการอุปกรณ์ฮาร์ดแวร์ ESP32 สำหรับโซนที่เลือก */}
-        <div className="animate-fade-in-up delay-300 mt-6">
-          <section
-            className="border rounded-2xl p-4 shadow-md theme-transition flex flex-col sm:flex-row items-center justify-between gap-4"
-            style={{
-              backgroundColor: 'var(--bg-section)',
-              borderColor: 'var(--border-card)',
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-rose-500/10 text-rose-500 rounded-xl">
-                <RefreshCcw size={18} className={rebooting ? 'animate-spin' : ''} />
-              </div>
-              <div className="text-left">
-                <h3 className="text-sm font-black flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                  <span>จัดการอุปกรณ์บอร์ด ESP32 (โซน {selectedZone === 5 ? 'A' : selectedZone === 2 ? 'B' : selectedZone === 4 ? 'C' : selectedZone === 1 ? 'D' : 'E'})</span>
-                </h3>
-                <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                  {rebootSuccess 
-                    ? '✅ ส่งคำสั่งรีเฟรชบอร์ดสำเร็จ บอร์ดจะทำการเริ่มการเชื่อมต่อใหม่และดึงข้อมูลอัปเดต' 
-                    : 'ส่งคำสั่งรีเฟรชบอร์ดควบคุมระยะไกลเพื่อดึงค่าข้อมูลล่าสุดเมื่อข้อมูลหยุดนิ่ง'}
-                </p>
-              </div>
-            </div>
-            
-            <button
-              onClick={handleRebootESP}
-              disabled={rebooting || rebootSuccess}
-              className={`w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer border hover:opacity-90 active:scale-95 shrink-0 ${
-                rebootSuccess
-                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500'
-                  : 'bg-rose-500/15 border-rose-500/30 text-rose-500'
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              <RefreshCcw size={13} className={rebooting ? 'animate-spin' : ''} />
-              <span>{rebootSuccess ? 'ส่งคำสั่งแล้ว' : (rebooting ? 'กำลังส่งคำสั่ง...' : 'รีเฟรชบอร์ด (Refresh ESP32)')}</span>
-            </button>
           </section>
         </div>
 
