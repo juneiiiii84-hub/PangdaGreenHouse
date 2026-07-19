@@ -220,13 +220,16 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
               callback: (_val: any, index: number): string | null => {
                 const label = labels[index];
                 if (!label || !label.includes(':')) return label || null;
+                if (index === labels.length - 1 || index === 0) return label;
                 const minutes = label.split(':')[1];
                 if (minutes !== '00') return null;
                 const hour = parseInt(label.split(':')[0]!, 10);
-                if (typeof window !== 'undefined' && window.innerWidth < 640) {
-                  return hour % 3 === 0 ? label : null;
+                const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+                const interval = isMobile ? 3 : 2;
+                if (hour % interval === 0 && (labels.length - 1 - index) > 2) {
+                  return label;
                 }
-                return hour % 2 === 0 ? label : null;
+                return null;
               }
             }
           },
@@ -349,13 +352,16 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
               callback: (_val: any, index: number): string | null => {
                 const label = labels[index];
                 if (!label || !label.includes(':')) return label || null;
+                if (index === labels.length - 1 || index === 0) return label;
                 const minutes = label.split(':')[1];
                 if (minutes !== '00') return null;
                 const hour = parseInt(label.split(':')[0]!, 10);
-                if (typeof window !== 'undefined' && window.innerWidth < 640) {
-                  return hour % 3 === 0 ? label : null;
+                const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+                const interval = isMobile ? 3 : 2;
+                if (hour % interval === 0 && (labels.length - 1 - index) > 2) {
+                  return label;
                 }
-                return hour % 2 === 0 ? label : null;
+                return null;
               }
             }
           },
