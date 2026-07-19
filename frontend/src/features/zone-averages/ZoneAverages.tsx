@@ -191,10 +191,10 @@ const detailExplanations: Record<string, { title: string; description: string; u
     description: 'ระดับความสว่างรวมรอบๆ เซนเซอร์ (แปลงเกณฑ์มาจากค่าหลัก PPFD)',
     unit: 'Lux',
     list: [
-      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '13,378 — 26,756 Lux', effect: 'ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์' },
-      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '10,033 — 13,377 Lux หรือ 26,757 — 31,773 Lux', effect: 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น' },
-      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '6,689 — 10,032 Lux หรือ 31,774 — 36,789 Lux', effect: 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง' },
-      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 6,689 Lux หรือสูงกว่า 36,789 Lux', effect: 'มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย' },
+      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '13,378 — 26,756 Lux', effect: 'ความเข้มแสงกำลังพอดี พืชสังเคราะห์อาหารและเติบโตได้เร็วที่สุด' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '10,033 — 13,377 Lux หรือ 26,757 — 31,773 Lux', effect: 'ความเข้มแสงเพียงพอต่อการเจริญเติบโตได้อย่างแข็งแรงปกติ' },
+      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '6,689 — 10,032 Lux หรือ 31,774 — 36,789 Lux', effect: 'แสงน้อยไปจนต้นพืชยืดหาแสง หรือแสงแดดแรงไปจนพืชเครียดสะสมความร้อน' },
+      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 6,689 Lux หรือสูงกว่า 36,789 Lux', effect: 'มืดเกินไปจนไม่เติบโต หรือแดดแรงจัดเกินจนผิวใบแห้งไหม้เสียหาย' },
     ]
   }
 };
@@ -516,27 +516,27 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
               </p>
 
               {/* รายการเกณฑ์ 4 ระดับ (ภาษาคน) */}
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {detailExplanations[activeDetailMetric].list.map((item, index) => (
                   <div
                     key={index}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl border transition-all"
+                    className="p-3 rounded-2xl border transition-all space-y-1.5"
                     style={{
                       backgroundColor: 'var(--bg-subtle)',
                       borderColor: 'var(--border-subtle)',
                     }}
                   >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`w-[82px] text-center py-1 rounded-full text-[10px] font-black border uppercase whitespace-nowrap flex-shrink-0 ${item.color}`}>
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-1.5" style={{ borderColor: 'var(--border-subtle)' }}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black border uppercase shrink-0 ${item.color}`}>
                         {item.status}
                       </span>
-                      <span className="text-xs font-black font-mono whitespace-nowrap" style={{ color: 'var(--text-value)' }}>
+                      <span className="text-[11px] sm:text-xs font-bold font-mono leading-tight break-words max-w-full text-right" style={{ color: 'var(--text-value)' }}>
                         {item.range}
                       </span>
                     </div>
-                    <span className="text-[11px] font-medium mt-1 sm:mt-0" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-[11px] sm:text-xs font-medium leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                       {item.effect}
-                    </span>
+                    </p>
                   </div>
                 ))}
               </div>
