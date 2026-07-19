@@ -175,7 +175,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
           borderWidth: 2.5,
           tension: 0.4,
           fill: false,
-          pointRadius: 3,
+          pointRadius: 1.5,
           pointHoverRadius: 6,
         };
       });
@@ -210,7 +210,25 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         scales: {
           x: {
             grid: { display: false },
-            ticks: { font: { size: 10, weight: 'bold' as const }, maxRotation: 0, autoSkip: true, autoSkipPadding: 15, color: textColor }
+            ticks: {
+              font: { size: 9.5, weight: 'bold' as const },
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: true,
+              autoSkipPadding: 8,
+              color: textColor,
+              callback: (_val: any, index: number): string | null => {
+                const label = labels[index];
+                if (!label || !label.includes(':')) return label || null;
+                const minutes = label.split(':')[1];
+                if (minutes !== '00') return null;
+                const hour = parseInt(label.split(':')[0]!, 10);
+                if (typeof window !== 'undefined' && window.innerWidth < 640) {
+                  return hour % 3 === 0 ? label : null;
+                }
+                return hour % 2 === 0 ? label : null;
+              }
+            }
           },
           y: {
             border: { dash: [4, 4] },
@@ -281,7 +299,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
           tension: 0.4,
           yAxisID: 'yA',
           fill: false,
-          pointRadius: 3
+          pointRadius: 1.5
         },
         {
           label: `${tabB.emoji} ${tabB.label} (${tabB.unit})`,
@@ -292,7 +310,7 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
           tension: 0.4,
           yAxisID: 'yB',
           fill: false,
-          pointRadius: 3
+          pointRadius: 1.5
         }
       ];
 
@@ -321,7 +339,25 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
         scales: {
           x: {
             grid: { display: false },
-            ticks: { font: { size: 10, weight: 'bold' as const }, maxRotation: 0, autoSkip: true, autoSkipPadding: 15, color: textColor }
+            ticks: {
+              font: { size: 9.5, weight: 'bold' as const },
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: true,
+              autoSkipPadding: 8,
+              color: textColor,
+              callback: (_val: any, index: number): string | null => {
+                const label = labels[index];
+                if (!label || !label.includes(':')) return label || null;
+                const minutes = label.split(':')[1];
+                if (minutes !== '00') return null;
+                const hour = parseInt(label.split(':')[0]!, 10);
+                if (typeof window !== 'undefined' && window.innerWidth < 640) {
+                  return hour % 3 === 0 ? label : null;
+                }
+                return hour % 2 === 0 ? label : null;
+              }
+            }
           },
           yA: {
             type: 'linear' as const,
