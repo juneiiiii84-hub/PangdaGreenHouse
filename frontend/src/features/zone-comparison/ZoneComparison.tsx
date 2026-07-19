@@ -214,22 +214,16 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
               font: { size: 9.5, weight: 'bold' as const },
               maxRotation: 0,
               minRotation: 0,
-              autoSkip: true,
-              autoSkipPadding: 8,
+              autoSkip: false,
               color: textColor,
               callback: (_val: any, index: number): string | null => {
                 const label = labels[index];
-                if (!label || !label.includes(':')) return label || null;
-                if (index === labels.length - 1 || index === 0) return label;
-                const minutes = label.split(':')[1];
-                if (minutes !== '00') return null;
-                const hour = parseInt(label.split(':')[0]!, 10);
+                if (!label) return null;
                 const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
-                const interval = isMobile ? 3 : 2;
-                if (hour % interval === 0 && (labels.length - 1 - index) > 2) {
-                  return label;
-                }
-                return null;
+                // มือถือ: แสดงทุกๆ 4 ชั่วโมง (8 ช่อง = 0, 8, 16, 24, 32, 40, 48 รวม 7 ช่วงเวลาเท่ากันพอดี)
+                // จอคอม: แสดงทุกๆ 3 ชั่วโมง (6 ช่อง = 0, 6, 12, 18, 24, 30, 36, 42, 48 รวม 9 ช่วงเวลา)
+                const step = isMobile ? 8 : 6;
+                return index % step === 0 ? label : null;
               }
             }
           },
@@ -346,22 +340,14 @@ export const ZoneComparison: React.FC<ZoneComparisonProps> = ({ dataList, select
               font: { size: 9.5, weight: 'bold' as const },
               maxRotation: 0,
               minRotation: 0,
-              autoSkip: true,
-              autoSkipPadding: 8,
+              autoSkip: false,
               color: textColor,
               callback: (_val: any, index: number): string | null => {
                 const label = labels[index];
-                if (!label || !label.includes(':')) return label || null;
-                if (index === labels.length - 1 || index === 0) return label;
-                const minutes = label.split(':')[1];
-                if (minutes !== '00') return null;
-                const hour = parseInt(label.split(':')[0]!, 10);
+                if (!label) return null;
                 const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
-                const interval = isMobile ? 3 : 2;
-                if (hour % interval === 0 && (labels.length - 1 - index) > 2) {
-                  return label;
-                }
-                return null;
+                const step = isMobile ? 8 : 6;
+                return index % step === 0 ? label : null;
               }
             }
           },
