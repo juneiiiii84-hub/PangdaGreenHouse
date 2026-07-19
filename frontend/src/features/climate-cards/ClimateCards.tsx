@@ -600,21 +600,26 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
                   {detailExplanations[activeDetailMetric].list.map((item, index) => (
                     <div
                       key={index}
-                      className="p-3 rounded-2xl border transition-all space-y-1.5"
+                      className="p-3.5 rounded-2xl border transition-all space-y-2"
                       style={{
                         backgroundColor: 'var(--bg-subtle)',
                         borderColor: 'var(--border-subtle)',
                       }}
                     >
-                      <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-1.5" style={{ borderColor: 'var(--border-subtle)' }}>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black border uppercase shrink-0 ${item.color}`}>
+                      {/* บรรทัด 1: ป้ายสถานะ */}
+                      <div className="flex items-center justify-between">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black border uppercase ${item.color}`}>
                           {item.status}
                         </span>
-                        <span className="text-[11px] sm:text-xs font-bold font-mono leading-tight break-words max-w-full text-right" style={{ color: 'var(--text-value)' }}>
-                          {item.range}
-                        </span>
                       </div>
-                      <p className="text-[11px] sm:text-xs font-medium leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+
+                      {/* บรรทัด 2: ตัวเลขช่วงเกณฑ์ (ย้ายลงมาอยู่บรรทัดใหม่) */}
+                      <div className="text-xs sm:text-sm font-black font-mono leading-snug break-words" style={{ color: 'var(--text-value)' }}>
+                        {item.range}
+                      </div>
+
+                      {/* บรรทัด 3: คำอธิบายผลกระทบ */}
+                      <p className="text-[11px] sm:text-xs font-medium leading-relaxed border-t pt-1.5" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-subtle)' }}>
                         {item.effect}
                       </p>
                     </div>
