@@ -48,7 +48,7 @@ export default function App() {
     // 1. ดึงประวัติข้อมูลเริ่มต้นของทั้ง 5 โซนในเวลาเดียวกันเพื่อแสดงค่าเฉลี่ย
     const loadInitialLogs = async () => {
       try {
-        const promises = Array.from({ length: 5 }, (_, i) => api.getLogs(i + 1, 144));
+        const promises = Array.from({ length: 5 }, (_, i) => api.getLogs(i + 1, 288));
         const results = await Promise.all(promises);
         const allData: SensorData[] = [];
         results.forEach((res) => {
@@ -89,10 +89,10 @@ export default function App() {
           setIsInitialLoaded(true);
           setDataList((prev) => {
             const combined = [...prev, ...validTicks];
-            // กรองขอบเขตประวัติสูงสุด 144 แถว (12 ชั่วโมง) ต่อโซนในการเก็บบันทึกบนหน้าจอเพื่อความเบา
+            // กรองขอบเขตประวัติสูงสุด 288 แถว (24 ชั่วโมง) ต่อโซนในการเก็บบันทึกบนหน้าจอเพื่อความเบา
             const trimmed: SensorData[] = [];
             for (let z = 1; z <= 5; z++) {
-              trimmed.push(...combined.filter((d) => d.zone === z).slice(-144));
+              trimmed.push(...combined.filter((d) => d.zone === z).slice(-288));
             }
             return trimmed;
           });
@@ -117,7 +117,7 @@ export default function App() {
   useEffect(() => {
     const fetchZoneLogs = async () => {
       try {
-        const logsRes = await api.getLogs(selectedZone, 144);
+        const logsRes = await api.getLogs(selectedZone, 288);
         if (logsRes.success && logsRes.data.length > 0) {
           setDataList((prev) => {
             const filteredPrev = prev.filter((d) => d.zone !== selectedZone);

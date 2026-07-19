@@ -57,10 +57,8 @@ const getAverageDiagnostics = (
     return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
   }
   // LUX
-  if (roundedValue >= 21600 && roundedValue <= 43200) return { state: 'excellent', status: 'เหมาะสมมาก', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
-  if ((roundedValue >= 16200 && roundedValue <= 21599) || (roundedValue >= 43201 && roundedValue <= 51350)) return { state: 'good', status: 'เหมาะสม', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' };
-  if ((roundedValue >= 10800 && roundedValue <= 16199) || (roundedValue >= 51351 && roundedValue <= 59450)) return { state: 'warning', status: 'เฝ้าระวัง', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
-  return { state: 'critical', status: 'ไม่เหมาะสม', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
+  const ppfdVal = roundedValue * DEFAULT_MULTIPLIER;
+  return getAverageDiagnostics('ppfd', ppfdVal);
 };
 
 const getDynamicBorderColor = (state?: 'excellent' | 'good' | 'warning' | 'critical', theme?: 'night' | 'day') => {
@@ -108,9 +106,10 @@ const getGreenhouseSummary = (avg: any) => {
   const isVpdGood = vpd >= 0.3 && vpd <= 1.2;
   const isAirAndHumidityGood = isTempGood && isHumGood && isVpdGood;
 
-  // ตรวจสอบสถานะแสง
-  const isLightLow = lux < 21600;
-  const isLightHigh = lux > 43200;
+  // ตรวจสอบสถานะแสง (ใช้ PPFD เป็นเกณฑ์หลักในการตัดสิน)
+  const ppfdVal = lux * DEFAULT_MULTIPLIER;
+  const isLightLow = ppfdVal < 400;
+  const isLightHigh = ppfdVal > 800;
 
   if (isAirAndHumidityGood) {
     if (isLightLow) {
@@ -189,13 +188,13 @@ const detailExplanations: Record<string, { title: string; description: string; u
   },
   lux: {
     title: 'เกณฑ์ความเหมาะสมความส่องสว่าง (Lux)',
-    description: 'ระดับความสว่างรวมรอบๆ เซนเซอร์ เพื่อประเมินความสว่างรวมในโรงเรือน',
+    description: 'ระดับความสว่างรวมรอบๆ เซนเซอร์ (แปลงเกณฑ์มาจากค่าหลัก PPFD)',
     unit: 'Lux',
     list: [
-      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '21,600 — 43,200 Lux', effect: 'ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์' },
-      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '16,200 — 21,599 Lux หรือ 43,201 — 51,350 Lux', effect: 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น' },
-      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '10,800 — 16,199 Lux หรือ 51,351 — 59,450 Lux', effect: 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง' },
-      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 10,800 Lux หรือสูงกว่า 59,450 Lux', effect: 'มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย' },
+      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '13,378 — 26,756 Lux', effect: 'ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '10,033 — 13,377 Lux หรือ 26,757 — 31,773 Lux', effect: 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น' },
+      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '6,689 — 10,032 Lux หรือ 31,774 — 36,789 Lux', effect: 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง' },
+      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 6,689 Lux หรือสูงกว่า 36,789 Lux', effect: 'มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย' },
     ]
   }
 };

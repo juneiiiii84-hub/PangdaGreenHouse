@@ -201,43 +201,14 @@ export class ClimateService {
 
     // LUX
     if (type === 'lux') {
-      if (roundedValue >= 21600 && roundedValue <= 43200) {
-        return {
-          state: 'excellent',
-          status: 'เหมาะสมมาก',
-          color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-          desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux อยู่ในเกณฑ์เหมาะสมมาก ซึ่งเป็นเกณฑ์ดีที่สุดต่อการเติบโตและการสังเคราะห์แสงของพืช`,
-          recommendation: '✅ ระดับแสงเหมาะสมมากสำหรับการเจริญเติบโตของพืช'
-        };
-      }
-      if ((roundedValue >= 16200 && roundedValue <= 21599) || (roundedValue >= 43201 && roundedValue <= 51350)) {
-        return {
-          state: 'good',
-          status: 'เหมาะสม',
-          color: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-          desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux อยู่ในเกณฑ์เหมาะสม พืชสังเคราะห์แสงได้ปกติ`,
-          recommendation: '👍 ระดับแสงปกติ สังเกตแนวโน้มของแสงแดดในช่วงกลางวัน'
-        };
-      }
-      if ((roundedValue >= 10800 && roundedValue <= 16199) || (roundedValue >= 51351 && roundedValue <= 59450)) {
-        return {
-          state: 'warning',
-          status: 'เฝ้าระวัง',
-          color: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-          desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux อยู่ในเกณฑ์เฝ้าระวัง แสงแดดอาจน้อยเกินไปหรือร้อนแรงเกินไป`,
-          recommendation: roundedValue > 51351
-            ? '⚠️ แสงเริ่มแรงเกินไป: แนะนำให้เตรียมกางสแลนกรองแสงเพื่อชะลอความร้อนสะสม'
-            : '⚠️ แสงค่อนข้างสลัว: พืชสังเคราะห์แสงได้ช้าลงเล็กน้อย'
-        };
-      }
+      const ppfdVal = roundedValue * 0.0299;
+      const ppfdDiag = this.getDiagnosticStatus(ppfdVal, 'ppfd');
       return {
-        state: 'critical',
-        status: 'ไม่เหมาะสม',
-        color: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-        desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux อยู่ในเกณฑ์ไม่เหมาะสม มืดเกินไปหรือสว่างจ้าเกินไป`,
-        recommendation: roundedValue > 59450
-          ? '🚨 แสงแดดจัดแผดเผา: แนะนำให้กางสแลนกรองแสงอย่างน้อย 50% หรือเปิดพัดลมสเปรย์หมอกน้ำเพื่อกำบังความร้อนเฉียบพลันด่วน'
-          : '🚨 แสงมืดสลัวรุนแรง: อัตราแลกธาตุพืชหยุดชะงัก แนะนำเปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมประสิทธิภาพแสงสังเคราะห์'
+        state: ppfdDiag.state,
+        status: ppfdDiag.status,
+        color: ppfdDiag.color,
+        desc: `ความสว่าง ${roundedValue.toLocaleString()} Lux (แปลงเป็น PPFD ${ppfdVal.toFixed(1)} μmol/m²/s) อยู่ในเกณฑ์${ppfdDiag.status}`,
+        recommendation: ppfdDiag.recommendation
       };
     }
 

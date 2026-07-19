@@ -55,13 +55,13 @@ const detailExplanations: Record<string, { title: string; description: string; u
   },
   lux: {
     title: 'เกณฑ์ความเหมาะสมความส่องสว่าง (Lux)',
-    description: 'ระดับความสว่างรวมรอบๆ เซนเซอร์ เพื่อประเมินความสว่างรวมในโรงเรือน',
+    description: 'ระดับความสว่างรวมรอบๆ เซนเซอร์ (แปลงเกณฑ์มาจากค่าหลัก PPFD)',
     unit: 'Lux',
     list: [
-      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '21,600 — 43,200 Lux', effect: 'ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์' },
-      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '16,200 — 21,599 Lux หรือ 43,201 — 51,350 Lux', effect: 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น' },
-      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '10,800 — 16,199 Lux หรือ 51,351 — 59,450 Lux', effect: 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง' },
-      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 10,800 Lux หรือสูงกว่า 59,450 Lux', effect: 'มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย' },
+      { status: 'เหมาะสมมาก', color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', range: '13,378 — 26,756 Lux', effect: 'ความสว่างรอบข้างดีเลิศ พืชสังเคราะห์แสงได้สมบูรณ์' },
+      { status: 'เหมาะสม', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20', range: '10,033 — 13,377 Lux หรือ 26,757 — 31,773 Lux', effect: 'ความสว่างอยู่ในระดับปกติ พืชเจริญเติบโตได้อย่างราบรื่น' },
+      { status: 'เฝ้าระวัง', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20', range: '6,689 — 10,032 Lux หรือ 31,774 — 36,789 Lux', effect: 'แสงสลัวพืชสังเคราะห์แสงได้ช้าลง หรือแดดเริ่มแรงขึ้นจนอุณหภูมิใบสูง' },
+      { status: 'ไม่เหมาะสม', color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', range: 'ต่ำกว่า 6,689 Lux หรือสูงกว่า 36,789 Lux', effect: 'มืดเกินไปจนไม่เติบโต หรือแสงจ้าจัดแผดเผาจนผิวใบเสียหาย' },
     ]
   }
 };
@@ -173,20 +173,21 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
           : 'แสงมืดสลัวรุนแรง: อัตราแลกธาตุพืชหยุดชะงัก แนะนำเปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมประสิทธิภาพแสงสูงสุดทันที';
       }
     } else if (key === 'lux') {
-      if (roundedValue >= 21600 && roundedValue <= 43200) {
+      const ppfdVal = roundedValue * DEFAULT_MULTIPLIER;
+      if (ppfdVal >= 400 && ppfdVal <= 800) {
         state = 'excellent';
         recommendation = 'ระดับแสงเหมาะสมมากสำหรับการเจริญเติบโตของพืช';
-      } else if ((roundedValue >= 16200 && roundedValue <= 21599) || (roundedValue >= 43201 && roundedValue <= 51350)) {
+      } else if ((ppfdVal >= 300 && ppfdVal <= 399.9) || (ppfdVal >= 800.1 && ppfdVal <= 950)) {
         state = 'good';
         recommendation = 'ระดับแสงปกติ สังเกตแนวโน้มของแสงแดดในช่วงกลางวัน';
-      } else if ((roundedValue >= 10800 && roundedValue <= 16199) || (roundedValue >= 51351 && roundedValue <= 59450)) {
+      } else if ((ppfdVal >= 200 && ppfdVal <= 299.9) || (ppfdVal >= 950.1 && ppfdVal <= 1100)) {
         state = 'warning';
-        recommendation = roundedValue > 51351
+        recommendation = ppfdVal > 950
           ? 'แสงเริ่มแรงเกินไป: แนะนำให้เตรียมกางสแลนกรองแสงเพื่อชะลอความร้อนสะสม'
           : 'แสงค่อนข้างสลัว: พืชสังเคราะห์แสงได้ช้าลงเล็กน้อย';
       } else {
         state = 'critical';
-        recommendation = roundedValue > 59450
+        recommendation = ppfdVal > 1100
           ? 'แสงแดดจัดแผดเผา: แนะนำให้กางสแลนกรองแสงอย่างน้อย 50% หรือเปิดพัดลมสเปรย์หมอกน้ำเพื่อกำบังความร้อนเฉียบพลันด่วน'
           : 'แสงมืดสลัวรุนแรง: อัตราแลกธาตุพืชหยุดชะงัก แนะนำเปิดหลอดไฟช่วยปลูก (Grow Lights) เสริมประสิทธิภาพแสงสังเคราะห์';
       }
