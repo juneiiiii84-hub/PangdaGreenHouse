@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Thermometer, Droplets, Wind, Sun, SunMedium, Moon, Info, X } from 'lucide-react';
 import type { SensorData } from '../../services/api';
 import type { ThemePeriod } from '../../shared/utils/useTheme';
@@ -478,7 +479,7 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
       </p>
 
       {/* หน้าต่างแสดงคำอธิบายเกณฑ์ประเมินอัจฉริยะ (ภาษาคนเข้าใจง่าย) */}
-      {activeDetailMetric && (
+      {activeDetailMetric && createPortal(
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div
             className="rounded-3xl w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200 border theme-transition"
@@ -555,7 +556,8 @@ export const ZoneAverages: React.FC<ZoneAveragesProps> = ({ dataList, theme }) =
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );

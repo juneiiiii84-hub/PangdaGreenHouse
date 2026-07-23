@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Line } from 'react-chartjs-2';
 import { Thermometer, Droplets, Wind, Sun, Info, X } from 'lucide-react';
 import { DEFAULT_MULTIPLIER } from '../../shared/utils/ppfd';
@@ -497,7 +498,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
       </div>
 
       {/* หน้าต่างแสดงคำอธิบายเกณฑ์ประเมินอัจฉริยะ (ภาษาคนเข้าใจง่าย) */}
-      {activeDetailMetric && (
+      {activeDetailMetric && createPortal(
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div
             className="rounded-3xl w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200 border theme-transition"
@@ -646,7 +647,8 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
