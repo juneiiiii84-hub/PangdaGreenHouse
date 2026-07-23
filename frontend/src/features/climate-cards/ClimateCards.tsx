@@ -501,7 +501,7 @@ export const ClimateCards: React.FC<ClimateCardsProps> = ({ latestData, history,
       {activeDetailMetric && createPortal(
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div
-            className="rounded-3xl w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200 border theme-transition"
+            className="rounded-3xl w-full max-w-lg p-6 shadow-2xl animate-in fade-in zoom-in duration-200 border theme-transition max-h-[90vh] overflow-y-auto"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border-primary)',
